@@ -1,4 +1,5 @@
 #include "CreateProjectModule.h"
+
 namespace Loopie
 {
 	CreateProjectModule::CreateProjectModule()

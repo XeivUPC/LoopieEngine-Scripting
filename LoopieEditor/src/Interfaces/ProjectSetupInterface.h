@@ -1,7 +1,7 @@
 #pragma once
+#include "Interface.h"
 
 #include <string>
-#include "Interface.h"
 #include <filesystem>
 
 namespace Loopie {

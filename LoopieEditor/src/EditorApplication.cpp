@@ -1,5 +1,6 @@
-#include "Loopie/Core/Application.h"
 #include "CreateProjectModule.h"
+
+#include "Loopie/Core/Application.h"
 
 namespace Loopie {
 	class EditorApplication : public Application {
