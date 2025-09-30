@@ -6,6 +6,7 @@
 #include <SDL3/SDL_init.h>
 #include <glad/glad.h>
 
+
 namespace Loopie {
 	Window::Window()
 	{
@@ -52,7 +53,7 @@ namespace Loopie {
 		return returnStatus;
 	}
 
-	std::pair<int, int> Window::GetSize() const /// Change To vector when posible (glm)
+	ivec2 Window::GetSize() const /// Change To vector when posible (glm)
 	{
 		int x;
 		int y;
@@ -62,7 +63,7 @@ namespace Loopie {
 		return { x, y };
 	}
 
-	std::pair<int, int> Window::GetPosition() const /// Change To vector when posible (glm)
+	ivec2 Window::GetPosition() const /// Change To vector when posible (glm)
 	{
 		int x;
 		int y;
@@ -89,8 +90,8 @@ namespace Loopie {
 	{
 		if (savePreviousWindowsSize)
 		{
-			m_windowPrevWidth = GetSize().first;
-			m_windowPrevHeight = GetSize().second;
+			m_windowPrevWidth = GetSize().x;
+			m_windowPrevHeight = GetSize().y;
 		}
 		ASSERT(!SDL_SetWindowSize(m_window, width, height), "Window couldn't change to new size!");
 	}

@@ -128,7 +128,7 @@ namespace Loopie {
 		if (m_inputEvent.HasEvent(SDL_EVENT_KEY_DOWN)) {
 			if (m_inputEvent.GetKeyStatus(SDL_SCANCODE_F1) == KeyState::DOWN)
 			{
-				m_window->GetSize().second, m_window->GetPosition().first, m_window->GetPosition().second, m_window->IsFullscreen();
+				m_window->GetSize().y, m_window->GetPosition().x, m_window->GetPosition().y, m_window->IsFullscreen();
 			}
 			else if (m_inputEvent.GetKeyStatus(SDL_SCANCODE_F2) == KeyState::DOWN)
 			{
