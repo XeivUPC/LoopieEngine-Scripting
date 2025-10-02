@@ -50,9 +50,17 @@ namespace Loopie {
 			Log::Info("{0}", nameNode.GetSelf<std::string>().Result);
 
 			Log::Info("{0}", playerNode.AddArrayElement("inventory", "potion"));
-			Log::Info("{0}", playerNode.Get<std::vector<std::string>>("inventory").Result[1]);
+			Log::Info("{0}", playerNode.Get<std::vector<std::string>>("inventory").Result[0]);
 
 			playerNode.AddField("testStats", 100);
+
+			JsonNode test = playerNode.AddObjectField("backpack");
+			Log::Info("{0}", test.AddField("potions", 3).Exists());
+
+			JsonNode test2 = playerNode.AddArrayField("titles");
+			Log::Info("{0}", test2.AddArrayElementSelf("baron"));
+
+			root.Child("player.inventory").ModifyArrayElementSelf(0, "camion");
 
 			Json::WriteToFile("test.json", data);
 		}

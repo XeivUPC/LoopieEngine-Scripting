@@ -21,16 +21,19 @@ namespace Loopie {
 	{
 	public:
 		JsonNode() = default;
-		JsonNode(json* node) { m_node = node; }
+		JsonNode(json* node);
+		JsonNode(json* node, json* parentNode);
 
 		bool Exists() const { return m_node != nullptr; }
+		bool HasParent() const { return m_parentNode != nullptr; }
+		void Clear();
 
 		template <typename T>
 		JsonResult<T> Get(const std::string& keyPath, T defaultValue = {}) const {
 
 			if (keyPath.empty())
 				return GetSelf<T>(defaultValue);
-	
+
 			JsonNode node = Child(keyPath);
 			if (node.Exists()) {
 				return node.GetSelf(defaultValue);
@@ -41,7 +44,7 @@ namespace Loopie {
 		}
 
 		template <typename T>
-		JsonResult<T> GetSelf( T defaultValue = {}) const {
+		JsonResult<T> GetSelf(T defaultValue = {}) const {
 
 			JsonResult<T> result;
 			if (Exists()) {
@@ -53,7 +56,6 @@ namespace Loopie {
 
 			return result;
 		}
-
 
 		template <typename T>
 		bool Set(const std::string& keyPath, T value) {
@@ -78,34 +80,96 @@ namespace Loopie {
 			return false;
 		}
 
+		JsonNode AddObjectField(const std::string& keyPath);
+
+		JsonNode AddArrayField(const std::string& keyPath);
+
 		template <typename T>
-		bool AddField(const std::string& keyPath, T value) {
-			if (keyPath.empty()) return false;
+		JsonNode AddField(const std::string& keyPath, T value) {
+
+			if (!Exists() || keyPath.empty()) return JsonNode();
 
 			auto pos = keyPath.find_last_of('.');
 			std::string parentPath = (pos == std::string::npos) ? "" : keyPath.substr(0, pos);
 			std::string key = (pos == std::string::npos) ? keyPath : keyPath.substr(pos + 1);
 
 			JsonNode parent = parentPath.empty() ? *this : Child(parentPath);
-			if (!parent.Exists() || !parent.m_node->is_object()) return false;
+			if (!parent.Exists() || !parent.m_node->is_object()) return JsonNode();
 
 			(*parent.m_node)[key] = value;
-			return true;
+			return JsonNode(&(*parent.m_node)[key]);
 		}
 
 		template <typename T>
 		bool AddArrayElement(const std::string& keyPath, T value) {
-			JsonNode node = keyPath.empty() ? *this : Child(keyPath);
+			if (keyPath.empty())
+				return AddArrayElementSelf(value);
+
+			JsonNode node = Child(keyPath);
 			if (!node.Exists() || !node.m_node->is_array()) return false;
 
 			node.m_node->push_back(value);
 			return true;
 		}
 
+		template <typename T>
+		bool AddArrayElementSelf(T value) {
+			if (!Exists() || !m_node->is_array())
+				return false;
+	
+			m_node->push_back(value);
+			return true;
+		}
+
+		template <typename T>
+		bool ModifyArrayElement(const std::string& keyPath, unsigned int index, T value) {
+			if (keyPath.empty())
+				return RemoveArrayElementSelf(index);
+
+			JsonNode node = Child(keyPath);
+			if (!node.Exists() || !node.m_node->is_array())
+				return false;
+
+			if (node.m_node->empty())
+				return false;
+
+			if (node.m_node->size() <= index)
+				return false;
+			(node.m_node->begin() + index).value() = value;
+			return true;
+		}
+
+		template <typename T>
+		bool ModifyArrayElementSelf(unsigned int index, T value) {
+			if (!Exists() || !m_node->is_array())
+				return false;
+
+			if (m_node->empty())
+				return false;
+
+			if (m_node->size() <= index)
+				return false;
+			(m_node->begin() + index).value() = value;
+			return true;
+		}
+
+		bool RemoveField(const std::string& keyPath);
+
+		bool RemoveArrayElement(const std::string& keyPath, unsigned int index);
+
+		bool RemoveArrayElementSelf(unsigned int index);
+
+		bool ClearArrayField(const std::string& keyPath);
+
+		bool ClearArrayFieldSelf();
+
+
+
 		JsonNode Child(const std::string& keyPath) const;
 
 	private:
 		json* m_node = nullptr;
+		json* m_parentNode = nullptr;
 	};
 
 
