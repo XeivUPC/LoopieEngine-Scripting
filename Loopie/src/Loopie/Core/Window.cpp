@@ -2,10 +2,9 @@
 
 #include "Loopie/Core/Assert.h"
 #include "Loopie/Core/Log.h"
+#include "Loopie/Render/Renderer.h"
 
 #include <SDL3/SDL_init.h>
-#include <glad/glad.h>
-
 
 namespace Loopie {
 	Window::Window()
@@ -22,10 +21,10 @@ namespace Loopie {
 		ASSERT(m_glContext == NULL, "OpenGL context is NULL!");
 
 		// Load OpenGL functions via GLAD
-		ASSERT(!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress), "Failed to Initialize GLAD!");
+		Renderer::Init(SDL_GL_GetProcAddress); /// Replace
 		
 		// Set clear color, optional
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		Renderer::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 	}
 
 	Window::~Window()
@@ -136,12 +135,5 @@ namespace Loopie {
 	{
 		SDL_SetWindowPosition(m_window, x, y); // returns bool
 	}
-
-	void Window::ClearWindow()
-	{
-		glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-	}
-
 }
 

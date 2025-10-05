@@ -2,6 +2,7 @@
 
 #include "Loopie/Core/Assert.h"
 #include "Loopie/Core/Log.h"
+#include "Loopie/Render/Renderer.h"
 #include "Loopie/Render/Shader.h" // TEMP INCLUDE FOR SHADER TESTING
 
 #include <SDL3/SDL_init.h> // TEMP INCLUDE FOR POLLING EVENTS
@@ -90,10 +91,19 @@ namespace Loopie {
 
 	void Application::Run()
 	{
+		////TESTING VARIABLES
+		/*
+		
+		create a Shader
+		create a VAO/EBO/VBO & SetDatas
+		
+		*/
+		////
+
 		while (m_running)
 		{
 
-			m_window->ClearWindow(); ///Test -> this should be moved to a RenderClass in the future
+			Renderer::Clear();
 			
 			m_imguiManager.StartFrame();
 

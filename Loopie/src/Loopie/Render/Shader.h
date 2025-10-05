@@ -1,3 +1,4 @@
+#pragma once
 #include <Loopie/Core/Math.h>
 
 #include <string>

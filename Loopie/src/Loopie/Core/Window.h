@@ -27,9 +27,6 @@ namespace Loopie {
 		void SetPosition(int x, int y);
 		// missing borderless, vsync, multi-monitor?
 
-
-		void ClearWindow(); /// Remove Later when Rendering Class implemented
-
 		SDL_Window* GetSDLWindow() const { return m_window; }
 		SDL_GLContext GetSDL_GL_Context() const { return m_glContext; }
 
