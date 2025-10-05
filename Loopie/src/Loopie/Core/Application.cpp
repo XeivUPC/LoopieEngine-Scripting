@@ -2,6 +2,8 @@
 
 #include "Loopie/Core/Assert.h"
 #include "Loopie/Core/Log.h"
+#include "Loopie/Render/Renderer.h"
+#include "Loopie/Render/Shader.h" // TEMP INCLUDE FOR SHADER TESTING
 
 #include <SDL3/SDL_init.h> // TEMP INCLUDE FOR POLLING EVENTS
 #include <SDL3/SDL.h>// TEMP INCLUDE FOR POLLING EVENTS
@@ -89,10 +91,19 @@ namespace Loopie {
 
 	void Application::Run()
 	{
+		////TESTING VARIABLES
+		/*
+		
+		create a Shader
+		create a VAO/EBO/VBO & SetDatas
+		
+		*/
+		////
+
 		while (m_running)
 		{
 
-			m_window->ClearWindow(); ///Test -> this should be moved to a RenderClass in the future
+			Renderer::Clear();
 			
 			m_imguiManager.StartFrame();
 
@@ -148,13 +159,47 @@ namespace Loopie {
 			{
 				m_window->SetPosition(10, 10);
 			}
+			// TEST - F7 FOR CORRECT SHADER TESTING
 			else if (m_inputEvent.GetKeyStatus(SDL_SCANCODE_F7) == KeyState::DOWN)
 			{
-				m_window->SetWindowSize(1280, 720);
+				Shader* shader = new Shader("../../../Loopie/src/Loopie/Render/CorrectShader.shader");
+				if (!shader->GetIsValidShader())
+				{
+					delete shader;
+					shader = nullptr;
+				}
+				if (shader)
+				{
+					/*shader->PrintParsedVariables();*/
+				}
 			}
+			// TEST - F8 FOR INCORRECT SHADER PATH
 			else if (m_inputEvent.GetKeyStatus(SDL_SCANCODE_F8) == KeyState::DOWN)
 			{
-				m_window->SetWindowSize(1280, 720, true);
+				Shader* shader = new Shader("../../../Loopie/src/Loopie/Render/CorrectShaader.shader");
+				if (!shader->GetIsValidShader())
+				{
+					delete shader;
+					shader = nullptr;
+				}
+				if (shader)
+				{
+					/*shader->PrintParsedVariables();*/
+				}
+			}
+			// TEST - F9 FOR FAILING SHADER TESTING
+			else if (m_inputEvent.GetKeyStatus(SDL_SCANCODE_F9) == KeyState::DOWN)
+			{
+				Shader* shader = new Shader("../../../Loopie/src/Loopie/Render/WrongShader.shader");
+				if (!shader->GetIsValidShader())
+				{
+					delete shader;
+					shader = nullptr;
+				}
+				if (shader)
+				{
+					/*shader->PrintParsedVariables();*/
+				}
 			}
 			else if (m_inputEvent.GetKeyStatus(SDL_SCANCODE_ESCAPE) == KeyState::DOWN)
 			{
