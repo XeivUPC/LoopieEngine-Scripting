@@ -3,10 +3,9 @@
 #include "Loopie/Core/Assert.h"
 #include "Loopie/Core/Log.h"
 #include "Loopie/Render/Renderer.h"
-#include "Loopie/Render/Shader.h" // TEMP INCLUDE FOR SHADER TESTING
-#include "Loopie/Render/VertexArray.h" // TEMP INCLUDE FOR SHADER TESTING
-#include "Loopie/Render/VertexBuffer.h" // TEMP INCLUDE FOR SHADER TESTING
-#include "Loopie/Render/IndexBuffer.h" // TEMP INCLUDE FOR SHADER TESTING
+#include "Loopie/Components/Mesh.h"
+
+
 #include "Loopie/Core/Math.h" // TEMP INCLUDE FOR SHADER TESTING
 
 #include <SDL3/SDL_init.h> // TEMP INCLUDE FOR POLLING EVENTS
@@ -97,20 +96,20 @@ namespace Loopie {
 	{
 		////TESTING VARIABLES
 
-		float cubeVertices[]
+		std::vector<Vertex> cubeVertices
 		{
-			//  Position                Color
-				-0.5f, -0.5f, -0.5f,    1.0f, 0.0f, 0.0f,
-				0.5f, -0.5f, -0.5f,     0.0f, 1.0f, 0.0f,
-				0.5f, 0.5f, -0.5f,      0.0f, 0.0f, 1.0f,
-				-0.5f, 0.5f, -0.5f,     1.0f, 0.0f, 0.0f,
-				-0.5f, -0.5f, 0.5f,     0.0f, 1.0f, 1.0f,
-				0.5f, -0.5f, 0.5f,      1.0f, 1.0f, 0.0f,
-				0.5f, 0.5f, 0.5f,       1.0f, 0.0f, 1.0f,
-				-0.5f, 0.5f, 0.5f,      1.0f, 1.0f, 1.0f,
+			//Position                  Color
+			{{-0.5f, -0.5f, -0.5f},		{1.0f, 0.0f, 0.0f,}},
+			{{0.5f, -0.5f, -0.5f},		{0.0f, 1.0f, 0.0f,}},
+			{{0.5f, 0.5f, -0.5f},		{0.0f, 0.0f, 1.0f,}},
+			{{-0.5f, 0.5f, -0.5f},		{1.0f, 0.0f, 0.0f,}},
+			{{-0.5f, -0.5f, 0.5f},		{0.0f, 1.0f, 1.0f,}},
+			{{0.5f, -0.5f, 0.5f},		{1.0f, 1.0f, 0.0f,}},
+			{{0.5f, 0.5f, 0.5f},		{1.0f, 0.0f, 1.0f,}},
+			{{-0.5f, 0.5f, 0.5f},		{1.0f, 1.0f, 1.0f,}}
 		};
 
-		unsigned int cubeIndices[]
+		std::vector<unsigned int> cubeIndices
 		{
 			// Top face
 			3, 2, 6,
@@ -132,20 +131,7 @@ namespace Loopie {
 			6, 7, 4,
 		};
 
-
-
-		Shader shader = Shader("../../../Loopie/src/Loopie/Render/CorrectShader.shader");
-		VertexBuffer vb = VertexBuffer(cubeVertices,sizeof(cubeVertices));
-		IndexBuffer ib = IndexBuffer(cubeIndices,36);
-
-
-		vb.GetLayout().AddLayoutElement(GLVariableType::FLOAT, 3);
-		vb.GetLayout().AddLayoutElement(GLVariableType::FLOAT, 3);
-
-
-		VertexArray va;
-		va.AddBuffer(vb, ib);
-
+		Mesh mesh = Mesh(cubeVertices, cubeIndices);
 
 		glm::vec3 position(0.0f, 0.0f, -5.0f);
 		glm::vec3 forward(0.0f, 0.0f, 1.0f);
@@ -164,7 +150,7 @@ namespace Loopie {
 		const float SPEED = 100.0f;
 
 
-		vec2 windowSize = m_window->GetSize();
+		ivec2 windowSize = m_window->GetSize();
 		glm::mat4 projectionMatrix = glm::perspective(glm::radians(FOV), static_cast<float>(windowSize.x) / static_cast<float>(windowSize.y), NEAR_PLANE, FAR_PLANE);
 
 		////
@@ -197,7 +183,6 @@ namespace Loopie {
 
 			if (m_inputEvent.HasEvent(SDL_EVENT_WINDOW_RESIZED)) {
 				windowSize = m_window->GetSize();
-				ivec2 windowPosition = m_window->GetPosition();
 				projectionMatrix = glm::perspective(glm::radians(FOV), static_cast<float>(windowSize.x) / static_cast<float>(windowSize.y), NEAR_PLANE, FAR_PLANE);
 				glViewport(0,0, windowSize.x, windowSize.y);
 			}
@@ -213,9 +198,9 @@ namespace Loopie {
 			rotation += SPEED * dt;
 			prevTime = currentTime;
 
-			shader.Bind();
-			shader.SetUniformMat4("modelViewProj", modelViewProj);
-			Renderer::Draw(va, shader);
+			mesh.GetShader().Bind();
+			mesh.GetShader().SetUniformMat4("modelViewProj", modelViewProj);
+			mesh.Render();
 
 			/////
 

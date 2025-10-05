@@ -54,7 +54,7 @@ namespace Loopie
         for (const auto& element : layout.GetElements())
         {
             glEnableVertexAttribArray(index);
-            glVertexAttribPointer(index, element.Count, ConvertGLVariableTypeToGlType(element.Type), GL_FALSE, layout.GetStride(), (const void*) element.Offset);
+            glVertexAttribPointer(index, element.Count, ConvertGLVariableTypeToGlType(element.Type), GL_FALSE, layout.GetStride(), (const void*)(uintptr_t)element.Offset);
             index++;
         }
         
