@@ -4,7 +4,8 @@ project ("Loopie" VERSION 0.1.0 LANGUAGES C CXX)
 
 
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
-file(GLOB_RECURSE  SOURCES "${SRC_DIR}/*.cpp" "${SRC_DIR}/*.h")
+set(VENDOR_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vendor")
+file(GLOB_RECURSE  SOURCES "${SRC_DIR}/*.cpp" "${SRC_DIR}/*.h" "${VENDOR_DIR}/*.cpp" "${VENDOR_DIR}/*.h" )
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${SOURCES})
 
 find_package(spdlog REQUIRED)
@@ -21,7 +22,8 @@ find_package(imgui REQUIRED)
 add_library(${PROJECT_NAME} ${SOURCES})
 add_library(loopie-core ALIAS ${PROJECT_NAME})
 
-target_include_directories(${PROJECT_NAME} PUBLIC "${SRC_DIR}")
+
+target_include_directories(${PROJECT_NAME} PUBLIC "${SRC_DIR}" "${VENDOR_DIR}")
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
 	spdlog::spdlog
