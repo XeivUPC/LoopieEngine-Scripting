@@ -34,6 +34,10 @@ namespace Loopie {
 		float GetLeftTrigger() const;
 		float GetRightTrigger() const;
 
+		std::vector<const char*> GetDroppedFiles();
+		const char* GetDroppedFile(int index);
+		bool HasFileBeenDropped() const;
+
 		void SetAxisDeadzone(float value) { m_axisDeadZone = value; }
 		
 	private:
@@ -69,6 +73,9 @@ namespace Loopie {
 		vec2 m_mousePosition;
 
 		float m_axisDeadZone = 0.15f;
+
+		std::vector<const char*> m_droppedFiles;
+		bool m_hasFileBeenDropped = false;
 
 		SDL_Gamepad* gamepad = nullptr;
 	};
