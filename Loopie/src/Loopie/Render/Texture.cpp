@@ -3,17 +3,40 @@
 #include "Loopie/Core/Log.h"
 
 #include <iostream>
-#include <stb_image.h>
+#include <IL/il.h>
+#include <IL/ilu.h>
 #include <glad/glad.h>
 
 namespace Loopie
 {
 	Texture::Texture(const std::string& path, bool flipVertically) : m_texture_ID(0), m_width(0), m_height(0), m_channels(0)
 	{
-		stbi_set_flip_vertically_on_load(flipVertically);
-		unsigned char* data = stbi_load(path.c_str(), &m_width, &m_height, &m_channels, 4);
-		if (data)
+		ILuint imageID;
+		ilGenImages(1, &imageID);
+		ilBindImage(imageID);
+
+		// If we need to flip, just use the following code
+		//if (flipVertically)
+		//	ilEnable(IL_ORIGIN_SET);
+		//else
+		//	ilDisable(IL_ORIGIN_SET);
+
+		if (ilLoadImage(path.c_str()))
 		{
+			// Convert to RGBA format
+			if (!ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE))
+			{
+				Log::Error("Failed to convert image {0}", path);
+				ilDeleteImages(1, &imageID);
+				return;
+			}
+
+			m_width = ilGetInteger(IL_IMAGE_WIDTH);
+			m_height = ilGetInteger(IL_IMAGE_HEIGHT);
+			m_channels = ilGetInteger(IL_IMAGE_CHANNELS);
+
+			ILubyte* data = ilGetData();
+
 			GLenum format = GL_RGB;
 			if (m_channels == 1)
 				format = GL_RED;
@@ -33,13 +56,12 @@ namespace Loopie
 
 			Unbind();
 
-			if(data)
-				stbi_image_free(data);
+			ilDeleteImages(1, &imageID);
 		}
 		else
 		{
 			Log::Error("Failed to load image {0}", path);
-			stbi_image_free(data);
+			ilDeleteImages(1, &imageID);
 		}
 	}
 

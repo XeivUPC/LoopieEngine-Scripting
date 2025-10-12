@@ -3,6 +3,8 @@
 #include "Loopie/Core/Assert.h"
 
 #include <glad/glad.h>
+#include <IL/il.h>
+#include <IL/ilu.h>
 
 namespace Loopie {
 	void Renderer::Init(void* context) {
@@ -11,6 +13,10 @@ namespace Loopie {
 		glEnable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		// DevIL Init
+		ilInit();
+		iluInit();
 	}
 
 	void Renderer::Clear() {
