@@ -1,6 +1,9 @@
 #include "InputEventManager.h"
 #include "Loopie/Core/Log.h"
 
+#include "Loopie/Core/Application.h"
+#include "Loopie/Core/Window.h"
+
 #include <SDL3/SDL.h>
 #include <imgui_impl_sdl3.h>
 #include <cmath>
@@ -34,6 +37,9 @@ namespace Loopie {
 		AdvanceKeyStates(m_keyboard);
 		AdvanceKeyStates(m_gamepad);
 		AdvanceKeyStates(m_mouse);
+
+		m_mouseDelta = { 0.0f, 0.0f };
+		m_scrollDelta = { 0.0f, 0.0f };
 
 		SDL_Event event;
 		while (SDL_PollEvent(&event))
@@ -73,7 +79,12 @@ namespace Loopie {
 					break;
 
 				case SDL_EVENT_MOUSE_MOTION:
+					m_mouseDelta = { event.motion.xrel, event.motion.yrel };
 					m_mousePosition = { event.motion.x, event.motion.y };
+					break;
+
+				case SDL_EVENT_MOUSE_WHEEL:
+					m_scrollDelta = { event.wheel.x, event.wheel.y };
 					break;
 
 				case SDL_EVENT_GAMEPAD_AXIS_MOTION:
@@ -106,7 +117,8 @@ namespace Loopie {
 				case SDL_EVENT_DROP_FILE: {
 					const char* droppedFile = event.drop.data;
 					m_droppedFiles.push_back(droppedFile);
-					Log::Info("Dropped file into the Engine: '{0}'", droppedFile);
+					Log::Info("Dropped file: '{0}'", droppedFile);
+					break;
 				}
 
 				default:
@@ -134,6 +146,16 @@ namespace Loopie {
 	const vec2& InputEventManager::GetMousePosition() const
 	{
 		return m_mousePosition;
+	}
+
+	const vec2& InputEventManager::GetMouseDelta() const
+	{
+		return m_mouseDelta;
+	}
+
+	const vec2& InputEventManager::GetScrollDelta() const
+	{
+		return m_scrollDelta;
 	}
 
 	vec2 InputEventManager::GetLeftAxis() const
@@ -176,5 +198,15 @@ namespace Loopie {
 	bool InputEventManager::HasFileBeenDropped() const
 	{
 		return !m_droppedFiles.empty();
+	}
+
+	void InputEventManager::SetMouseCaptured(bool capture)
+	{
+		SDL_SetWindowRelativeMouseMode(Application::GetInstance().GetWindow().GetSDLWindow(), capture);
+	}
+
+	bool InputEventManager::IsMouseCaptured() const
+	{
+		return SDL_GetWindowRelativeMouseMode(Application::GetInstance().GetWindow().GetSDLWindow());
 	}
 }

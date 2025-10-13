@@ -28,6 +28,8 @@ namespace Loopie {
 		KeyState GetMouseButtonStatus(int mouseIndex) const;
 
 		const vec2& GetMousePosition() const;
+		const vec2& GetMouseDelta() const;
+		const vec2& GetScrollDelta() const;
 		vec2 GetLeftAxis() const;
 		vec2 GetRightAxis() const;
 
@@ -39,6 +41,11 @@ namespace Loopie {
 		bool HasFileBeenDropped() const;
 
 		void SetAxisDeadzone(float value) { m_axisDeadZone = value; }
+
+		void SetMouseCaptured(bool capture);
+
+		bool IsMouseCaptured() const;
+
 		
 	private:
 
@@ -70,7 +77,9 @@ namespace Loopie {
 		std::array<float, SDL_GAMEPAD_AXIS_COUNT> m_axes;
 		std::array<KeyState, 5> m_mouse;
 
-		vec2 m_mousePosition;
+		vec2 m_mousePosition = { 0.0f, 0.0f };
+		vec2 m_mouseDelta = { 0.0f, 0.0f };
+		vec2 m_scrollDelta = { 0.0f, 0.0f };
 
 		float m_axisDeadZone = 0.15f;
 

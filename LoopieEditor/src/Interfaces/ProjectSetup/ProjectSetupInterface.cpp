@@ -9,6 +9,8 @@
 #include "Loopie/Core/Window.h"
 
 #include <imgui.h>
+#include <imgui_stdlib.h>
+
 namespace Loopie
 {
 	ProjectSetupInterface::ProjectSetupInterface()
@@ -56,6 +58,7 @@ namespace Loopie
 			JsonResult<std::string> result;
 			for (unsigned int i = 0; i < recentArray.Size(); ++i) {
 				result = recentArray.GetArrayElement<std::string>(i);
+
 				m_recentProjects.emplace_back(result.Result);
 			}
 		}
@@ -79,7 +82,7 @@ namespace Loopie
 		}
 	}
 
-	bool ProjectSetupInterface::TryOpenProject(const std::string& path)
+	bool ProjectSetupInterface::TryOpenProject(const std::string& path) const
 	{
 		if (!DirectoryManager::Contains(path))
 			return false;
@@ -99,7 +102,7 @@ namespace Loopie
 
 			ImGui::BeginGroup();
 
-			ImGui::InputText("##ProjectPath", m_recentProjects[i].data(), m_recentProjects[i].capacity());
+			ImGui::InputText("##ProjectPath", &m_recentProjects[i], ImGuiInputTextFlags_ReadOnly);
 			ImGui::SameLine();
 			if (ImGui::Button("Open")) {
 				TryOpenProject(m_recentProjects[i]);
@@ -119,12 +122,12 @@ namespace Loopie
 
 		ImGui::End();
 	}
-	void ProjectSetupInterface::RenderCreateProjectMenu()
+	void ProjectSetupInterface::RenderCreateProjectMenu() 
 	{
 		ImGui::Begin("Create Project", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
 		ImGui::InputText("Project Name", m_projectName, IM_ARRAYSIZE(m_projectName));
 
-		ImGui::InputText("Path", m_createProjectPath.data(), m_createProjectPath.capacity(), ImGuiInputTextFlags_ReadOnly);
+		ImGui::InputText("Path", &m_createProjectPath, ImGuiInputTextFlags_ReadOnly);
 		ImGui::SameLine();
 		if (ImGui::Button("##", { 20,20 }))
 		{
@@ -152,7 +155,7 @@ namespace Loopie
 	void ProjectSetupInterface::RenderLoadProjectMenu()
 	{
 		ImGui::Begin("Load Project", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
-		ImGui::InputText("Path", m_loadProjectPath.data(), m_loadProjectPath.capacity(), ImGuiInputTextFlags_ReadOnly);
+		ImGui::InputText("Path", &m_loadProjectPath, ImGuiInputTextFlags_ReadOnly);
 		ImGui::SameLine();
 		if (ImGui::Button("##", { 20,20 }))
 		{

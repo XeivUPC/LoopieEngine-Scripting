@@ -227,6 +227,10 @@ namespace Loopie {
             return Root().Size();
         }
 
+        JsonNode Child(const std::string& keyPath) {
+            return Root().Child(keyPath);
+        }
+
         template <typename T>
         JsonResult<T> GetValue(const std::string& keyPath, T defaultValue = {}) {
             return Root().GetValue(keyPath, defaultValue);

@@ -128,11 +128,19 @@ namespace Loopie {
 
     bool JsonNode::RemoveSelf(const std::string& name)
     {
-        if (name.empty())
-            return false;
+        if (name.empty()) {
 
-        if (m_parentNode == nullptr || !IsValid())
+            if (m_parentNode == nullptr)
+            {
+                if (IsValid()) {
+                    m_node->clear();
+                    return true;
+                }
+                return false;
+            }
+
             return false;
+        }
 
         if (!m_parentNode->contains(name))
             return false;

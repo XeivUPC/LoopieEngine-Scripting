@@ -15,17 +15,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(${PROJECT_NAME} PUBLIC loopie-core)
 
 
-add_custom_target(copy_resources ALL
-
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${PROJECT_SOURCE_DIR}/assets
-        ${OUTPUT_PATH}/assets
-
-        COMMAND ${CMAKE_COMMAND} -E copy
-        ${PROJECT_SOURCE_DIR}/imgui.ini
-        ${OUTPUT_PATH}/imgui.ini
-
-        COMMENT "Resources Copied Successfully")
-
-add_dependencies(${PROJECT_NAME} copy_resources)
+file(COPY ${PROJECT_SOURCE_DIR}/assets DESTINATION ${OUTPUT_PATH})
+file(COPY ${PROJECT_SOURCE_DIR}/imgui.ini DESTINATION ${OUTPUT_PATH})
 

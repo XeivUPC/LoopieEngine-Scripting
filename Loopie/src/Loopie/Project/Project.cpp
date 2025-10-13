@@ -11,6 +11,7 @@ namespace Loopie {
 
 		m_projectPath = DirectoryManager::CreateFolder(projectPath, name);
 		m_assetsPath = DirectoryManager::CreateFolder(m_projectPath, "Assets");
+		m_cachePath = DirectoryManager::CreateFolder(m_projectPath, ".Cache");
 		m_congifPath = DirectoryManager::CreateFile(m_projectPath, "project", ".config");
 
 		/// Maybe some config Files???? Once Scene Exists a default One
@@ -24,6 +25,7 @@ namespace Loopie {
 
 		m_projectPath = projectPath;
 		m_assetsPath = DirectoryManager::CreateFolder(m_projectPath, "Assets");
+		m_cachePath = DirectoryManager::CreateFolder(m_projectPath, ".Cache");
 		m_congifPath = projectPath / "project.config";
 
 		/// Maybe read/save config Files????

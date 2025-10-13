@@ -17,14 +17,14 @@ namespace Loopie {
 		bool ExistsRecentProject(const std::string& id);
 		void DeleteRecentProject(const std::string& id);
 
-		bool TryOpenProject(const std::string& path);
+		bool TryOpenProject(const std::string& path) const;
 
 		void RenderRecentProjectsMenu();
 		void RenderCreateProjectMenu();
 		void RenderLoadProjectMenu();
 
 	private:
-		std::vector<std::string > m_recentProjects;
+		std::vector<std::string> m_recentProjects;
 
 		std::string m_createProjectPath;
 		std::string m_loadProjectPath;

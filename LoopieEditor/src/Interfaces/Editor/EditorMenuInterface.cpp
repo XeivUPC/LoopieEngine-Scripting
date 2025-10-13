@@ -5,6 +5,7 @@
 #include "Loopie/Files/FileDialog.h"
 
 #include <imgui.h>
+#include <imgui_stdlib.h>
 #include <SDL3/SDL_misc.h>
 #include <SDL3/SDL_cpuinfo.h>
 #include <SDL3/SDL_video.h>
@@ -228,7 +229,7 @@ namespace Loopie {
 	void EditorMenuInterface::RenderOpenProjectPopUp()
 	{
 		if (ImGui::BeginPopupModal("Open Project###OpenProjectPopUp", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize)) {
-			ImGui::InputText("Path", m_projectPath.data(), m_projectPath.capacity(), ImGuiInputTextFlags_ReadOnly);
+			ImGui::InputText("Path",& m_projectPath, ImGuiInputTextFlags_ReadOnly);
 			ImGui::SameLine();
 			if (ImGui::Button("##", { 20,20 }))
 			{
@@ -258,7 +259,7 @@ namespace Loopie {
 
 			ImGui::InputText("Project Name", m_projectName, IM_ARRAYSIZE(m_projectName));
 
-			ImGui::InputText("Path", m_projectPath.data(), m_projectPath.capacity(), ImGuiInputTextFlags_ReadOnly);
+			ImGui::InputText("Path", &m_projectPath, ImGuiInputTextFlags_ReadOnly);
 			ImGui::SameLine();
 			if (ImGui::Button("##", { 20,20 }))
 			{
