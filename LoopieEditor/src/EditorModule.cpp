@@ -103,6 +103,8 @@ namespace Loopie
 			}
 		}
 
+
+		orbitalCamera->ProcessEvents(inputEvent);
 		vec3 moveCameraInput = { 0,0,0 };
 		if (inputEvent.GetKeyStatus(SDL_SCANCODE_W) == KeyState::REPEAT)
 			moveCameraInput.z += 1;
@@ -113,7 +115,13 @@ namespace Loopie
 		if (inputEvent.GetKeyStatus(SDL_SCANCODE_D) == KeyState::REPEAT)
 			moveCameraInput.x -= 1;
 
+
+		orbitalCamera->Update(dt);
 		camera->GetTransform()->Translate(moveCameraInput * 10.f * dt);
+
+
+		
+
 		rotation = SPEED * dt;
 		//meshContainerEntity->GetTransform()->Rotate({0,rotation,0}); //// this should Propagete to its childs
 
