@@ -4,6 +4,8 @@
 #include <imgui.h>
 
 namespace Loopie {
+	std::shared_ptr<Entity> HierarchyInterface::s_SelectedEntity = nullptr;
+
 	HierarchyInterface::HierarchyInterface() {
 		
 	}
@@ -43,7 +45,7 @@ namespace Loopie {
 
 		if (!hasChildren)
 			flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-		if (m_selectedEntity == entity)
+		if (s_SelectedEntity == entity)
 			flags |= ImGuiTreeNodeFlags_Selected;
 
 		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity.get(), flags, entity->GetName().c_str());
@@ -51,7 +53,7 @@ namespace Loopie {
 		if (ImGui::IsItemClicked())
 		{
 			////Expand To Select Multiple
-			m_selectedEntity = entity;
+			s_SelectedEntity = entity;
 		}
 
 		if (opened && hasChildren)

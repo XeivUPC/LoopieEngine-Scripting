@@ -14,8 +14,10 @@ namespace Loopie {
 
 	private:
 		void DrawEntitySlot(const std::shared_ptr<Entity>& entity);
+
+	public:
+		static std::shared_ptr<Entity> s_SelectedEntity;
 	private:
 		Scene* m_scene = nullptr;
-		std::shared_ptr<Entity> m_selectedEntity;
 	};
 }
