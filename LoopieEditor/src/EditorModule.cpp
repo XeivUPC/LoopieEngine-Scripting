@@ -75,8 +75,7 @@ namespace Loopie
 
 						std::shared_ptr<Mesh> mesh = ResourceDatabase::LoadResource<Mesh>(metadata.uuid);
 						if (mesh) {
-							std::shared_ptr<Entity> newEntity = scene->CreateEntity("ModelEntity");
-							newEntity->SetParent(meshContainerEntity);
+							std::shared_ptr<Entity> newEntity = scene->CreateEntity("ModelEntity", meshContainerEntity);
 							MeshRenderer* renderer = newEntity->AddComponent<MeshRenderer>();
 							renderer->SetMesh(mesh);
 						}
@@ -89,8 +88,7 @@ namespace Loopie
 						AssetMetadata* metadata = AssetRegistry::GetMetadata(uuids[i]);
 						std::shared_ptr<Mesh> mesh = ResourceDatabase::LoadResource<Mesh>(metadata->uuid);
 						if (mesh) {
-							std::shared_ptr<Entity> newEntity = scene->CreateEntity("ModelEntity");
-							newEntity->SetParent(meshContainerEntity);
+							std::shared_ptr<Entity> newEntity = scene->CreateEntity("ModelEntity", meshContainerEntity);
 							MeshRenderer* renderer = newEntity->AddComponent<MeshRenderer>();
 							renderer->SetMesh(mesh);
 						}

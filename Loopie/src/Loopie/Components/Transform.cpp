@@ -8,6 +8,12 @@ namespace Loopie
         SetDirty();
     }
 
+    Transform::Transform(const Transform& otherTransform)
+        : m_position(otherTransform.m_position), m_rotation(otherTransform.m_rotation), m_scale(otherTransform.m_scale)
+    {
+        SetDirty();
+    }
+
     matrix4 Transform::GetTransformMatrix() const
     {
         RecalculateCache();

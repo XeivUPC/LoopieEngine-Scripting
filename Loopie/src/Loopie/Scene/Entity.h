@@ -20,15 +20,15 @@ namespace Loopie {
 		Entity(const std::string& name);
 		~Entity();
 
-		template<typename T, typename = std::enable_if_t<std::is_base_of_v<Component, T>>>
-		T* AddComponent()
+		template<typename T, typename... Args, typename = std::enable_if_t<std::is_base_of_v<Component, T>>>
+		T* AddComponent(Args&&... args)
 		{
 			if constexpr (std::is_same_v<T, Transform>) {
 				if (m_transform)
 					return GetTransform();
 			}
 
-			m_components.push_back(std::make_unique<T>());
+			m_components.push_back(std::make_unique<T>(std::forward<Args>(args)...));
 			T* componentPtr = static_cast<T*>(m_components.back().get());
 
 			componentPtr->m_owner = weak_from_this();
