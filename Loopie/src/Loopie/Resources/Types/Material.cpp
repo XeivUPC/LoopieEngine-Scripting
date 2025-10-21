@@ -20,7 +20,7 @@ namespace Loopie
 
 		m_shader.Bind();
 		m_texture->m_tb->Bind();
-		m_shader.SetUniformInt("u_Texture", 0);
+		m_shader.SetUniformInt("u_Albedo", 0);
 		m_shader.Unbind();
 	}
 
@@ -29,7 +29,7 @@ namespace Loopie
 		m_shader.Bind();
 		if (m_texture) {
 			m_texture->m_tb->Bind();
-			m_shader.SetUniformInt("u_Texture", 0);
+			m_shader.SetUniformInt("u_Albedo", 0);
 		}
 	}
 

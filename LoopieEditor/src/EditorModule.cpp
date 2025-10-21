@@ -133,8 +133,7 @@ namespace Loopie
 								}
 							}
 						}
-					}
-					
+					}	
 				}
 			}
 		}
@@ -151,7 +150,7 @@ namespace Loopie
 		for (auto& entity : scene->GetAllEntities()) {
 			MeshRenderer* renderer = entity.second->GetComponent<MeshRenderer>();
 			if (renderer) {
-				renderer->GetTransform()->DegreesRotate({ 0,rotation,0 }); //// this should Propagete to its childs
+				//renderer->GetTransform()->DegreesRotate({ 0,rotation,0 }); //// this should Propagete to its childs
 				renderer->GetMaterial()->GetShader().Bind();
 				renderer->GetMaterial()->GetShader().SetUniformMat4("u_ViewProjection", viewProj);
 				renderer->Render();

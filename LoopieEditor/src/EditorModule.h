@@ -13,7 +13,7 @@
 
 #include "Loopie/Core/Math.h"
 #include "Loopie/Components/MeshRenderer.h"
-#include "Loopie/Files/OrbitalCamera.h"
+#include "Loopie/Scene/OrbitalCamera.h"
 #include "Loopie/Components/Transform.h"
 
 ///
