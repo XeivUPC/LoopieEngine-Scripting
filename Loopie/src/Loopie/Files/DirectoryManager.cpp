@@ -4,7 +4,7 @@
 #include <fstream>
 
 namespace Loopie {
-    const std::filesystem::path DirectoryManager::CreateFolder(const std::filesystem::path& path, const std::string& folderName)
+    std::filesystem::path DirectoryManager::CreateFolder(const std::filesystem::path& path, const std::string& folderName)
     {
         if(folderName.empty())
             return std::filesystem::path();
@@ -20,7 +20,7 @@ namespace Loopie {
         return std::filesystem::path();
     }
 
-    const std::filesystem::path DirectoryManager::CreateFile(const std::filesystem::path& path, const std::string& fileName, const std::string& fileExtension)
+    std::filesystem::path DirectoryManager::CreateFile(const std::filesystem::path& path, const std::string& fileName, const std::string& fileExtension)
     {
 
         if (fileName.empty())
@@ -33,9 +33,37 @@ namespace Loopie {
 
         std::ofstream ofs(filePath);
         if (ofs.good()) {
+            ofs.close();
             return  filePath;
         }
         return std::filesystem::path();
+    }
+
+    bool DirectoryManager::Move(const std::filesystem::path& from, const std::filesystem::path& to)
+    {
+        if (!Contains(from))
+            return false;
+        std::filesystem::rename(from, to);
+        return true;
+    }
+
+    bool DirectoryManager::Copy(const std::filesystem::path& fileToCopy, const std::filesystem::path& to)
+    {
+        if (!Contains(fileToCopy))
+            return false;
+        std::filesystem::copy(fileToCopy, to, std::filesystem::copy_options::overwrite_existing);
+        return true;
+    }
+
+    bool DirectoryManager::Delete(const std::filesystem::path& fileToDelete)
+    {
+        if (!Contains(fileToDelete))
+            return false;
+        if (std::filesystem::is_directory(fileToDelete))
+            std::filesystem::remove_all(fileToDelete);
+        else
+            std::filesystem::remove(fileToDelete);
+        return true;
     }
 
     bool DirectoryManager::Contains(const std::filesystem::path& path)
