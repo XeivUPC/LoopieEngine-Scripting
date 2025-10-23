@@ -28,6 +28,9 @@ namespace Loopie {
 		void DrawFolderContent();
 		std::vector<std::filesystem::path> GetFilteredFiles();
 
+		void DragFile(std::string from);
+		void DropFile(std::string to);
+
 	private:
 		std::filesystem::path m_currentDirectory;
 		std::filesystem::path m_selectedFile;

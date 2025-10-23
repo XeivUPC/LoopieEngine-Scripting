@@ -1,6 +1,7 @@
 #include "AssetsExplorerInterface.h"
 
 #include "Loopie/Core/Application.h"
+#include "Loopie/Files/DirectoryManager.h"
 #include "Loopie/Resources/ResourceDatabase.h"
 #include "Loopie/Importers/TextureImporter.h"
 #include "Loopie/Resources/Types/Texture.h"
@@ -156,8 +157,10 @@ namespace Loopie {
 
 		bool opened = ImGui::TreeNodeEx(folderName.c_str(), flags);
 
-		if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+		if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) && !ImGui::IsItemToggledOpen()) {
+
 			GoToDirectory(directory);
+		}
 
 		if (opened && hasChildren)
 		{
@@ -166,8 +169,11 @@ namespace Loopie {
 			{
 				const auto& path = entry.path();
 				std::string name = path.filename().string();
+				bool isDir = std::filesystem::is_directory(path);
 
-				if (entry.is_directory())
+				
+
+				if (isDir)
 				{
 					DrawDirectoryTree(path, indent + 1);
 				}
@@ -180,11 +186,12 @@ namespace Loopie {
 
 					ImGui::TreeNodeEx(name.c_str(), leafFlags);
 
-					if (ImGui::IsItemClicked()) {
+					if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
 						GoToFile(path);
 					}
 				}
 			}
+
 			ImGui::TreePop();
 		}
 	}
@@ -241,21 +248,18 @@ namespace Loopie {
 		}
 
 		for (auto& filePath : filesToShow) {
-			std::string fileName = filePath.filename().string();
+			std::string fileName = filePath.stem().string();
 
 			ImGui::PushID(fileName.c_str());
 			bool isDir = std::filesystem::is_directory(filePath);
 
 			if (isDir) {
 				bool isEmpty = std::filesystem::is_empty(filePath);
-				if(isEmpty)
-					ImGui::Image((ImTextureID)m_emptyFolderIcon->GetRenderId(), ImVec2((float)thumbnailSize, (float)thumbnailSize));
-				else
-					ImGui::Image((ImTextureID)m_folderIcon->GetRenderId(), ImVec2((float)thumbnailSize, (float)thumbnailSize));
+				std::shared_ptr<Texture> folderIcon = isEmpty ? m_emptyFolderIcon : m_folderIcon;
+				ImGui::Image((ImTextureID)folderIcon->GetRenderId(), ImVec2((float)thumbnailSize, (float)thumbnailSize));
 			}
-			else {
+			else
 				ImGui::Image((ImTextureID)m_fileIcon->GetRenderId(), ImVec2((float)thumbnailSize, (float)thumbnailSize));
-			}
 
 			if (ImGui::IsItemHovered())
 			{
@@ -271,6 +275,12 @@ namespace Loopie {
 				else if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
 					GoToFile(filePath);
 				}
+			}
+
+			DragFile(filePath.string());
+			if (isDir)
+			{
+				DropFile(filePath.string());
 			}
 
 			ImGui::Text(ImGuiHelpers::TruncateText(fileName, (float)thumbnailSize).c_str());
@@ -301,5 +311,29 @@ namespace Loopie {
 			}
 		}
 		return results;
+	}
+	void AssetsExplorerInterface::DragFile(std::string from)
+	{
+		if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceNoDisableHover | ImGuiDragDropFlags_SourceAllowNullID))
+		{
+			std::string filePathStr = from;
+			ImGui::SetDragDropPayload("ASSET_EXPLORER_FILE", filePathStr.c_str(), filePathStr.size() + 1);
+			ImGui::EndDragDropSource();
+		}
+	}
+	void AssetsExplorerInterface::DropFile(std::string to)
+	{
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_EXPLORER_FILE", ImGuiDragDropFlags_AcceptNoDrawDefaultRect))
+			{
+				const char* from = (const char*)payload->Data;
+				std::filesystem::path fromPath = from;
+				std::filesystem::path newPath = to;
+				newPath /= fromPath.filename().string();
+				DirectoryManager::Move(fromPath, newPath);
+			}
+			ImGui::EndDragDropTarget();
+		}
 	}
 }
