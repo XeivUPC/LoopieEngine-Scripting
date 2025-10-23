@@ -10,9 +10,12 @@ namespace Loopie
         SetRotation(pos);
         SetQuaternion(rot);
         SetScale(sca);
+       
+    }
+
+    void Transform::Init(){
         UpdateParent();
     }
-    void Transform::Init(){}
 #pragma region Transformations
 
     void Transform::Translate(const vec3& translation, bool local)
@@ -173,7 +176,7 @@ namespace Loopie
     }
     void Transform::UpdateParent()
     {
-        Entity* parent = GetOwner()->GetParent();
+        std::shared_ptr<Entity> parent = GetOwner()->GetParent().lock();
         if (parent)
             m_parentTransform = parent->GetTransform();
         else
