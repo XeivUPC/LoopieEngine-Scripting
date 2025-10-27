@@ -24,8 +24,8 @@ namespace Loopie
         vec3 Forward();  
 #pragma endregion
 #pragma region Matrix
-        matrix4 GetMatrix();
-        void UpdateMatrix();
+        matrix4 GetMatrix() const;
+        void UpdateMatrix() const;
 #pragma endregion
 #pragma region Get
         vec3 GetPosition() const;
@@ -51,14 +51,14 @@ namespace Loopie
         void Recalculate();
     private:
         vec3 m_position;
-        vec3 m_localPosition;
+        vec3 m_localPosition = vec3(0);
         quaternion m_rotation;
-        quaternion m_localRotation;
+        quaternion m_localRotation = quaternion( 1,0,0,0 );
         vec3 m_eulerAngles;
-        vec3 m_localEulerAngles;
+        vec3 m_localEulerAngles = vec3(0);
         vec3 m_scale;
-        vec3 m_localScale;
-        matrix4 m_globalMatrix;
+        vec3 m_localScale = vec3(1);
+        mutable matrix4 m_globalMatrix;
 
         Transform* m_parentTransform;
     };

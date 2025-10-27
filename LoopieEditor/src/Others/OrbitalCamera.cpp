@@ -61,13 +61,12 @@ namespace Loopie
                 if (inputEvent.GetKeyStatus(SDL_SCANCODE_LSHIFT) == KeyState::REPEAT)
                     m_speedMultiplier = 2.0f;
                 else
-                    m_speedMultiplier = 1.0f;
-
-                if (inputEvent.GetKeyStatus(SDL_SCANCODE_W) == KeyState::REPEAT) m_inputDirection.z -= m_cameraMovementSpeed;
-                if (inputEvent.GetKeyStatus(SDL_SCANCODE_S) == KeyState::REPEAT) m_inputDirection.z += m_cameraMovementSpeed;
-                if (inputEvent.GetKeyStatus(SDL_SCANCODE_A) == KeyState::REPEAT) m_inputDirection.x -= m_cameraMovementSpeed;
-                if (inputEvent.GetKeyStatus(SDL_SCANCODE_D) == KeyState::REPEAT) m_inputDirection.x += m_cameraMovementSpeed;
+                    m_speedMultiplier = 1.0f;  
             }
+            if (inputEvent.GetKeyStatus(SDL_SCANCODE_W) == KeyState::REPEAT) m_inputDirection.z -= m_cameraMovementSpeed;
+            if (inputEvent.GetKeyStatus(SDL_SCANCODE_S) == KeyState::REPEAT) m_inputDirection.z += m_cameraMovementSpeed;
+            if (inputEvent.GetKeyStatus(SDL_SCANCODE_A) == KeyState::REPEAT) m_inputDirection.x -= m_cameraMovementSpeed;
+            if (inputEvent.GetKeyStatus(SDL_SCANCODE_D) == KeyState::REPEAT) m_inputDirection.x += m_cameraMovementSpeed;
         }
         if (inputEvent.GetKeyStatus(SDL_SCANCODE_F) == KeyState::DOWN)
         {
@@ -131,7 +130,7 @@ namespace Loopie
             quaternion pitchRotation = glm::normalize(glm::angleAxis(m_pitch, glm::vec3(1, 0, 0)));
             quaternion orbitRotation = yawRotation * pitchRotation;
 
-            transform->Translate(m_inputDirection, false);
+            transform->Translate(m_inputDirection*dt, false);
             transform->SetQuaternion(orbitRotation);
         }
     }

@@ -4,8 +4,8 @@ namespace Loopie
 {
     Transform::Transform(vec3 pos, quaternion rot, vec3 sca) :
         m_globalMatrix(1.0f),
-        m_position(0.0f), m_rotation(1, 0, 0, 0), m_scale(1.0f), m_eulerAngles(0, 0, 0),
-        m_localPosition(1.0f), m_localScale(1.0f), m_localRotation(1, 0, 0, 0), m_localEulerAngles(0, 0, 0)
+        m_position(pos), m_rotation(rot), m_scale(sca), m_eulerAngles(0, 0, 0),
+        m_localPosition(0), m_localScale(1.0f), m_localRotation(1, 0, 0, 0), m_localEulerAngles(0, 0, 0)
     {
         SetRotation(pos);
         SetQuaternion(rot);
@@ -15,6 +15,7 @@ namespace Loopie
 
     void Transform::Init(){
         UpdateParent();
+        UpdateMatrix();
     }
 #pragma region Transformations
 
@@ -101,12 +102,12 @@ namespace Loopie
     }
 #pragma endregion
 #pragma region Matrix
-    matrix4 Transform::GetMatrix()
+    matrix4 Transform::GetMatrix() const
     {
         UpdateMatrix();
         return m_globalMatrix;
     }
-    void Transform::UpdateMatrix()
+    void Transform::UpdateMatrix() const
     {
         m_globalMatrix = matrix4(1.0f);
         m_globalMatrix = glm::translate(m_globalMatrix, m_localPosition);
