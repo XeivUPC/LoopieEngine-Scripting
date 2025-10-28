@@ -10,7 +10,7 @@
 
 namespace Loopie {
 	Texture::Texture(const UUID& id) : Resource(id) {
-
+		Reload();
 	}
 
 	void Texture::LoadFromFile(const std::string path)

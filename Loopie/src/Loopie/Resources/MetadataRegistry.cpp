@@ -47,11 +47,15 @@ namespace Loopie {
         JsonData data;
         data.CreateField("Id",metadata.UUID.Get());
         data.CreateField("HasCache", metadata.HasCache);
-        data.CreateArrayField("Caches");
-        for (const auto& paths : metadata.CachesPath)
-        {
-            data.AddArrayElement("Caches", paths);
+
+        if (metadata.HasCache) {
+            data.CreateArrayField("Caches");
+            for (const auto& paths : metadata.CachesPath)
+            {
+                data.AddArrayElement("Caches", paths);
+            }
         }
+       
         data.ToFile(metadataPath);
 	}
     bool MetadataRegistry::IsMetadataFile(const std::filesystem::path& assetPath)

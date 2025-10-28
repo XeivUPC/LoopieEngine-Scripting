@@ -33,13 +33,8 @@ namespace Loopie {
 		}
 		
 		m_fileIcon = std::make_shared<Texture>(AssetRegistry::GetMetadata(iconsToLoad[0])->UUID);
-		m_fileIcon->Reload();
-
 		m_folderIcon = std::make_shared<Texture>(AssetRegistry::GetMetadata(iconsToLoad[1])->UUID);
-		m_folderIcon->Reload();
-
 		m_emptyFolderIcon = std::make_shared<Texture>(AssetRegistry::GetMetadata(iconsToLoad[2])->UUID);
-		m_emptyFolderIcon->Reload();
 
 		const Project& project = Application::GetInstance().m_activeProject;
 		GoToDirectory(project.GetAssetsPath());

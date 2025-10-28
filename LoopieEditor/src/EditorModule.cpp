@@ -124,7 +124,6 @@ namespace Loopie
 				std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(meta.UUID, i);
 
 				if (mesh) {
-					mesh->Reload();
 					std::shared_ptr<Entity> newEntity = scene->CreateEntity("ModelEntity", meshContainerEntity);
 					MeshRenderer* renderer = newEntity->AddComponent<MeshRenderer>();
 					renderer->SetMesh(mesh);
@@ -135,7 +134,6 @@ namespace Loopie
 			TextureImporter::ImportImage(file, meta);
 			std::shared_ptr<Texture> texture = std::make_shared<Texture>(meta.UUID);
 			if (texture) {
-				texture->Reload();
 				if (m_hierarchy.s_SelectedEntity != nullptr) {
 					MeshRenderer* renderer = m_hierarchy.s_SelectedEntity->GetComponent<MeshRenderer>();
 					if (renderer) {

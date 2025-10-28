@@ -12,6 +12,7 @@ namespace Loopie {
 	Mesh::Mesh(const UUID& id, unsigned int index) : Resource(id)
 	{
 		m_meshIndex = index;
+		Reload();
 	}
 	void Mesh::LoadFromFile(const std::string path)
 	{
