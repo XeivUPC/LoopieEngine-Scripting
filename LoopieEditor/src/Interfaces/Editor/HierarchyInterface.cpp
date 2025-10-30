@@ -144,12 +144,12 @@ namespace Loopie {
 				s_SelectedEntity = newEntity;
 			}
 
-			if (ImGui::MenuItem("Cone"))
+			if (ImGui::MenuItem("Cylinder"))
 			{
-				std::shared_ptr<Entity> newEntity = m_scene->CreateEntity("Cone", entity);
+				std::shared_ptr<Entity> newEntity = m_scene->CreateEntity("Cylinder", entity);
 				MeshRenderer* renderer = newEntity->AddComponent<MeshRenderer>();
 
-				std::string modelPath = "assets/models/primitives/cone.fbx";
+				std::string modelPath = "assets/models/primitives/cylinder.fbx";
 				Metadata& meta = AssetRegistry::GetOrCreateMetadata(modelPath);
 				MeshImporter::ImportModel(modelPath, meta);
 				std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(meta.UUID, 0);
@@ -159,12 +159,12 @@ namespace Loopie {
 				s_SelectedEntity = newEntity;
 			}
 
-			if (ImGui::MenuItem("Cylinder"))
+			if (ImGui::MenuItem("Plane"))
 			{
-				std::shared_ptr<Entity> newEntity = m_scene->CreateEntity("Cylinder", entity);
+				std::shared_ptr<Entity> newEntity = m_scene->CreateEntity("Plane", entity);
 				MeshRenderer* renderer = newEntity->AddComponent<MeshRenderer>();
 
-				std::string modelPath = "assets/models/primitives/cylinder.fbx";
+				std::string modelPath = "assets/models/primitives/plane.fbx";
 				Metadata& meta = AssetRegistry::GetOrCreateMetadata(modelPath);
 				MeshImporter::ImportModel(modelPath, meta);
 				std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(meta.UUID, 0);
