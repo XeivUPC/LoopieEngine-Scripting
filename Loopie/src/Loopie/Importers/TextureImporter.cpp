@@ -66,6 +66,8 @@ namespace Loopie {
 			metadata.CachesPath.clear();
 			metadata.CachesPath.push_back(locationPath.string());
 			MetadataRegistry::SaveMetadata(filepath, metadata);
+
+			Log::Trace("Texture Imported -> {0}", filepath);
 		}
 		else
 		{
@@ -111,6 +113,8 @@ namespace Loopie {
 		file.close();
 
 		texture.m_tb = std::make_shared<TextureBuffer>(texture.m_pixels.data(), texture.m_width, texture.m_height, texture.m_channels);
+
+		Log::Trace("Texture Loaded -> {0}", path);
 	}
 
 	bool TextureImporter::CheckIfIsImage(const char* path)

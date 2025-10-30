@@ -222,6 +222,7 @@ namespace Loopie {
 						break;
 					}
 					case UniformType_Sampler2D:
+						
 						break;
 					default:
 						break;

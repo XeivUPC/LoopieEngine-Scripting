@@ -74,13 +74,12 @@ namespace Loopie {
 			}
 			ImGui::TreePop();
 		}
-
-		
-		
 	}
 
 	void HierarchyInterface::DrawContextMenu(const std::shared_ptr<Entity>& entity)
 	{
+
+		//// EXPAND MAYBE WITH A CUSTOM CREATOR -> MenuItem class (contains an Execute function, label, active Condition)???
 
 		if (ImGui::MenuItem("Create Empty"))
 		{
@@ -115,64 +114,16 @@ namespace Loopie {
 		if (ImGui::BeginMenu("3D Object"))
 		{
 			if (ImGui::MenuItem("Cube"))
-			{
-				std::shared_ptr<Entity> newEntity = m_scene->CreateEntity("Cube", entity);
-				MeshRenderer* renderer = newEntity->AddComponent<MeshRenderer>();
-
-				std::string modelPath = "assets/models/primitives/cube.fbx";
-				Metadata& meta = AssetRegistry::GetOrCreateMetadata(modelPath);
-				MeshImporter::ImportModel(modelPath, meta);
-				std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(meta.UUID, 0);
-				if (mesh)
-					renderer->SetMesh(mesh);
-
-				s_SelectedEntity = newEntity;
-			}
+				s_SelectedEntity = CreatePrimitiveModel("assets/models/primitives/cube.fbx", "Cube", entity);
 
 			if (ImGui::MenuItem("Sphere"))
-			{
-				std::shared_ptr<Entity> newEntity = m_scene->CreateEntity("Sphere", entity);
-				MeshRenderer* renderer = newEntity->AddComponent<MeshRenderer>();
-
-				std::string modelPath = "assets/models/primitives/sphere.fbx";
-				Metadata& meta = AssetRegistry::GetOrCreateMetadata(modelPath);
-				MeshImporter::ImportModel(modelPath, meta);
-				std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(meta.UUID, 0);
-				if(mesh)
-					renderer->SetMesh(mesh);
-
-				s_SelectedEntity = newEntity;
-			}
+				s_SelectedEntity = CreatePrimitiveModel("assets/models/primitives/sphere.fbx", "Sphere", entity);
 
 			if (ImGui::MenuItem("Cylinder"))
-			{
-				std::shared_ptr<Entity> newEntity = m_scene->CreateEntity("Cylinder", entity);
-				MeshRenderer* renderer = newEntity->AddComponent<MeshRenderer>();
-
-				std::string modelPath = "assets/models/primitives/cylinder.fbx";
-				Metadata& meta = AssetRegistry::GetOrCreateMetadata(modelPath);
-				MeshImporter::ImportModel(modelPath, meta);
-				std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(meta.UUID, 0);
-				if (mesh)
-					renderer->SetMesh(mesh);
-
-				s_SelectedEntity = newEntity;
-			}
+				s_SelectedEntity = CreatePrimitiveModel("assets/models/primitives/cylinder.fbx", "Cylinder", entity);
 
 			if (ImGui::MenuItem("Plane"))
-			{
-				std::shared_ptr<Entity> newEntity = m_scene->CreateEntity("Plane", entity);
-				MeshRenderer* renderer = newEntity->AddComponent<MeshRenderer>();
-
-				std::string modelPath = "assets/models/primitives/plane.fbx";
-				Metadata& meta = AssetRegistry::GetOrCreateMetadata(modelPath);
-				MeshImporter::ImportModel(modelPath, meta);
-				std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(meta.UUID, 0);
-				if (mesh)
-					renderer->SetMesh(mesh);
-
-				s_SelectedEntity = newEntity;
-			}
+				s_SelectedEntity = CreatePrimitiveModel("assets/models/primitives/plane.fbx", "Plane", entity);
 
 			ImGui::EndMenu();
 		}
@@ -203,5 +154,18 @@ namespace Loopie {
 			/// Cut
 		}
 
+	}
+	std::shared_ptr<Entity> HierarchyInterface::CreatePrimitiveModel(const std::string& modelPath, const std::string& name, const std::shared_ptr<Entity>& parent)
+	{
+		std::shared_ptr<Entity> newEntity = m_scene->CreateEntity(name, parent);
+		MeshRenderer* renderer = newEntity->AddComponent<MeshRenderer>();
+
+		Metadata& meta = AssetRegistry::GetOrCreateMetadata(modelPath);
+		MeshImporter::ImportModel(modelPath, meta);
+		std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(meta.UUID, 0);
+		if (mesh)
+			renderer->SetMesh(mesh);
+
+		return newEntity;
 	}
 }

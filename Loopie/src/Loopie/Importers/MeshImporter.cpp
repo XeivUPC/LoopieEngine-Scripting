@@ -29,6 +29,8 @@ namespace Loopie {
 
 		metadata.HasCache = true;
 		MetadataRegistry::SaveMetadata(filepath, metadata);
+
+		Log::Trace("Mesh Imported -> {0}", filepath);
 	}
 
 	void MeshImporter::LoadModel(const std::string& path ,Mesh& mesh)
@@ -100,6 +102,8 @@ namespace Loopie {
 
 		mesh.m_data = data;
 		mesh.m_vao->AddBuffer(mesh.m_vbo.get(), mesh.m_ebo.get());
+
+		Log::Trace("Mesh Loaded -> {0}", filepath.string());
 	}
 
 	bool MeshImporter::CheckIfIsModel(const char* path)

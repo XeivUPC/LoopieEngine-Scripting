@@ -16,8 +16,8 @@ namespace Loopie {
 		void Stop() { m_active = false; }
 		void Start() { m_active = true; }
 
-		const std::string& GetName() { return m_name; }
-		bool IsActive() { return m_active; }
+		const std::string& GetName() const { return m_name; }
+		bool IsActive() const { return m_active; }
 	private:
 		std::string m_name;
 		bool m_active = true;

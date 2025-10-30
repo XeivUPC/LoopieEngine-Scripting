@@ -122,7 +122,7 @@ namespace Loopie {
 		ImGui::Text("Built using:");
 		ImGui::BulletText("SDL3 / OpenGl / Glm");
 		ImGui::BulletText("Dear ImGui / ImGuizmo");
-		ImGui::BulletText("Assimp / Spdlog");
+		ImGui::BulletText("Assimp / Spdlog / Devil");
 		ImGui::BulletText("Nativefiledialog-Extended");
 		ImGui::BulletText("nlohmann-json");
 
