@@ -75,7 +75,7 @@ namespace Loopie {
 				fs.write(reinterpret_cast<const char*>(&data), sizeof(data));
 			}
 			else if (type == "Float") {
-				int data = std::stof(value);
+				float data = std::stof(value);
 				fs.write(reinterpret_cast<const char*>(&data), sizeof(data));
 			}
 			else if (type == "UInt") {
@@ -83,7 +83,7 @@ namespace Loopie {
 				fs.write(reinterpret_cast<const char*>(&data), sizeof(data));
 			}
 			else if (type == "Bool") {
-				int data = key == "True" ? 1 : 0;
+				int data = value == "True" ? 1 : 0;
 				fs.write(reinterpret_cast<const char*>(&data), sizeof(data));
 			}
 			else if (type == "Vec2" || type == "Vec3" || type == "Vec4" || type == "Mat2" || type == "Mat3" || type == "Mat4") {		
@@ -160,44 +160,54 @@ namespace Loopie {
 			UniformValue uv{};
 
 			if (type == "Int") {
-				int32_t v; file.read(reinterpret_cast<char*>(&v), sizeof(v));
+				int v; 
+				file.read(reinterpret_cast<char*>(&v), sizeof(v));
 				uv.type = UniformType_int; uv.value = v;
 			}
 			else if (type == "Float") {
-				float v; file.read(reinterpret_cast<char*>(&v), sizeof(v));
+				float v;
+				file.read(reinterpret_cast<char*>(&v), sizeof(v));
 				uv.type = UniformType_float; uv.value = v;
 			}
 			else if (type == "UInt") {
-				uint32_t v; file.read(reinterpret_cast<char*>(&v), sizeof(v));
+				unsigned int v; 
+				file.read(reinterpret_cast<char*>(&v), sizeof(v));
 				uv.type = UniformType_uint; uv.value = v;
 			}
 			else if (type == "Bool") {
-				uint8_t b; file.read(reinterpret_cast<char*>(&b), sizeof(b));
+				bool b; 
+				file.read(reinterpret_cast<char*>(&b), sizeof(b));
 				uv.type = UniformType_bool; uv.value = (b != 0);
 			}
 			else if (type == "Vec2") {
-				float v[2]; file.read(reinterpret_cast<char*>(v), sizeof(v));
-				uv.type = UniformType_vec2; uv.value = vec2(v[0], v[1]);
+				glm::vec2 v;
+				file.read(reinterpret_cast<char*>(&v), sizeof(v));
+				uv.type = UniformType_vec2;
 			}
 			else if (type == "Vec3") {
-				float v[3]; file.read(reinterpret_cast<char*>(v), sizeof(v));
-				uv.type = UniformType_vec3; uv.value = vec3(v[0], v[1], v[2]);
+				glm::vec3 v;
+				file.read(reinterpret_cast<char*>(&v), sizeof(v));
+				uv.type = UniformType_vec3;
 			}
 			else if (type == "Vec4") {
-				float v[4]; file.read(reinterpret_cast<char*>(v), sizeof(v));
-				uv.type = UniformType_vec4; uv.value = vec4(v[0], v[1], v[2], v[3]);
+				glm::vec4 v;
+				file.read(reinterpret_cast<char*>(&v), sizeof(v));
+				uv.type = UniformType_vec4;
 			}
 			else if (type == "Mat2") {
-				float v[4]; file.read(reinterpret_cast<char*>(v), sizeof(v));
-				uv.type = UniformType_mat2; uv.value = matrix2(v[0], v[1], v[2], v[3]);
+				glm::mat2 v;
+				file.read(reinterpret_cast<char*>(&v), sizeof(v));
+				uv.type = UniformType_mat2;
 			}
 			else if (type == "Mat3") {
-				float v[9]; file.read(reinterpret_cast<char*>(v), sizeof(v));
-				uv.type = UniformType_mat3; uv.value = matrix3(v[0], v[1], v[2], v[3], v[4],v[5], v[6], v[7], v[8]);
+				glm::mat3 v;
+				file.read(reinterpret_cast<char*>(&v), sizeof(v));
+				uv.type = UniformType_mat3;
 			}
 			else if (type == "Mat4") {
-				float v[16]; file.read(reinterpret_cast<char*>(v), sizeof(v));
-				uv.type = UniformType_mat4; uv.value = matrix4(v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], v[8], v[9], v[10], v[11], v[12], v[13], v[14], v[15]);
+				glm::mat4 v;
+				file.read(reinterpret_cast<char*>(&v), sizeof(v));
+				uv.type = UniformType_mat4;
 			}
 			else if (type == "Sampler2D" ) {
 

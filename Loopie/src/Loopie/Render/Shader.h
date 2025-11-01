@@ -5,6 +5,7 @@
 #include <vector>
 #include <unordered_map>
 #include <regex>
+#include <variant>
 
 typedef unsigned int GLuint;
 typedef int GLint;
@@ -16,33 +17,34 @@ typedef unsigned int GLenum;
 // - Verify if we actually need to cache the attributes, version and uniforms.
 // - Verify if we need array support for uniformTypes.
 
-enum UniformType
-{
-	UniformType_float,
-	UniformType_int,
-	UniformType_uint,
-	UniformType_bool,
-	UniformType_vec2,
-	UniformType_vec3,
-	UniformType_vec4,
-	UniformType_mat2,
-	UniformType_mat3,
-	UniformType_mat4,
-	UniformType_Sampler2D, // treated as int
-	UniformType_Sampler3D, // treated as int
-	UniformType_SamplerCube, // treated as int?
-
-	UniformType_Unknown
-};
-
-struct Uniform
-{
-	std::string id;
-	UniformType type;
-};
-
-
 namespace Loopie {
+
+	enum UniformType
+	{
+		UniformType_float,
+		UniformType_int,
+		UniformType_uint,
+		UniformType_bool,
+		UniformType_vec2,
+		UniformType_vec3,
+		UniformType_vec4,
+		UniformType_mat2,
+		UniformType_mat3,
+		UniformType_mat4,
+		UniformType_Sampler2D, // treated as int
+		UniformType_Sampler3D, // treated as int
+		UniformType_SamplerCube, // treated as int?
+
+		UniformType_Unknown
+	};
+
+	struct Uniform
+	{
+		std::string id;
+		UniformType type;
+		std::variant<int, float, bool, unsigned int, vec2, vec3, vec4, matrix2, matrix3, matrix4> default;
+	};
+
 	class Shader
 	{
 	public:
@@ -78,8 +80,6 @@ namespace Loopie {
 		const std::string& GetFragmentSource() const;
 		const std::string& GetGeometrySource() const;
 		const std::string& GetFilePath() const;
-		const std::vector<std::string>& GetActiveUniforms() const;
-		const std::vector<std::string>& GetActiveAttributes() const;
 		const std::vector<Uniform>& GetUniforms() const;
 
 		// Setters
@@ -97,6 +97,7 @@ namespace Loopie {
 		std::string ParseGLSLVersion(const std::string& source);
 		bool ParseShaderSourcePath(const std::string& filePath);
 		void GetUniformsGL();
+		bool GetUniformDefaultValue(Uniform& uniform);
 		//void ExtractUniforms(const std::string& parsedShader, const std::unordered_map<std::string, 
 							 //UniformType>& typeMap, const std::regex& uniformRegex);
 		bool CheckIfShaderIsBoundAndWarn();
@@ -107,8 +108,6 @@ namespace Loopie {
 		GLuint m_rendererID = 0;
 		std::vector<Uniform> m_uniforms;
 		std::unordered_map<std::string, GLint> m_uniformLocationCache;
-		mutable std::vector<std::string> m_activeUniformsCache;
-		mutable std::vector<std::string> m_activeAttributesCache;
 		mutable bool m_uniformsCached = false;
 		mutable bool m_attributesCached = false;
 

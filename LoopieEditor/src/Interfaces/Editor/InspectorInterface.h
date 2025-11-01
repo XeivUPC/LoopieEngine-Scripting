@@ -22,12 +22,6 @@ namespace Loopie {
 		void DrawCamera(Camera* camera);
 		void DrawMeshRenderer(MeshRenderer* meshRenderer);
 
-
-		void DrawFloatField(float& values, vec3& color);
-		void DrawVectorField(vec2& values);
-		void DrawVectorField(vec3& values);
-		void DrawVectorField(vec4& values);
-
 		void PushMultiItemsWidths(int components, float width);
 	};
 }

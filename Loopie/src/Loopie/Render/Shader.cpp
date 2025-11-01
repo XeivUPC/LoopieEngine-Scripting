@@ -48,8 +48,6 @@ namespace Loopie {
 
 		// Clear cache since uniform locations may have changed
 		m_uniformLocationCache.clear();
-		m_activeUniformsCache.clear();
-		m_activeAttributesCache.clear();
 		m_uniformsCached = false;
 		m_attributesCached = false;
 
@@ -90,6 +88,7 @@ namespace Loopie {
 			return;
 		}
 		glUniformMatrix2fv(location, 1, GL_FALSE, &matrix[0][0]);
+
 	}
 
 	void Shader::SetUniformMat3(const std::string& name, const Loopie::matrix3& matrix)
@@ -204,56 +203,6 @@ namespace Loopie {
 		GLint currentProgram;
 		glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
 		return currentProgram == static_cast<GLint>(m_rendererID);
-	}
-
-	const std::vector<std::string>& Shader::GetActiveUniforms() const
-	{
-		if (m_uniformsCached)
-			return m_activeUniformsCache;
-
-		m_activeUniformsCache.clear();
-
-		GLint count;
-		glGetProgramiv(m_rendererID, GL_ACTIVE_UNIFORMS, &count);
-
-		for (GLint i = 0; i < count; i++)
-		{
-			GLchar name[256];
-			GLsizei length;
-			GLint size;
-			GLenum type;
-
-			glGetActiveUniform(m_rendererID, i, sizeof(name), &length, &size, &type, name);
-			m_activeUniformsCache.push_back(std::string(name));
-		}
-
-		m_uniformsCached = true;
-		return m_activeUniformsCache;
-	}
-
-	const std::vector<std::string>& Shader::GetActiveAttributes() const
-	{
-		if (m_attributesCached)
-			return m_activeAttributesCache;
-
-		m_activeAttributesCache.clear();
-
-		GLint count;
-		glGetProgramiv(m_rendererID, GL_ACTIVE_ATTRIBUTES, &count);
-
-		for (GLint i = 0; i < count; i++)
-		{
-			GLchar name[256];
-			GLsizei length;
-			GLint size;
-			GLenum type;
-
-			glGetActiveAttrib(m_rendererID, i, sizeof(name), &length, &size, &type, name);
-			m_activeAttributesCache.push_back(std::string(name));
-		}
-
-		m_attributesCached = true;
-		return m_activeAttributesCache;
 	}
 
 	const std::vector<Uniform>& Shader::GetUniforms() const
@@ -524,7 +473,7 @@ namespace Loopie {
 			glGetActiveUniform(m_rendererID, i, maxNameLength, &length, &size, &type, nameBuffer.data());
 			std::string name(nameBuffer.data(), length);
 
-			if (name.rfind("lp_", 0) == 0)
+			if (name._Starts_with("lp_"))
 			{
 				continue;
 			}
@@ -533,14 +482,109 @@ namespace Loopie {
 			if (typeIt != typeMap.end())
 			{
 				m_uniforms.push_back(Uniform{ name, typeIt->second });
+				GetUniformDefaultValue(m_uniforms.back());
 			}
 			else
 			{
 				Log::Warn("Unknown uniform type {0} for uniform '{1}'", type, name);
 				m_uniforms.push_back(Uniform{ name, UniformType_Unknown }); 
+				m_uniforms.back().default = 0;
 			}
 		}
 	}
+
+	bool Shader::GetUniformDefaultValue(Uniform& uniform)
+	{
+		GLint location = GetUniformLocation(uniform.id);
+		if (location == -1)
+		{
+			Log::Warn("Uniform not found: {}", uniform.id);
+			return false;
+		}
+
+		switch (uniform.type)
+		{
+		case UniformType_float:
+		{
+			GLfloat value;
+			glGetUniformfv(m_rendererID, location, &value);
+			uniform.default = value;
+			break;
+		}
+		case UniformType_bool:
+		{
+			GLint value;
+			glGetUniformiv(m_rendererID, location, &value);
+			uniform.default = static_cast<bool>(value);
+			break;
+		}
+		case UniformType_int:
+		case UniformType_Sampler2D:
+		case UniformType_Sampler3D:
+		case UniformType_SamplerCube:
+		{
+			GLint value;
+			glGetUniformiv(m_rendererID, location, &value);
+			uniform.default = value;
+			break;
+		}
+		case UniformType_uint:
+		{
+			GLuint value;
+			glGetUniformuiv(m_rendererID, location, &value);
+			uniform.default = value;
+			break;
+		}
+		case UniformType_vec2:
+		{
+			glm::vec2 value;
+			glGetUniformfv(m_rendererID, location, &value[0]);
+			uniform.default = value;
+			break;
+		}
+		case UniformType_vec3:
+		{
+			glm::vec3 value;
+			glGetUniformfv(m_rendererID, location, &value[0]);
+			uniform.default = value;
+			break;
+		}
+		case UniformType_vec4:
+		{
+			glm::vec4 value;
+			glGetUniformfv(m_rendererID, location, &value[0]);
+			uniform.default = value;
+			break;
+		}
+		case UniformType_mat2:
+		{
+			glm::mat2 value;
+			glGetUniformfv(m_rendererID, location, &value[0][0]);
+			uniform.default = value;
+			break;
+		}
+		case UniformType_mat3:
+		{
+			glm::mat3 value;
+			glGetUniformfv(m_rendererID, location, &value[0][0]);
+			uniform.default = value;
+			break;
+		}
+		case UniformType_mat4:
+		{
+			glm::mat4 value;
+			glGetUniformfv(m_rendererID, location, &value[0][0]);
+			uniform.default = value;
+			break;
+		}
+		default:
+			Log::Warn("Unknown uniform type in GetUniformDefaultValue: {}", uniform.id);
+			return false;
+		}
+
+		return true;
+	}
+
 
 	bool Shader::CheckIfShaderIsBoundAndWarn() 
 	{

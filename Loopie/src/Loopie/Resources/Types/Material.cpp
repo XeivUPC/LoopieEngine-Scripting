@@ -31,13 +31,7 @@ namespace Loopie
 			return;
 		}
 
-		const auto& uniforms = m_shader.GetUniforms();
-		for (const auto& uniform : uniforms)
-		{
-			m_uniformValues[uniform.id] = GetDefaultValue(uniform.type);
-		}
-
-		//Log::Info("Material initialized with {0} uniforms.", m_uniformValues.size()); // Uncomment for debugging
+		ResetMaterial();
 	}
 
 	void Material::ResetMaterial()
@@ -48,15 +42,12 @@ namespace Loopie
 			return;
 		}
 
+		m_uniformValues.clear();
 		const auto& uniforms = m_shader.GetUniforms();
-
 		for (const auto& uniform : uniforms)
 		{
-			auto it = m_uniformValues.find(uniform.id);
-			if (it != m_uniformValues.end())
-			{
-				it->second = GetDefaultValue(uniform.type);
-			}
+			m_uniformValues[uniform.id].type = uniform.type;
+			m_uniformValues[uniform.id].value = uniform.default;
 		}
 
 		Log::Info("Material reset to default values");
@@ -105,34 +96,6 @@ namespace Loopie
 		case UniformType_Sampler3D: 	break;
 		default: Log::Warn("Unknown uniform type for '{0}'", name);	break;
 		}
-	}
-
-	UniformValue Material::GetDefaultValue(UniformType type) const
-	{
-		UniformValue defaultValue;
-		defaultValue.type = type;
-
-		switch (type)
-		{
-		case UniformType_float:	defaultValue.value = 0.0f;			break;
-		case UniformType_int:	defaultValue.value = 0;				break;
-		case UniformType_uint:	defaultValue.value = 0u;			break;
-		case UniformType_bool:	defaultValue.value = false;			break;
-		case UniformType_vec2:	defaultValue.value = vec2(1);	break;
-		case UniformType_vec3:	defaultValue.value = vec3(1);	break;
-		case UniformType_vec4:	defaultValue.value = vec4(1);	break;
-		case UniformType_mat2:	defaultValue.value = matrix2(1.0f);	break;
-		case UniformType_mat3:	defaultValue.value = matrix3(1.0f);	break;
-		case UniformType_mat4:	defaultValue.value = matrix4(1.0f);	break;
-		case UniformType_Sampler2D: 	break;
-		case UniformType_Sampler3D: 	break;
-		default:
-			Log::Warn("Unknown uniform type in GetDefaultValue.");
-			defaultValue.value = 0;
-			break;
-		}
-
-		return defaultValue;
 	}
 
 	UniformValue* Material::GetShaderVariable(const std::string& name)

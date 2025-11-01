@@ -132,6 +132,10 @@ namespace Loopie {
 					case UniformType_int:
 					{
 						int value = std::get<int>(uniform.value);
+
+						ImGui::Text("%s", name.c_str());
+						ImGui::SameLine();
+
 						if (ImGui::DragInt(("##" + name).c_str(), &value))
 						{
 							UniformValue newVal = uniform;
@@ -143,6 +147,11 @@ namespace Loopie {
 					case UniformType_uint:
 					{
 						unsigned int value = std::get<unsigned int>(uniform.value);
+
+						ImGui::Text("%s", name.c_str());
+						ImGui::SameLine();
+
+						ImGui::SetNextItemWidth(100);
 						if (ImGui::DragScalar(("##" + name).c_str(), ImGuiDataType_U32, &value, 1.0f))
 						{
 							UniformValue newVal = uniform;
@@ -154,6 +163,11 @@ namespace Loopie {
 					case UniformType_float:
 					{
 						float value = std::get<float>(uniform.value);
+
+						ImGui::Text("%s", name.c_str());
+						ImGui::SameLine();
+
+						ImGui::SetNextItemWidth(100);
 						if (ImGui::DragFloat(("##" + name).c_str(), &value, 0.01f))
 						{
 							UniformValue newVal = uniform;
@@ -165,6 +179,10 @@ namespace Loopie {
 					case UniformType_bool:
 					{
 						bool value = std::get<bool>(uniform.value);
+
+						ImGui::Text("%s", name.c_str());
+						ImGui::SameLine();
+
 						if (ImGui::Checkbox(("##" + name).c_str(), &value))
 						{
 							UniformValue newVal = uniform;
@@ -176,6 +194,10 @@ namespace Loopie {
 					case UniformType_vec2:
 					{
 						vec2 value = std::get<vec2>(uniform.value);
+
+						ImGui::Text("%s", name.c_str());
+						ImGui::SameLine();
+
 						if (ImGui::DragFloat2(("##" + name).c_str(), &value.x, 0.01f))
 						{
 							UniformValue newVal = uniform;
@@ -187,6 +209,10 @@ namespace Loopie {
 					case UniformType_vec3:
 					{
 						vec3 value = std::get<vec3>(uniform.value);
+
+						ImGui::Text("%s", name.c_str());
+						ImGui::SameLine();
+
 						if (ImGui::DragFloat3(("##" + name).c_str(), &value.x))
 						{
 							UniformValue newVal = uniform;
