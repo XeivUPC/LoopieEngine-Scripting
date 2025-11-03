@@ -273,13 +273,14 @@ namespace Loopie {
 
 		int cellSize = thumbnailSize + padding;
 		float availX = ImGui::GetContentRegionAvail().x;
-		int columnCount = (int)(availX / cellSize);
-		if (columnCount < 1) 
-			columnCount = 1;
+		int columnCount = std::max(1, (int)(availX / cellSize));
 
-		ImGui::Columns(columnCount, 0, false);
+		ImVec2 iconSize = ImVec2((float)thumbnailSize, (float)thumbnailSize);
+
+		ImGui::Columns(columnCount, nullptr, false);
 
 		std::vector<std::filesystem::path> filesToShow;
+		
 		if (m_isSearching) {
 			filesToShow = GetFilteredFiles();
 
@@ -289,7 +290,7 @@ namespace Loopie {
 				return;
 			}
 		}
-		else {			
+		else {		
 			for (auto& entry : std::filesystem::directory_iterator(m_currentDirectory, std::filesystem::directory_options::skip_permission_denied)) {
 				if(MetadataRegistry::IsMetadataFile(entry.path()))
 					continue;
@@ -297,9 +298,12 @@ namespace Loopie {
 			}
 		}
 
-		for (auto& directory : filesToShow) {
-			ImGui::PushID(directory.string().c_str());
-			bool isDir = std::filesystem::is_directory(directory);
+		for (size_t i = 0; i < filesToShow.size(); ++i) {
+
+			const auto& directory = filesToShow[i];
+			const bool isDir = std::filesystem::is_directory(directory);
+
+			ImGui::PushID(i);
 
 			std::shared_ptr<Texture> icon = nullptr;
 			if (isDir) {
@@ -310,7 +314,7 @@ namespace Loopie {
 				icon = m_fileIcon;
 
 			ImVec2 cursor = ImGui::GetCursorScreenPos();
-			ImGui::Image((ImTextureID)icon->GetRenderId(), ImVec2((float)thumbnailSize, (float)thumbnailSize));
+			ImGui::Image((ImTextureID)icon->GetRenderId(), iconSize);
 
 			if (ImGui::IsItemHovered()) {
 				if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
