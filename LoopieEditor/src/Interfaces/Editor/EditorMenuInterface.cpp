@@ -40,11 +40,13 @@ namespace Loopie {
 
 				if (ImGui::MenuItem("Save [WIP]"))
 				{
+					// TODO: save all scenes and config
 					Application::GetInstance().GetScene().SaveScene();
 				}
 
-				if (ImGui::MenuItem("Save As [WIP]"))
+				if (ImGui::MenuItem("Save as... [WIP]"))
 				{
+					// TODO: save all scenes and config to a specific file
 					Application::GetInstance().GetScene().SaveScene();
 				}
 

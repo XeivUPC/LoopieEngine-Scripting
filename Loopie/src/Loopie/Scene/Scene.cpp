@@ -25,20 +25,27 @@ namespace Loopie {
 		JsonData saveData;
 		saveData.CreateArrayField("entities");
 
+		// Array field = values
+		// Object field = kvm
+
+		json rootObj = json::object();
+		rootObj["uuid"] = m_rootEntity->GetUUID().Get();
+		rootObj["name"] = m_rootEntity->GetName();
+		saveData.AddArrayElement("entities", rootObj);
+		
 		for (const auto& [id, entity] : GetAllEntities())
 		{
-			// Create a standalone JSON object for this entity
 			json entityObj = json::object();
 
 			entityObj["uuid"] = id.Get();
 			entityObj["name"] = entity->GetName();
+			entityObj["active"] = entity->GetIsActive();
 
 			if (std::shared_ptr<Entity> parentEntity = entity->GetParent().lock())
 				entityObj["parent_uuid"] = parentEntity->GetUUID().Get();
 			else
 				entityObj["parent_uuid"] = nullptr;
 
-			// Create transform structure
 			Transform* transform = entity->GetTransform();
 
 			entityObj["transform"] = json::object();
@@ -58,7 +65,38 @@ namespace Loopie {
 				{"z", transform->GetScale().z}
 			};
 
-			// Add the complete object to the array
+			// Creates an array of components
+			entityObj["components"] = json::array();
+			for (auto const& component : entity->GetComponents())
+			{
+				//if (component->GetTypeIDStatic() == Transform::GetTypeIDStatic())
+				json componentObj = json::object();
+				componentObj["uuid"] = component->GetUUID().Get();
+				componentObj["type"] = component->GetTypeID();
+
+				Transform* compTransform = component->GetTransform();
+
+
+				// index + uuid
+				componentObj["transform"] = json::object();
+				componentObj["transform"]["position"] = {
+					{"x", compTransform->GetPosition().x},
+					{"y", compTransform->GetPosition().y},
+					{"z", compTransform->GetPosition().z}
+				};
+				componentObj["transform"]["rotation"] = {
+					{"x", compTransform->GetRotation().x},
+					{"y", compTransform->GetRotation().y},
+					{"z", compTransform->GetRotation().z}
+				};
+				componentObj["transform"]["scale"] = {
+					{"x", compTransform->GetScale().x},
+					{"y", compTransform->GetScale().y},
+					{"z", compTransform->GetScale().z}
+				};
+				entityObj["components"].push_back(componentObj);
+			}
+
 			saveData.AddArrayElement("entities", entityObj);
 		}
 
