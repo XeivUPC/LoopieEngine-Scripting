@@ -61,7 +61,9 @@ namespace Loopie
 			AssetRegistry::RefreshAssetRegistry();
 		}
 
+		m_assetsExplorer.Update(dt, inputEvent);
 		m_scene.Update(dt, inputEvent);
+
 		const matrix4& viewProj = m_scene.GetCamera()->GetViewProjectionMatrix();
 		m_scene.StartScene();
 		Renderer::BeginScene(viewProj);

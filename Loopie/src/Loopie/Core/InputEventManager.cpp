@@ -226,13 +226,13 @@ namespace Loopie {
 		return m_axes[SDL_GAMEPAD_AXIS_RIGHT_TRIGGER];
 	}
 
-	std::vector<const char*> InputEventManager::GetDroppedFiles()
+	const std::vector<const char*>& InputEventManager::GetDroppedFiles() const
 	{
 		return m_droppedFiles;
 	}
 
 	// Remember that index starts at 0.
-	const char* InputEventManager::GetDroppedFile(int index)
+	const char* InputEventManager::GetDroppedFile(int index) const
 	{
 		if (index >= m_droppedFiles.size() || index < 0)
 		{

@@ -40,6 +40,18 @@ namespace Loopie {
 		GoToDirectory(project.GetAssetsPath());
 	}
 
+	void AssetsExplorerInterface::Update(float dt, const InputEventManager& inputEvent) {
+
+		if (inputEvent.HasFileBeenDropped()) {
+			const std::vector<const char*>& files = inputEvent.GetDroppedFiles();
+			for (size_t i = 0; i < files.size(); i++)
+			{
+				std::filesystem::path path = files[i];
+				DirectoryManager::Move(path, m_currentDirectory/path.filename());
+			}
+		}
+	}
+
 	void AssetsExplorerInterface::Render() {
 		if (ImGui::Begin("Assets Explorer", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)){
 			const Project& project = Application::GetInstance().m_activeProject;

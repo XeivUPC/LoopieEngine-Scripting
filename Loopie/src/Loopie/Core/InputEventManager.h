@@ -48,8 +48,8 @@ namespace Loopie {
 		float GetLeftTrigger() const;
 		float GetRightTrigger() const;
 
-		std::vector<const char*> GetDroppedFiles();
-		const char* GetDroppedFile(int index);
+		const std::vector<const char*>& GetDroppedFiles() const;
+		const char* GetDroppedFile(int index) const;
 		bool HasFileBeenDropped() const;
 
 		void SetAxisDeadzone(float value) { m_axisDeadZone = value; }
