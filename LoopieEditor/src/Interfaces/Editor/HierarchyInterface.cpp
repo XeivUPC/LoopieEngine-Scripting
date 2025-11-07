@@ -15,12 +15,16 @@ namespace Loopie {
 
 	void HierarchyInterface::Update(float dt, const InputEventManager& inputEvent)
 	{
-		HotKeysSelectedEntiy(inputEvent);
+		if(m_focused)
+			HotKeysSelectedEntiy(inputEvent);
 	}
 
 	void HierarchyInterface::Render() {
 
 		if (ImGui::Begin("Hierarchy")) {
+
+			m_focused = ImGui::IsWindowHovered();
+
 			if (!m_scene) {
 				ImGui::End();
 				return;

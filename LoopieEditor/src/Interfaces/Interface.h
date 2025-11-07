@@ -13,5 +13,7 @@ namespace Loopie {
 		virtual void Render() {};
 		virtual void Init() {};
 
+	protected:
+		bool m_focused = false;
 	};
 }

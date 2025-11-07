@@ -52,11 +52,15 @@ namespace Loopie {
 			AssetRegistry::RefreshAssetRegistry();
 		}
 
-		HotKeysControls(inputEvent);
+		if (m_focused)
+			HotKeysControls(inputEvent);
 	}
 
 	void AssetsExplorerInterface::Render() {
 		if (ImGui::Begin("Assets Explorer", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)){
+
+			m_focused = ImGui::IsWindowHovered();
+
 			const Project& project = Application::GetInstance().m_activeProject;
 			if (project.IsEmpty()) {
 				ImGui::End();
