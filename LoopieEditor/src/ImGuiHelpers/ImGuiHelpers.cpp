@@ -50,6 +50,9 @@ namespace Loopie {
         if(vertical)
             ImGui::SameLine();
 
+        if (avail.x == 0 || avail.y == 0)
+            return;
+
         ImGui::InvisibleButton("splitter", (vertical ? ImVec2(m_size, avail.y ) : ImVec2(avail.x, m_size)));
         if (ImGui::IsItemActive()) {
             float mouseDelta = vertical ? ImGui::GetIO().MouseDelta.x : ImGui::GetIO().MouseDelta.y;
