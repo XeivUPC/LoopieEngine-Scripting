@@ -120,10 +120,22 @@ namespace Loopie
         return m_localToWorld;
     }
 
+	float* Transform::GetLocalToWorldMatrixPtr() const
+	{
+		RefreshMatrices();
+		return &m_localToWorld[0][0];
+	}
+
     const matrix4& Transform::GetWorldToLocalMatrix() const
     {
         RefreshMatrices();
         return m_worldToLocal;
+    }
+
+    float* Transform::GetWorldToLocalMatrixPtr() const
+    {
+        RefreshMatrices();
+        return &m_worldToLocal[0][0];
     }
 
     vec3 Transform::GetWorldPosition() const

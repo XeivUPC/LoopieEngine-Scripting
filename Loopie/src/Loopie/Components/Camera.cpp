@@ -23,16 +23,34 @@ namespace Loopie
 		return m_viewMatrix;
 	}
 
+	float* Camera::GetViewMatrixPtr() const
+	{
+		CalculateMatrices();
+		return &m_viewMatrix[0][0];
+	}
+
 	const matrix4& Camera::GetProjectionMatrix() const
 	{
 		CalculateMatrices();
 		return m_projectionMatrix;
 	}
 
+	float* Camera::GetProjectionMatrixPtr() const
+	{
+		CalculateMatrices();
+		return &m_projectionMatrix[0][0];
+	}
+
 	const matrix4& Camera::GetViewProjectionMatrix() const
 	{
 		CalculateMatrices();
 		return m_viewProjectionMatrix;
+	}
+
+	float* Camera::GetViewProjectionMatrixPtr() const
+	{
+		CalculateMatrices();
+		return &m_viewProjectionMatrix[0][0];
 	}
 
 	void Camera::SetFov(float fov)

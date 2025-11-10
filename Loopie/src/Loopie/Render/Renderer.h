@@ -34,6 +34,9 @@ namespace Loopie {
 
 		static void SetDefaultTexture(std::shared_ptr<Texture> texture) { s_DefaultTexture = texture; }
 
+		static void EnableDepth();
+		static void DisableDepth();
+
 	private:
 		static void SetRenderUniforms(std::shared_ptr<Material> material, const Transform* transform);
 		static void FlushRenderQueue();

@@ -14,6 +14,7 @@
 #include "src/Interfaces/Editor/HierarchyInterface.h"
 
 #include <imgui.h>
+#include <ImGuizmo.h>
 
 namespace Loopie {
 	SceneInterface::SceneInterface() {
@@ -34,9 +35,17 @@ namespace Loopie {
 
 	void SceneInterface::Render() {
 
-		if (ImGui::Begin("Scene")) {
+		const bool gizmoActive = ImGuizmo::IsOver() || ImGuizmo::IsUsing();
+		ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
+		if (gizmoActive)
+		{
+			flags |= ImGuiWindowFlags_NoMove;
+		}
+
+		if (ImGui::Begin("Scene",nullptr, flags)) {
 			m_windowSize =  ImGui::GetContentRegionAvail();
 			m_focused = ImGui::IsWindowHovered();
+			ImVec2 cursorScreenPos = ImGui::GetCursorScreenPos();
 
 			if (!m_focused && m_interacted || m_focused)
 				m_interacted = ImGui::IsMouseDown(ImGuiMouseButton_Left) || ImGui::IsMouseDown(ImGuiMouseButton_Right) || ImGui::IsMouseDown(ImGuiMouseButton_Middle);
@@ -44,6 +53,17 @@ namespace Loopie {
 				m_interacted = false;
 
 			ImGui::Image((ImTextureID)m_buffer->GetTextureId(), m_windowSize, ImVec2(0,1), ImVec2(1,0));
+
+			if (HierarchyInterface::s_SelectedEntity) {
+				std::shared_ptr<Entity> selectedEntity = HierarchyInterface::s_SelectedEntity;
+
+				Renderer::DisableDepth();
+				ImGuizmo::SetRect(cursorScreenPos.x, cursorScreenPos.y, m_windowSize.x, m_windowSize.y);
+				ImGuizmo::SetDrawlist();
+				ImGuizmo::Manipulate(m_camera->GetCamera()->GetViewMatrixPtr(), m_camera->GetCamera()->GetProjectionMatrixPtr(), ImGuizmo::TRANSLATE, ImGuizmo::WORLD, selectedEntity->GetTransform()->GetWorldToLocalMatrixPtr());
+				Renderer::EnableDepth();
+			}
+
 		}
 
 		Drop();

@@ -15,8 +15,11 @@ namespace Loopie
 		void SetViewport(unsigned int x, unsigned int y, unsigned int width, unsigned int height);
 
 		const matrix4& GetViewMatrix()const;
+		float* GetViewMatrixPtr()const;
 		const matrix4& GetProjectionMatrix()const;
+		float* GetProjectionMatrixPtr()const;
 		const matrix4& GetViewProjectionMatrix()const;
+		float* GetViewProjectionMatrixPtr()const;
 
 		void SetFov(float fov);
 		float GetFov() const;

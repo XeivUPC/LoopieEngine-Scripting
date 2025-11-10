@@ -33,7 +33,9 @@ namespace Loopie
         void SetLocalScale(const vec3& scale);
 
         const matrix4& GetLocalToWorldMatrix() const;
+        float* GetLocalToWorldMatrixPtr() const;
         const matrix4& GetWorldToLocalMatrix() const;
+        float* GetWorldToLocalMatrixPtr() const;
 
         vec3 GetWorldPosition() const;
         quaternion GetWorldRotation() const;

@@ -19,7 +19,7 @@ namespace Loopie {
 		ASSERT(!gladLoadGLLoader((GLADloadproc)context), "Failed to Initialize GLAD!");
 
 		glEnable(GL_BLEND);
-		glEnable(GL_DEPTH_TEST);
+		EnableDepth();
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		// DevIL Init
@@ -91,5 +91,15 @@ namespace Loopie {
 	{
 		material->GetShader().SetUniformMat4("lp_ViewProjection", s_ViewProjection);
 		material->GetShader().SetUniformMat4("lp_Transform", transform->GetWorldToLocalMatrix());
+	}
+
+	void Renderer::EnableDepth()
+	{
+			glEnable(GL_DEPTH_TEST);
+	}
+
+	void Renderer::DisableDepth()
+	{
+			glDisable(GL_DEPTH_TEST);
 	}
 }
