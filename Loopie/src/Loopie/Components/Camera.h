@@ -1,6 +1,7 @@
 #pragma once
 #include "Loopie/Core/Math.h"
 #include "Loopie/Components/Component.h"
+#include "Loopie/Render/FrameBuffer.h"
 
 namespace Loopie
 {
@@ -10,7 +11,7 @@ namespace Loopie
 		DEFINE_TYPE(Camera)
 
 		Camera(float fov = 45.0f, float near_plane = 0.1f, float far_plane = 200.0f);
-		~Camera() = default;
+		~Camera();
 
 		void SetViewport(unsigned int x, unsigned int y, unsigned int width, unsigned int height);
 
@@ -29,6 +30,8 @@ namespace Loopie
 
 		void SetDirty() const;
 
+		const std::shared_ptr<FrameBuffer> GetFramebuffer() const { return m_framebuffer; }
+
 		void Init() override; //// From Component
 	private:
 		void CalculateMatrices() const;
@@ -44,5 +47,7 @@ namespace Loopie
 		mutable matrix4 m_viewProjectionMatrix = matrix4(1);
 
 		mutable bool m_dirty = true;
+
+		std::shared_ptr<FrameBuffer> m_framebuffer;
 	};
 }

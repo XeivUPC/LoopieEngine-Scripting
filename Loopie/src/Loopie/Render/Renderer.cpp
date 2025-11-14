@@ -12,8 +12,9 @@
 namespace Loopie {
 
 	std::shared_ptr<Texture> Renderer::s_DefaultTexture = nullptr;
-	matrix4 Renderer::s_ViewProjection = matrix4(1);
 	std::vector<Renderer::RenderItem> Renderer::s_RenderQueue = std::vector<Renderer::RenderItem>();
+	std::vector<Camera*> Renderer::s_renderCameras = std::vector<Camera*>();
+	std::shared_ptr<UniformBuffer> Renderer::s_matricesUniformBuffer = nullptr;
 
 	void Renderer::Init(void* context) {
 		ASSERT(!gladLoadGLLoader((GLADloadproc)context), "Failed to Initialize GLAD!");
@@ -31,6 +32,12 @@ namespace Loopie {
 
 		// Gizmo Data Structure Init
 		Gizmo::Init();
+
+		BufferLayout layout;
+		layout.AddLayoutElement(0, GLVariableType::MATRIX4, 1, "View");
+		layout.AddLayoutElement(1, GLVariableType::MATRIX4, 1, "Proj");
+		s_matricesUniformBuffer = std::make_shared<UniformBuffer>(layout);
+		s_matricesUniformBuffer->BindToLayout(0);
 	}
 
 	void Renderer::Shutdown() {
@@ -51,10 +58,27 @@ namespace Loopie {
 		glViewport(x, y, width, height);
 	}
 
-	void Renderer::BeginScene(const matrix4& viewProjectionMatrix)
+	void Renderer::RegisterCamera(Camera& camera) {
+		auto it = std::find(s_renderCameras.begin(), s_renderCameras.end(), &camera);
+		if (it == s_renderCameras.end()) {
+			s_renderCameras.push_back(&camera);
+		}
+	}
+
+	void Renderer::UnregisterCamera(Camera& camera) {
+
+		auto it = std::find(s_renderCameras.begin(), s_renderCameras.end(), &camera);
+		if (it != s_renderCameras.end()) {
+			s_renderCameras.erase(it);
+		}
+	}
+
+	void Renderer::BeginScene(const matrix4& viewMatrix, const matrix4& projectionMatrix)
 	{
-		s_ViewProjection = viewProjectionMatrix;
-		Gizmo::BeginGizmo(viewProjectionMatrix);
+		s_matricesUniformBuffer->SetData(&projectionMatrix[0][0], 0);
+		s_matricesUniformBuffer->SetData(&viewMatrix[0][0], 1);
+
+		Gizmo::BeginGizmo();
 	}
 
 	void Renderer::EndScene()
@@ -89,7 +113,6 @@ namespace Loopie {
 
 	void Renderer::SetRenderUniforms(std::shared_ptr<Material> material, const Transform* transform)
 	{
-		material->GetShader().SetUniformMat4("lp_ViewProjection", s_ViewProjection);
 		material->GetShader().SetUniformMat4("lp_Transform", transform->GetLocalToWorldMatrix());
 	}
 

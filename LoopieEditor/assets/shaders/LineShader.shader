@@ -4,14 +4,18 @@
 layout(location = 0) in vec3 a_Position;
 layout(location = 4) in vec4 a_Color;
 
-out vec4 v_Color;
+layout (std140, binding = 0) uniform Matrices
+{
+    mat4 lp_Pprojection;
+    mat4 lp_View;
+};
 
-uniform mat4 lp_ViewProjection;
+out vec4 v_Color;
 
 void main()
 {
     v_Color = a_Color;
-    gl_Position = lp_ViewProjection * vec4(a_Position, 1.0);
+    gl_Position = lp_Pprojection * lp_View * vec4(a_Position, 1.0);
 }
 
 [fragment]

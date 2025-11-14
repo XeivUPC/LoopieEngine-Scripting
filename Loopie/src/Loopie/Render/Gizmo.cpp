@@ -38,13 +38,9 @@ namespace Loopie {
 		delete s_Data.LineBufferModel;
 	}
 
-	void Gizmo::BeginGizmo(const matrix4& viewProjectionMatrix)
+	void Gizmo::BeginGizmo()
 	{
-		s_Data.ViewProjection = viewProjectionMatrix;
-
 		s_Data.LineRender.Shader->Bind();
-		s_Data.LineRender.Shader->SetUniformMat4("lp_ViewProjection", s_Data.ViewProjection);
-
 
 		StartBatch();
 		DrawGrid();

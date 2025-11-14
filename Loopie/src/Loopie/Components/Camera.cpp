@@ -2,18 +2,25 @@
 
 #include "Loopie/Scene/Entity.h"
 #include "Loopie/Components/Transform.h"
+#include "Loopie/Render/Renderer.h"
 
 
 namespace Loopie
 {
 	Camera::Camera(float fov, float near_plane, float far_plane): m_fov(fov), m_nearPlane(near_plane), m_farPlane(far_plane)
 	{
-		
+		m_framebuffer = std::make_shared<FrameBuffer>(1, 1);
+		Renderer::RegisterCamera(*this);
+	}
+
+	Camera::~Camera() {
+		Renderer::UnregisterCamera(*this);
 	}
 
 	void Camera::SetViewport(unsigned int x, unsigned int y, unsigned int width, unsigned int height)
 	{
 		m_viewport = vec4(x, y, width, height);
+		m_framebuffer->Resize(width, height);
 		SetDirty();
 	}
 
@@ -71,7 +78,7 @@ namespace Loopie
 
 	void Camera::CalculateMatrices() const
 	{
-		if (!m_dirty)
+		if (!m_dirty || !GetTransform()->IsDirty())
 			return;
 		
 		m_viewMatrix = glm::inverse(GetTransform()->GetLocalToWorldMatrix());

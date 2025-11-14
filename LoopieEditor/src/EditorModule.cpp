@@ -70,21 +70,29 @@ namespace Loopie
 		m_assetsExplorer.Update(dt, inputEvent);
 		m_scene.Update(dt, inputEvent);
 
-		const matrix4& viewProj = m_scene.GetCamera()->GetViewProjectionMatrix();
-
 		m_scene.StartScene();
-		Renderer::BeginScene(viewProj);
+		for (const auto& cam : Renderer::GetRendererCameras())
+		{
+			if (!cam->GetOwner()->GetIsActive() || !cam->GetIsActive())
+				continue;
 
-		///// MayBe add an Update To Each Component????
-		for (auto& [uuid, entity] : scene->GetAllEntities()) {
-			if(!entity->GetIsActive())
-				continue;
-			MeshRenderer* renderer = entity->GetComponent<MeshRenderer>();
-			if (!renderer->GetIsActive())
-				continue;
-			Renderer::AddRenderItem(renderer->GetMesh()->GetVAO(), renderer->GetMaterial(), entity->GetTransform());
+			cam->GetFramebuffer()->Bind();
+			cam->GetFramebuffer()->Clear();
+			Renderer::BeginScene(cam->GetViewMatrix(), cam->GetProjectionMatrix());
+
+			/// FILTER OBJECTS TO RENDER
+
+			for (auto& [uuid, entity] : scene->GetAllEntities()) {
+				if (!entity->GetIsActive())
+					continue;
+				MeshRenderer* renderer = entity->GetComponent<MeshRenderer>();
+				if (!renderer->GetIsActive())
+					continue;
+				Renderer::AddRenderItem(renderer->GetMesh()->GetVAO(), renderer->GetMaterial(), entity->GetTransform());
+			}
+			Renderer::EndScene();
+			cam->GetFramebuffer()->Unbind();
 		}
-		Renderer::EndScene();
 		m_scene.EndScene();
 	}
 

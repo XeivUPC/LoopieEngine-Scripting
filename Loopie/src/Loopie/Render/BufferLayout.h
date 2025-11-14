@@ -9,7 +9,10 @@ namespace Loopie {
 		NONE,
 		INT,
 		FLOAT,
-		BOOL
+		BOOL,
+		MATRIX2,
+		MATRIX3,
+		MATRIX4
 	};
 
 	static unsigned int GetGLVariableSize(GLVariableType type) {
@@ -19,6 +22,12 @@ namespace Loopie {
 				return 4;
 			case GLVariableType::BOOL:
 				return 1;
+			case GLVariableType::MATRIX2:
+				return 16;
+			case GLVariableType::MATRIX3:
+				return 36;
+			case GLVariableType::MATRIX4:
+				return 64;
 			default:
 				return 0;
 		}

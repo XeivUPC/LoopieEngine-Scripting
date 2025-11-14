@@ -18,8 +18,8 @@
 
 namespace Loopie {
 	SceneInterface::SceneInterface() {
-		m_buffer = std::make_shared<FrameBuffer>(1, 1);
 		m_camera = std::make_shared<OrbitalCamera>();
+		m_buffer = m_camera->GetCamera()->GetFramebuffer();
 		m_camera->GetCamera()->GetTransform()->SetPosition({ 0,10,50.f });
 
 		std::vector<std::string> iconsToLoad = {
@@ -110,7 +110,6 @@ namespace Loopie {
 		if (m_windowSize.x != textureSize.x || m_windowSize.y != textureSize.y) {
 			Renderer::SetViewport(0, 0, m_windowSize.x, m_windowSize.y);
 			m_camera->GetCamera()->SetViewport(0, 0, m_windowSize.x, m_windowSize.y);
-			m_buffer->Resize(m_windowSize.x, m_windowSize.y);
 		}
 
 		m_buffer->Clear();	

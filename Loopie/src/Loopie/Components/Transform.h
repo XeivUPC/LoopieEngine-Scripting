@@ -55,6 +55,7 @@ namespace Loopie
 
         void MarkLocalDirty();
         void MarkWorldDirty();
+        bool IsDirty() const;
 
         void ForceRefreshMatrices();
 

@@ -24,7 +24,7 @@ namespace Loopie {
 
 	private:
 
-		static void BeginGizmo(const matrix4& viewProjectionMatrix);
+		static void BeginGizmo();
 		static void EndGizmo();
 
 		static void Flush();
@@ -66,8 +66,6 @@ namespace Loopie {
 			bool DrawGrid = true;
 			vec4 GridColor = { 0.6f, 0.6f, 0.6f, 1.0f };
 			///
-
-			matrix4 ViewProjection = matrix4(1);
 		};
 
 	private:

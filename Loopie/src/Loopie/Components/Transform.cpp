@@ -315,6 +315,10 @@ namespace Loopie
         }
     }
 
+    bool Transform::IsDirty() const{
+        return m_worldDirty || m_localDirty;
+    }
+
     void Transform::ForceRefreshMatrices()
     {
         m_localDirty = true;
