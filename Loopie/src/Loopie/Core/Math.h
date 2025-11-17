@@ -4,6 +4,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp> // Seems like it is experimental - Will cause error if uncommented
+#include <glm/gtx/matrix_decompose.hpp>
 
 // Might want to use wrappers / inliners to ensure glm can be swapped if necessary
 namespace Loopie
@@ -59,5 +60,13 @@ namespace Loopie
     using glm::mix;
     using glm::min;
     using glm::max;
+
+
+    static void DecomposeMatrix(const matrix4& matrix, vec3& position, quaternion& rotation, glm::vec3& scale)
+    {
+        vec3 skew;
+        vec4 perspective;
+        glm::decompose(matrix, scale, rotation, position, skew, perspective);
+    }
 }
 

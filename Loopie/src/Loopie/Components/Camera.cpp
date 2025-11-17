@@ -1,14 +1,40 @@
 #include "Camera.h"
 
+#include "Loopie/Core/Log.h"
 #include "Loopie/Scene/Entity.h"
 #include "Loopie/Components/Transform.h"
+#include "Loopie/Render/Renderer.h"
 
 
 namespace Loopie
 {
-	Camera::Camera(float fov, float near_plane, float far_plane): m_fov(fov), m_nearPlane(near_plane), m_farPlane(far_plane)
+	Camera* Camera::s_Main = nullptr;
+
+	Camera::Camera(float fov, float near_plane, float far_plane, bool canBeMainCamera): m_fov(fov), m_nearPlane(near_plane), m_farPlane(far_plane), m_canBeMainCamera(canBeMainCamera)
 	{
-		
+		m_renderTarget = nullptr;
+		Renderer::RegisterCamera(*this);
+
+		if (!s_Main && CanBeMainCamera())
+			SetAsMainCamera();
+	}
+
+	Camera::~Camera() {
+		Renderer::UnregisterCamera(*this);
+
+		if (s_Main == this)
+		{
+			s_Main = nullptr;
+			/// FindNewCamera
+			const std::vector<Camera*>& cameras = Renderer::GetRendererCameras();
+			for (const auto camera : cameras) {
+				if (camera->CanBeMainCamera())
+				{
+					SetMainCamera(camera);
+					return;
+				}
+			}
+		}
 	}
 
 	void Camera::SetViewport(unsigned int x, unsigned int y, unsigned int width, unsigned int height)
@@ -71,10 +97,17 @@ namespace Loopie
 
 	void Camera::CalculateMatrices() const
 	{
-		if (!m_dirty)
+		if (!m_dirty && !GetTransform()->IsDirty())
 			return;
 		
-		m_viewMatrix = glm::inverse(GetTransform()->GetMatrix());
+		auto transform = GetTransform();
+
+		const vec3 position = transform->GetPosition();
+		const vec3 forward = -transform->Forward();   // must exist in your Transform
+		const vec3 up = transform->Up();        // must exist in your Transform
+
+		// Make camera look forward
+		m_viewMatrix = glm::lookAt(position, position + forward, up);
 		m_projectionMatrix = glm::perspective(glm::radians(m_fov), m_viewport.z / m_viewport.w, m_nearPlane, m_farPlane);
 		m_viewProjectionMatrix = m_projectionMatrix * m_viewMatrix;
 	}
@@ -85,5 +118,20 @@ namespace Loopie
 	void Camera::Init()
 	{
 		CalculateMatrices();
+	}
+
+	bool Camera::SetMainCamera(Camera* camera) {
+		if (camera->m_canBeMainCamera) {
+			s_Main = camera;
+			camera->SetDirty();
+			return true;
+		}
+		else
+			Log::Warn("Camera cannot be MainCamera");
+		return false;
+	}
+
+	bool Camera::SetAsMainCamera() {
+		return SetMainCamera(this);
 	}
 }

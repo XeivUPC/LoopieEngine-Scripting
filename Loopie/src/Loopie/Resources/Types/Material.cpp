@@ -3,17 +3,12 @@
 #include "Loopie/Resources/AssetRegistry.h"
 #include "Loopie/Importers/TextureImporter.h"
 #include "Loopie/Core/Log.h"
+#include "Loopie/Render/Renderer.h"
 
 namespace Loopie
 {
 	Material::Material()
 	{
-
-		std::string defaultTeturePath = "assets/textures/simpleWhiteTexture.png";
-		Metadata& meta = AssetRegistry::GetOrCreateMetadata(defaultTeturePath);
-		TextureImporter::ImportImage(defaultTeturePath, meta);
-		m_defaultTexture = std::make_shared<Texture>(meta.UUID);
-
 		InitMaterial();
 	}
 
@@ -47,7 +42,7 @@ namespace Loopie
 		for (const auto& uniform : uniforms)
 		{
 			m_uniformValues[uniform.id].type = uniform.type;
-			m_uniformValues[uniform.id].value = uniform.default;
+			m_uniformValues[uniform.id].value = uniform.defaultValue;
 		}
 
 		Log::Info("Material reset to default values");
@@ -69,7 +64,7 @@ namespace Loopie
 		}
 		else
 		{
-			m_defaultTexture->m_tb->Bind();
+			Renderer::s_DefaultTexture->m_tb->Bind();
 		}
 
 		for (const auto& [name, uniformValue] : m_uniformValues)

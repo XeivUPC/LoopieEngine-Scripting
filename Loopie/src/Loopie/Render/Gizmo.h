@@ -24,7 +24,7 @@ namespace Loopie {
 
 	private:
 
-		static void BeginGizmo(const matrix4 viewProjectionMatrix);
+		static void BeginGizmo();
 		static void EndGizmo();
 
 		static void Flush();
@@ -40,11 +40,11 @@ namespace Loopie {
 		};
 
 		struct GizmoTypeRender {
-			std::shared_ptr<VertexArray> VertexArray;
-			std::shared_ptr<VertexBuffer> VertexBuffer;
-			std::shared_ptr<IndexBuffer> IndexBuffer;
+			std::shared_ptr<VertexArray> VAO;
+			std::shared_ptr<VertexBuffer> VBO;
+			std::shared_ptr<IndexBuffer> EBO;
 
-			std::shared_ptr <Shader> Shader;
+			std::shared_ptr <Shader> ShaderProg;
 		};
 
 		struct GizmoData
@@ -66,8 +66,6 @@ namespace Loopie {
 			bool DrawGrid = true;
 			vec4 GridColor = { 0.6f, 0.6f, 0.6f, 1.0f };
 			///
-
-			matrix4 ViewProjection = matrix4(1);
 		};
 
 	private:

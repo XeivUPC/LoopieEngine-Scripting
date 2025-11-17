@@ -12,6 +12,8 @@ namespace Loopie {
 
         if (!std::filesystem::exists(metadataPath)) {
             Metadata metadata;
+            metadata.IsOutdated = true;
+            metadata.LastModified = GetLastModifiedFromPath(assetPath);
             SaveMetadata(assetPath, metadata);
             return metadata;
         }
@@ -21,11 +23,15 @@ namespace Loopie {
             JsonData data = Json::ReadFromFile(metadataPath);
             metadata.UUID = UUID(data.GetValue<std::string>("Id").Result);
             metadata.HasCache = data.GetValue<bool>("HasCache").Result;
+            metadata.LastModified = data.GetValue<std::time_t>("LastModified").Result;
+            std::time_t currentTime = GetLastModifiedFromPath(assetPath);
+            metadata.IsOutdated = currentTime != metadata.LastModified;
+
             if (metadata.HasCache) {
                 JsonNode cacheNode = data.Child("Caches");
-                int entries = cacheNode.Size();
+                unsigned int entries = cacheNode.Size();
                 Project project = Application::GetInstance().m_activeProject;
-                for (size_t i = 0; i < entries; i++)
+                for (unsigned int i = 0; i < entries; i++)
                 {
                     std::string cachePath = cacheNode.GetArrayElement<std::string>(i).Result;
                     if (!std::filesystem::exists(project.GetChachePath() / cachePath))
@@ -37,6 +43,7 @@ namespace Loopie {
                     metadata.CachesPath.push_back(cachePath);
                 }
             }
+            metadata.RefreshLegibleLastModified();
             return metadata;
         }
 	}
@@ -44,15 +51,17 @@ namespace Loopie {
 	void MetadataRegistry::SaveMetadata(const std::filesystem::path& assetPath, const Metadata& metadata)
 	{
         std::filesystem::path metadataPath = assetPath.string() + ".meta";
+
         JsonData data;
-        data.CreateField("Id",metadata.UUID.Get());
-        data.CreateField("HasCache", metadata.HasCache);
+        data.CreateField<std::string>("Id",metadata.UUID.Get());
+        data.CreateField<bool>("HasCache", metadata.HasCache);
+        data.CreateField<time_t>("LastModified", metadata.LastModified);
 
         if (metadata.HasCache) {
             data.CreateArrayField("Caches");
             for (const auto& paths : metadata.CachesPath)
             {
-                data.AddArrayElement("Caches", paths);
+                data.AddArrayElement<std::string>("Caches", paths);
             }
         }
        
@@ -61,5 +70,14 @@ namespace Loopie {
     bool MetadataRegistry::IsMetadataFile(const std::filesystem::path& assetPath)
     {
         return assetPath.extension() == ".meta";
+    }
+
+    std::time_t MetadataRegistry::GetLastModifiedFromPath(const std::string& assetPath) {
+
+        auto ftime = std::filesystem::last_write_time(assetPath);
+        auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
+            ftime - decltype(ftime)::clock::now() + std::chrono::system_clock::now()
+        );
+        return std::chrono::system_clock::to_time_t(sctp);
     }
 }

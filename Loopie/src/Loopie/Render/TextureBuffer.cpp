@@ -9,29 +9,38 @@
 
 namespace Loopie
 {
-	TextureBuffer::TextureBuffer(const unsigned char* data, int width, int height, int channels) : m_texture_ID(0)
+	TextureBuffer::TextureBuffer(const unsigned char* data, int width, int height, int channels) : m_rendererId(0)
 	{
 		GLenum format = GL_RGB;
-		if (channels == 1)
-			format = GL_RED;
-		else if (channels == 4)
-			format = GL_RGBA;
+		GLenum internalFormat = GL_RGB8;
 
-		glGenTextures(1, &m_texture_ID);
-		glBindTexture(GL_TEXTURE_2D, m_texture_ID);
+		if (channels == 1) {
+			format = GL_RED;
+			internalFormat = GL_R8;
+		}
+		else if (channels == 4) {
+			format = GL_RGBA;
+			internalFormat = GL_RGBA8;
+		}
+
+		glGenTextures(1, &m_rendererId);
+		glBindTexture(GL_TEXTURE_2D, m_rendererId);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glTexStorage2D(GL_TEXTURE_2D, 1, internalFormat, width, height);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
+
+		Unbind();
 	}
 
 	TextureBuffer::~TextureBuffer()
 	{
-		glDeleteTextures(1, &m_texture_ID);
+		glDeleteTextures(1, &m_rendererId);
 	}
 
 	void TextureBuffer::Bind(unsigned int unit) const
@@ -42,7 +51,7 @@ namespace Loopie
 			return;
 		}
 		glActiveTexture(GL_TEXTURE0 + unit);
-		glBindTexture(GL_TEXTURE_2D, m_texture_ID);
+		glBindTexture(GL_TEXTURE_2D, m_rendererId);
 
 	}
 

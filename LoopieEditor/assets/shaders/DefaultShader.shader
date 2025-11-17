@@ -7,7 +7,12 @@ layout (location = 2) in vec3 a_Normal;
 layout (location = 3) in vec3 a_Tangent;
 layout (location = 4) in vec4 a_Color;
 
-uniform mat4 lp_ViewProjection;
+layout (std140, binding = 0) uniform Matrices
+{
+    mat4 lp_Pprojection;
+    mat4 lp_View;
+};
+
 uniform mat4 lp_Transform;
 ///
 
@@ -16,7 +21,7 @@ out vec3 v_Normal;
 
 void main()
 {
-    gl_Position = lp_ViewProjection * lp_Transform * vec4(a_Position, 1.0);
+    gl_Position = lp_Pprojection * lp_View* lp_Transform * vec4(a_Position, 1.0);
     v_TexCoord = a_TexCoord;
     v_Normal = mat3(lp_Transform) * a_Normal;
 }

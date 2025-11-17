@@ -16,6 +16,8 @@ find_package(SDL3 REQUIRED)
 find_package(nfd REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(assimp REQUIRED)
+find_package(lz4 REQUIRED)
+find_package(imguizmo REQUIRED)
 find_package(imgui REQUIRED)
 find_package(DevIL REQUIRED)
 
@@ -35,12 +37,14 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 	nfd::nfd
 	nlohmann_json::nlohmann_json
 	assimp::assimp
+	lz4::lz4
+	imguizmo::imguizmo
 	imgui::imgui
 	DevIL::IL
 	DevIL::ILU
 )
 
 
-target_compile_definitions(${PROJECT_NAME} PRIVATE GLFW_INCLUDE_NONE _CRT_SECURE_NO_WARNINGS )
+target_compile_definitions(${PROJECT_NAME} PUBLIC _CRT_SECURE_NO_WARNINGS GLFW_INCLUDE_NONE)
 
 

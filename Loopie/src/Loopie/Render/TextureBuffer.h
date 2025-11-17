@@ -11,8 +11,8 @@ namespace Loopie
 		void Bind(unsigned int unit = 0)const;
 		void Unbind()const;
 
-		unsigned int GetID()const { return m_texture_ID; }
+		unsigned int GetRendererID()const { return m_rendererId; }
 	private:
-		unsigned int m_texture_ID;
+		unsigned int m_rendererId;
 	};
 }

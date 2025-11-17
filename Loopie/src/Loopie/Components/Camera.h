@@ -1,6 +1,7 @@
 #pragma once
 #include "Loopie/Core/Math.h"
 #include "Loopie/Components/Component.h"
+#include "Loopie/Render/FrameBuffer.h"
 
 namespace Loopie
 {
@@ -9,8 +10,8 @@ namespace Loopie
 	public:
 		DEFINE_TYPE(Camera)
 
-		Camera(float fov = 45.0f, float near_plane = 0.1f, float far_plane = 200.0f);
-		~Camera() = default;
+		Camera(float fov = 45.0f, float near_plane = 0.1f, float far_plane = 200.0f, bool canBeMainCamera = true);
+		~Camera();
 
 		void SetViewport(unsigned int x, unsigned int y, unsigned int width, unsigned int height);
 
@@ -26,8 +27,20 @@ namespace Loopie
 
 		void SetFarPlane(float farPlane);
 		float GetFarPlane() const;
+		vec4 GetViewport() const { return m_viewport; }
 
 		void SetDirty() const;
+
+		const std::shared_ptr<FrameBuffer> GetRenderTarget() const { return m_renderTarget; }
+		void SetRenderTarget(std::shared_ptr<FrameBuffer> buffer) { m_renderTarget = buffer; }
+
+		static Camera* GetMainCamera() { return s_Main; }
+		static bool SetMainCamera(Camera* camera);
+
+		bool SetAsMainCamera();
+		bool CanBeMainCamera() const { return m_canBeMainCamera; }
+		void SetIfBeMainCamera(bool canBe) { m_canBeMainCamera = canBe; }
+
 
 		void Init() override; //// From Component
 	private:
@@ -44,5 +57,10 @@ namespace Loopie
 		mutable matrix4 m_viewProjectionMatrix = matrix4(1);
 
 		mutable bool m_dirty = true;
+
+		std::shared_ptr<FrameBuffer> m_renderTarget = nullptr;
+
+		static Camera* s_Main;
+		bool m_canBeMainCamera = true;
 	};
 }

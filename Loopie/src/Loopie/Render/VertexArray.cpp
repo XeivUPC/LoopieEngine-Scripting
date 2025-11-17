@@ -9,6 +9,9 @@ namespace Loopie
             return GL_INT;
             break;
         case Loopie::GLVariableType::FLOAT:
+        case Loopie::GLVariableType::MATRIX2:
+        case Loopie::GLVariableType::MATRIX3:
+        case Loopie::GLVariableType::MATRIX4:
             return GL_FLOAT;
             break;
         case Loopie::GLVariableType::BOOL:

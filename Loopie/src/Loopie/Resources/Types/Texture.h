@@ -23,9 +23,9 @@ namespace Loopie {
 
 		ivec2 GetSize() { return ivec2(m_width, m_height); }
 
-		int GetRenderId() { return m_tb->GetID(); }
+		unsigned int GetRendererId() { return m_tb->GetRendererID(); }
 	private:
-		std::vector<unsigned char> m_pixels;
+		//std::vector<unsigned char> m_pixels;
 		int m_width = 0;
 		int m_height = 0;
 		int m_channels = 0;

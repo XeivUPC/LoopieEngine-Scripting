@@ -14,6 +14,8 @@ namespace Loopie {
         static void Initialize();
         static void Shutdown();
 
+        static void RefreshAssetRegistry();
+
         static Metadata& GetOrCreateMetadata(const std::filesystem::path& assetPath);
 
         static Metadata* GetMetadata(const UUID& uuid);
@@ -24,12 +26,14 @@ namespace Loopie {
         static void Clear();
 
     private:
+        static void ScanEngineDirectory();
         static void ScanAssetDirectory();
         static void CleanOrphanedMetadata();
-        static void Register(const std::string& path,const Metadata& metadata, const UUID& uuid);
+        static void Register(const std::string& path,const Metadata& metadata);
 
     private:
         static std::unordered_map<UUID, Metadata> s_Assets;
         static std::unordered_map<std::string, UUID> s_PathToUUID;
+        static std::unordered_map<UUID, std::string> s_UUIDToPath;
     };
 }

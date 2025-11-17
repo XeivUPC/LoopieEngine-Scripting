@@ -9,7 +9,10 @@ namespace Loopie {
 		NONE,
 		INT,
 		FLOAT,
-		BOOL
+		BOOL,
+		MATRIX2,
+		MATRIX3,
+		MATRIX4
 	};
 
 	static unsigned int GetGLVariableSize(GLVariableType type) {
@@ -19,6 +22,12 @@ namespace Loopie {
 				return 4;
 			case GLVariableType::BOOL:
 				return 1;
+			case GLVariableType::MATRIX2:
+				return 16;
+			case GLVariableType::MATRIX3:
+				return 36;
+			case GLVariableType::MATRIX4:
+				return 64;
 			default:
 				return 0;
 		}
@@ -51,10 +60,13 @@ namespace Loopie {
 		unsigned int GetStride()const { return m_stride; }
 
 		const std::vector <BufferElement>& GetElements()const { return m_layout; }
-		const BufferElement& GetElementByIndex(int index) const{
-			for (size_t i = 0; i < m_layout.size(); i++)
-				if (m_layout[i].Index == index) return m_layout[i];
-			return BufferElement(0,0, GLVariableType::NONE,0);
+
+		const BufferElement* GetElementByIndex(int index) const {
+			for (const auto& element : m_layout) {
+				if (element.Index == index)
+					return &element;
+			}
+			return nullptr;
 		}
 
 	private:

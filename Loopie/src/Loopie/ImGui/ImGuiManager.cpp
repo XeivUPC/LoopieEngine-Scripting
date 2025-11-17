@@ -7,6 +7,8 @@
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_opengl3.h>
 
+#include <ImGuizmo.h>
+
 namespace Loopie {
 	ImGuiManager::~ImGuiManager()
 	{
@@ -33,6 +35,8 @@ namespace Loopie {
 		ImGui_ImplSDL3_InitForOpenGL(window.GetSDLWindow(), window.GetSDL_GL_Context());
 		ImGui_ImplOpenGL3_Init();
 
+		ImGuizmo::AllowAxisFlip(false);
+
 		CustomImGui();
 	}
 
@@ -46,6 +50,8 @@ namespace Loopie {
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplSDL3_NewFrame();
 		ImGui::NewFrame();
+
+		ImGuizmo::BeginFrame();
 	}
 
 	void ImGuiManager::EndFrame()

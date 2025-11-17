@@ -17,5 +17,6 @@ namespace Loopie
         void Unbind() const;
 
         unsigned int GetCount() const;
+        unsigned int GetRendererID()const { return m_rendererID; }
     };
 }

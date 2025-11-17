@@ -19,6 +19,8 @@ namespace Loopie
 		BufferLayout& GetLayout() { return m_layout; }
 		void SetLayout(const BufferLayout& layout) { m_layout = layout; }
 
+		unsigned int GetRendererID()const { return m_rendererID; }
+
 	private:
 		unsigned int m_rendererID = 0;
 		BufferLayout m_layout;

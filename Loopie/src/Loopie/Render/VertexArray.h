@@ -21,6 +21,8 @@ namespace Loopie
 
         void AddBuffer(VertexBuffer* vbo, IndexBuffer* ebo);
 
+        unsigned int GetRendererID()const { return m_rendererID; }
+
         const IndexBuffer& GetIndexBuffer() const;
     };
 }
