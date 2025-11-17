@@ -40,11 +40,11 @@ namespace Loopie {
 		};
 
 		struct GizmoTypeRender {
-			std::shared_ptr<VertexArray> VertexArray;
-			std::shared_ptr<VertexBuffer> VertexBuffer;
-			std::shared_ptr<IndexBuffer> IndexBuffer;
+			std::shared_ptr<VertexArray> VAO;
+			std::shared_ptr<VertexBuffer> VBO;
+			std::shared_ptr<IndexBuffer> EBO;
 
-			std::shared_ptr <Shader> Shader;
+			std::shared_ptr <Shader> ShaderProg;
 		};
 
 		struct GizmoData

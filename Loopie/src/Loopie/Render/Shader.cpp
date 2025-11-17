@@ -488,7 +488,7 @@ namespace Loopie {
 			{
 				Log::Warn("Unknown uniform type {0} for uniform '{1}'", type, name);
 				m_uniforms.push_back(Uniform{ name, UniformType_Unknown }); 
-				m_uniforms.back().default = 0;
+				m_uniforms.back().defaultValue = 0;
 			}
 		}
 	}
@@ -508,14 +508,14 @@ namespace Loopie {
 		{
 			GLfloat value;
 			glGetUniformfv(m_rendererID, location, &value);
-			uniform.default = value;
+			uniform.defaultValue = value;
 			break;
 		}
 		case UniformType_bool:
 		{
 			GLint value;
 			glGetUniformiv(m_rendererID, location, &value);
-			uniform.default = static_cast<bool>(value);
+			uniform.defaultValue = static_cast<bool>(value);
 			break;
 		}
 		case UniformType_int:
@@ -525,56 +525,56 @@ namespace Loopie {
 		{
 			GLint value;
 			glGetUniformiv(m_rendererID, location, &value);
-			uniform.default = value;
+			uniform.defaultValue = value;
 			break;
 		}
 		case UniformType_uint:
 		{
 			GLuint value;
 			glGetUniformuiv(m_rendererID, location, &value);
-			uniform.default = value;
+			uniform.defaultValue = value;
 			break;
 		}
 		case UniformType_vec2:
 		{
 			glm::vec2 value;
 			glGetUniformfv(m_rendererID, location, &value[0]);
-			uniform.default = value;
+			uniform.defaultValue = value;
 			break;
 		}
 		case UniformType_vec3:
 		{
 			glm::vec3 value;
 			glGetUniformfv(m_rendererID, location, &value[0]);
-			uniform.default = value;
+			uniform.defaultValue = value;
 			break;
 		}
 		case UniformType_vec4:
 		{
 			glm::vec4 value;
 			glGetUniformfv(m_rendererID, location, &value[0]);
-			uniform.default = value;
+			uniform.defaultValue = value;
 			break;
 		}
 		case UniformType_mat2:
 		{
 			glm::mat2 value;
 			glGetUniformfv(m_rendererID, location, &value[0][0]);
-			uniform.default = value;
+			uniform.defaultValue = value;
 			break;
 		}
 		case UniformType_mat3:
 		{
 			glm::mat3 value;
 			glGetUniformfv(m_rendererID, location, &value[0][0]);
-			uniform.default = value;
+			uniform.defaultValue = value;
 			break;
 		}
 		case UniformType_mat4:
 		{
 			glm::mat4 value;
 			glGetUniformfv(m_rendererID, location, &value[0][0]);
-			uniform.default = value;
+			uniform.defaultValue = value;
 			break;
 		}
 		default:

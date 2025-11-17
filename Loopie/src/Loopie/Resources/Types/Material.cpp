@@ -42,7 +42,7 @@ namespace Loopie
 		for (const auto& uniform : uniforms)
 		{
 			m_uniformValues[uniform.id].type = uniform.type;
-			m_uniformValues[uniform.id].value = uniform.default;
+			m_uniformValues[uniform.id].value = uniform.defaultValue;
 		}
 
 		Log::Info("Material reset to default values");

@@ -7,6 +7,7 @@
 #include "Loopie/Core/Application.h"
 #include "Loopie/Core/Log.h"
 #include "Loopie/Core/Window.h"
+#include "Loopie/Files/Json.h"
 
 #include <imgui.h>
 #include <imgui_stdlib.h>
@@ -36,7 +37,7 @@ namespace Loopie
 
 		for (size_t i = 0; i < m_recentProjects.size(); i++)
 		{
-			recentArray.AddArrayElement(m_recentProjects[i]);
+			recentArray.AddArrayElement<std::string>(m_recentProjects[i]);
 		}
 
 		data.ToFile("recentProjects.json");

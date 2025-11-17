@@ -25,14 +25,14 @@ namespace Loopie {
 		if (metadata.HasCache)
 			return;
 
-		JsonData data = Json::ReadFromFile(filepath);
-		if (data.IsEmpty())
+		JsonData jsonData = Json::ReadFromFile(filepath);
+		if (jsonData.IsEmpty())
 			return;
 
-		JsonResult<std::string> shaderNode = data.GetValue<std::string>("shader");
+		JsonResult<std::string> shaderNode = jsonData.GetValue<std::string>("shader");
 		std::string shaderUUID = shaderNode.Result;
 
-		JsonNode propertiesNode = data.Child("properties");
+		JsonNode propertiesNode = jsonData.Child("properties");
 		std::vector<std::string> propKeys = propertiesNode.GetObjectKeys();
 
 		Project project = Application::GetInstance().m_activeProject;
@@ -71,25 +71,25 @@ namespace Loopie {
 			unsigned int enumLength = (unsigned int)key.size();
 			fs.write(reinterpret_cast<const char*>(&enumLength), sizeof(enumLength));
 			if (type == "Int") {
-				int data = std::stoi(value);
-				fs.write(reinterpret_cast<const char*>(&data), sizeof(data));
+				int dataValue = std::stoi(value);
+				fs.write(reinterpret_cast<const char*>(&dataValue), sizeof(dataValue));
 			}
 			else if (type == "Float") {
-				float data = std::stof(value);
-				fs.write(reinterpret_cast<const char*>(&data), sizeof(data));
+				float dataValue = std::stof(value);
+				fs.write(reinterpret_cast<const char*>(&dataValue), sizeof(dataValue));
 			}
 			else if (type == "UInt") {
-				unsigned int data = std::stoul(value);
-				fs.write(reinterpret_cast<const char*>(&data), sizeof(data));
+				unsigned int dataValue = std::stoul(value);
+				fs.write(reinterpret_cast<const char*>(&dataValue), sizeof(dataValue));
 			}
 			else if (type == "Bool") {
-				int data = value == "True" ? 1 : 0;
-				fs.write(reinterpret_cast<const char*>(&data), sizeof(data));
+				int dataValue = value == "True" ? 1 : 0;
+				fs.write(reinterpret_cast<const char*>(&dataValue), sizeof(dataValue));
 			}
 			else if (type == "Vec2" || type == "Vec3" || type == "Vec4" || type == "Mat2" || type == "Mat3" || type == "Mat4") {		
 				auto nums = ParseNumberList(value);
-				for(const auto& data : nums)
-					fs.write(reinterpret_cast<const char*>(&data), sizeof(data));
+				for(const auto& dataValue : nums)
+					fs.write(reinterpret_cast<const char*>(&dataValue), sizeof(dataValue));
 			}
 			else if (type == "Sampler2D") {
 				//fs.write(shaderUUID.c_str(), UUID::UUID_SIZE);

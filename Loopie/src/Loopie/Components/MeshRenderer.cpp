@@ -58,8 +58,8 @@ namespace Loopie {
 			return;
 
 		const BufferLayout& layout = m_mesh->m_vbo->GetLayout();
-		BufferElement posElem = layout.GetElementByIndex(0);
-		if (posElem.Type == GLVariableType::NONE)
+		const BufferElement* posElem = layout.GetElementByIndex(0);
+		if (posElem->Type == GLVariableType::NONE)
 			return;
 
 		Transform* transform = GetTransform();
@@ -80,7 +80,7 @@ namespace Loopie {
 
 			vec3 p[6];
 			for (int j = 0; j < 6; j++)
-				p[j] = GetVertexVec3Data(data, indices[j], posElem.Offset);
+				p[j] = GetVertexVec3Data(data, indices[j], posElem->Offset);
 
 			for (int j = 0; j < 6; j++)
 				p[j] = vec3(modelMatrix * vec4(p[j], 1.0f));
@@ -104,8 +104,8 @@ namespace Loopie {
 			return;
 
 		const BufferLayout& layout = m_mesh->m_vbo->GetLayout();
-		BufferElement posElem = layout.GetElementByIndex(0); // a_Position
-		if (posElem.Type == GLVariableType::NONE)
+		const BufferElement* posElem = layout.GetElementByIndex(0); // a_Position
+		if (posElem->Type == GLVariableType::NONE)
 			return;
 
 		Transform* transform = GetTransform();
@@ -120,9 +120,9 @@ namespace Loopie {
 			if (i0 >= data.VerticesAmount || i1 >= data.VerticesAmount || i2 >= data.VerticesAmount)
 				continue;
 
-			vec3 p0 = GetVertexVec3Data(data, i0, posElem.Offset);
-			vec3 p1 = GetVertexVec3Data(data, i1, posElem.Offset);
-			vec3 p2 = GetVertexVec3Data(data, i2, posElem.Offset);
+			vec3 p0 = GetVertexVec3Data(data, i0, posElem->Offset);
+			vec3 p1 = GetVertexVec3Data(data, i1, posElem->Offset);
+			vec3 p2 = GetVertexVec3Data(data, i2, posElem->Offset);
 
 			p0 = vec3(modelMatrix * vec4(p0, 1.0f));
 			p1 = vec3(modelMatrix * vec4(p1, 1.0f));

@@ -1,4 +1,3 @@
-#include "Loopie/Files/DirectoryManager.h"
 #include "DirectoryManager.h"
 
 #include <fstream>

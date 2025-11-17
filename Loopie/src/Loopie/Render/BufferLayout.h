@@ -60,10 +60,13 @@ namespace Loopie {
 		unsigned int GetStride()const { return m_stride; }
 
 		const std::vector <BufferElement>& GetElements()const { return m_layout; }
-		const BufferElement& GetElementByIndex(int index) const{
-			for (size_t i = 0; i < m_layout.size(); i++)
-				if (m_layout[i].Index == index) return m_layout[i];
-			return m_layout[0];
+
+		const BufferElement* GetElementByIndex(int index) const {
+			for (const auto& element : m_layout) {
+				if (element.Index == index)
+					return &element;
+			}
+			return nullptr;
 		}
 
 	private:

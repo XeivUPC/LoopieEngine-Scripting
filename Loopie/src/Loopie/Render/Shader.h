@@ -42,7 +42,7 @@ namespace Loopie {
 	{
 		std::string id;
 		UniformType type;
-		std::variant<int, float, bool, unsigned int, vec2, vec3, vec4, matrix2, matrix3, matrix4> default;
+		std::variant<int, float, bool, unsigned int, vec2, vec3, vec4, matrix2, matrix3, matrix4> defaultValue;
 	};
 
 	class Shader

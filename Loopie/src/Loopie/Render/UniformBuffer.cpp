@@ -33,8 +33,13 @@ namespace Loopie
     void UniformBuffer::SetData(const void* data, int index)
     {
         Bind();
-        const BufferElement& element = m_layout.GetElementByIndex(index);
-        glBufferSubData(GL_UNIFORM_BUFFER, element.Offset, GetGLVariableSize(element.Type) * element.Count, data);
-        Unbind();
+        const BufferElement* element = m_layout.GetElementByIndex(index);
+        if (!element)
+        {
+            Unbind();
+            return;
+        }
+        glBufferSubData(GL_UNIFORM_BUFFER, element->Offset, GetGLVariableSize(element->Type) * element->Count, data);
+       
     }
 }

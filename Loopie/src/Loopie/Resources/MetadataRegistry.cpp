@@ -53,15 +53,15 @@ namespace Loopie {
         std::filesystem::path metadataPath = assetPath.string() + ".meta";
 
         JsonData data;
-        data.CreateField("Id",metadata.UUID.Get());
-        data.CreateField("HasCache", metadata.HasCache);
-        data.CreateField("LastModified", metadata.LastModified);
+        data.CreateField<std::string>("Id",metadata.UUID.Get());
+        data.CreateField<bool>("HasCache", metadata.HasCache);
+        data.CreateField<time_t>("LastModified", metadata.LastModified);
 
         if (metadata.HasCache) {
             data.CreateArrayField("Caches");
             for (const auto& paths : metadata.CachesPath)
             {
-                data.AddArrayElement("Caches", paths);
+                data.AddArrayElement<std::string>("Caches", paths);
             }
         }
        
