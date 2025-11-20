@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Loopie/Core/Module.h"
+#include "Loopie/Events/IObserver.h"
+#include "Loopie/Events/EventTypes.h"
 
 #include "Editor/Interfaces/Workspace/InspectorInterface.h"
 #include "Editor/Interfaces/Workspace/ConsoleInterface.h"
@@ -14,13 +16,15 @@ namespace Loopie {
 
 	class Camera;
 
-	class EditorModule : public Module {
+	class EditorModule : public Module, public IObserver<EngineNotification> {
 	public:
 		EditorModule() = default;
 		~EditorModule() = default;
 
 		void OnLoad()override;
 		void OnUnload()override;
+
+		void OnNotify(const EngineNotification& type) override;
 
 		void OnUpdate() override;
 
@@ -40,5 +44,7 @@ namespace Loopie {
 		AssetsExplorerInterface m_assetsExplorer;
 
 		Scene* scene;
+
+
 	};
 }

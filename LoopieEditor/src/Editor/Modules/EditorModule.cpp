@@ -50,11 +50,14 @@ namespace Loopie
 
 		m_hierarchy.SetScene(scene);
 
+		Application::GetInstance().m_notifier.AddObserver(this);
+
 	}
 
 	void EditorModule::OnUnload()
 	{
 		AssetRegistry::Shutdown();
+		Application::GetInstance().m_notifier.RemoveObserver(this);
 	}
 
 	void EditorModule::OnUpdate()
@@ -62,10 +65,6 @@ namespace Loopie
 
 		Application& app = Application::GetInstance();
 		InputEventManager& inputEvent = app.GetInputEvent();
-
-		if (inputEvent.HasEvent(SDL_EVENT_WINDOW_FOCUS_GAINED)) {
-			AssetRegistry::RefreshAssetRegistry();
-		}
 
 		m_hierarchy.Update(inputEvent);
 		m_assetsExplorer.Update(inputEvent);
@@ -161,5 +160,16 @@ namespace Loopie
 	{
 		m_scene.ChargeModel("assets/models/BakerHouse.fbx");
 		m_scene.ChargeTexture("assets/textures/Baker_house.png");
-	}	
+	}
+
+	void EditorModule::OnNotify(const EngineNotification& type)
+	{
+		if (type == EngineNotification::OnProjectChange) {
+			AssetRegistry::Initialize();
+			Application::GetInstance().GetWindow().SetTitle(Application::GetInstance().m_activeProject.GetProjectName().c_str());
+			m_assetsExplorer.Reload();
+			///LOAD SCENE
+		}
+	}
+
 }

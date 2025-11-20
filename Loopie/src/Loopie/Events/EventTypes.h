@@ -5,4 +5,9 @@ namespace Loopie {
         OnDirty,
         OnChanged
     };
+
+    enum class EngineNotification {
+        OnProjectChange,
+        OnAssetRegistryReload
+    };
 }

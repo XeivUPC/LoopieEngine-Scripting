@@ -52,6 +52,8 @@ namespace Loopie {
 				UpdateMetadata(metadata, pathString);
 			}
 		}
+
+		Application::GetInstance().m_notifier.Notify(EngineNotification::OnAssetRegistryReload);
 	}
 
 	void AssetRegistry::Clear() {

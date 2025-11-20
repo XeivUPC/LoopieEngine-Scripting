@@ -19,6 +19,8 @@ namespace Loopie {
 		void Update(const InputEventManager& inputEvent) override;
 		void Render() override;
 
+		void Reload();
+
 	private:
 		struct CachedDirectoryNode
 		{
