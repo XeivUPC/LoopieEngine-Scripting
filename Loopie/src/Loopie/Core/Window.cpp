@@ -60,19 +60,6 @@ namespace Loopie {
 		Renderer::Shutdown();
 	}
 
-	void Window::StartFrame() {
-		Uint64 now = SDL_GetPerformanceCounter();
-		if (m_lastFrameTime != 0)
-		{
-			m_deltaTimeMs = (float)((now - m_lastFrameTime) * 1000.0 / (double)SDL_GetPerformanceFrequency());
-		}
-		else
-		{
-			m_deltaTimeMs = 0.0f;
-		}
-		m_lastFrameTime = now;
-	}
-
 	// 24/09 Technically more of a swapbuffer rather than an update right now
 	void Window::Update()
 	{

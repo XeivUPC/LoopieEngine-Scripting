@@ -20,7 +20,6 @@ namespace Loopie {
 		Window();
 		~Window();
 
-		void StartFrame();
 		void ProcessEvents(InputEventManager& eventController);
 		void Update();
 

@@ -93,7 +93,9 @@ namespace Loopie {
 
 			Renderer::Clear();
 
-			m_window->StartFrame();
+			//m_window->StartFrame();
+			m_timeManager.CalculateFrame();
+
 			m_imguiManager.StartFrame();
 
 			m_inputEvent.Update();
@@ -101,7 +103,7 @@ namespace Loopie {
 			m_window->ProcessEvents(m_inputEvent);
 			ProcessEvents(m_inputEvent);
 
-			float dt = m_window->GetDeltaTime();
+			float dt = Time::DeltaTime();
 			for (Module* module : m_modules) {
 				if (module->IsActive()) {
 					module->OnUpdate(dt);
