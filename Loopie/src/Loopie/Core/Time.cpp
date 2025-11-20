@@ -2,48 +2,48 @@
 #include <SDL3/SDL_timer.h>
 namespace Loopie
 {
-	float Time::m_lastFrameTime = 0;
-	int Time::m_frameCount = 0;
-	float Time::m_fixedDeltaTime = 0.2f;
-	float Time::m_timeScale = 1;
-	float Time::m_deltaTime = 0;
-	float Time::m_runTime = 0;
-	float Time::m_executionTime = 0;
+	float Time::s_LastFrameTime = 0;
+	int Time::s_FrameCount = 0;
+	float Time::s_FixedDeltaTime = 0.2f;
+	float Time::s_TimeScale = 1;
+	float Time::s_DeltaTime = 0;
+	float Time::s_RunTime = 0;
+	float Time::s_ExecutionTime = 0;
 
 	void Time::CalculateFrame()
 	{
 		Uint64 now = SDL_GetPerformanceCounter();
-		if (m_lastFrameTime != 0)
+		if (s_LastFrameTime != 0)
 		{
-			m_deltaTime = (float)((now - m_lastFrameTime) / (double)SDL_GetPerformanceFrequency());
+			s_DeltaTime = (float)((now - s_LastFrameTime) / (double)SDL_GetPerformanceFrequency());
 		}
 		else
 		{
-			m_deltaTime = 0.0f;
+			s_DeltaTime = 0.0f;
 		}
-		m_lastFrameTime = now;
+		s_LastFrameTime = now;
 
-		m_runTime += GetDeltaTime();
-		m_executionTime += GetUnscaledDeltaTime();
+		s_RunTime += GetDeltaTime();
+		s_ExecutionTime += GetUnscaledDeltaTime();
 
-		m_frameCount++;
+		s_FrameCount++;
 	}
 
-	void Time::SetFixedDeltaTimeMs(float value)
+	void Time::SetFixedDeltaTimeMs(float ms)
 	{
-		m_fixedDeltaTime = value * 0.001f;
+		s_FixedDeltaTime = ms * 0.001f;
 	}
 
-	void Time::SetFixedDeltaTime(float value)
+	void Time::SetFixedDeltaTime(float seconds)
 	{
-		m_fixedDeltaTime = value;
+		s_FixedDeltaTime = seconds;
 	}
 
-	void Time::SetTimeScale(float value)
+	void Time::SetTimeScale(float scale)
 	{
-		if (value < 0.0f)
-			value = 0.0f;
+		if (scale < 0.0f)
+			scale = 0.0f;
 
-		m_timeScale = value;
+		s_TimeScale = scale;
 	}
 }
