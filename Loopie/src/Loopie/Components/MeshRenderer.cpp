@@ -13,7 +13,7 @@ namespace Loopie {
 
 	MeshRenderer::~MeshRenderer()
 	{
-		if(GetTransform())
+		if (GetOwner() && GetTransform())
 			GetTransform()->m_transformNotifier.RemoveObserver(this);
 	}
 
@@ -72,6 +72,28 @@ namespace Loopie {
 	{
 		RecalculateBoundingBoxes();
 		return m_worldOBB;
+	}
+
+	json MeshRenderer::Serialize() const
+	{
+		json meshRendererObj = json::object();
+
+		meshRendererObj["mesh_uuid"] = m_mesh->GetUUID().Get();
+
+		json componentWrapper = json::object();
+		componentWrapper["meshrenderer"] = meshRendererObj;
+
+		return componentWrapper;
+	}
+
+	void MeshRenderer::Deserialize(const json& data)
+	{
+		// TODO: Add deserialization for mesh renderer
+		if (data.contains("mesh_uuid"))
+		{
+			// This is causing an error so I have to revise it at another point
+			//m_mesh->SetUUID(data["mesh_uuid"].get<std::string>());
+		}
 	}
 
 	void MeshRenderer::RecalculateBoundingBoxes() const

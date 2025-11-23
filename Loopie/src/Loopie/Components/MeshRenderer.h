@@ -40,6 +40,10 @@ namespace Loopie {
 		void SetDrawOBB(bool value) { m_drawOBB = value; }
 		bool GetDrawOBB() { return m_drawOBB; }
 		///TEST
+
+		json Serialize() const override;
+		void Deserialize(const json& data) override;
+
 	private:
 		void RecalculateBoundingBoxes() const;
 

@@ -4,6 +4,9 @@
 #include "Loopie/Core/Identificable.h"
 #include "Loopie/Core/UUID.h"
 #include "Loopie/Events/IObserver.h"
+#include "Loopie/Files/Json.h"
+
+//#include <nlohmann/json.hpp>
 
 namespace Loopie {
 	class Entity;
@@ -25,6 +28,10 @@ namespace Loopie {
 		// Setters
 		void SetIsActive(bool active);
 		void SetUUID(const std::string uuid);
+
+		// Serialize & Deserialize
+		virtual json Serialize() const;
+		virtual void Deserialize(const json& data);
 
 		virtual void Init() = 0;
 

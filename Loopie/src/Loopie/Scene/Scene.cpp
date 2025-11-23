@@ -1,7 +1,9 @@
 #include "Scene.h"
-#include "Loopie/Components/Transform.h"
 #include "Loopie/Files/Json.h"
 #include "Loopie/Core/Log.h"
+#include "Loopie/Components/Transform.h"
+#include "Loopie/Components/Camera.h"
+#include "Loopie/Components/MeshRenderer.h"
 
 #include <unordered_set>
 
@@ -10,10 +12,12 @@ namespace Loopie {
 	Scene::Scene(const std::string& filePath)
 	{
 		m_filePath = filePath;
-		ReadAndLoadSceneFile();
 
 		m_rootEntity = std::make_shared<Entity>("scene");
 		m_rootEntity->AddComponent<Transform>();
+
+		//ReadAndLoadSceneFile(std::string("TESTSavedScene.json"));
+		//ReadAndLoadSceneFile(filePath);
 	}
 
 	Scene::~Scene()
@@ -26,13 +30,9 @@ namespace Loopie {
 		JsonData saveData;
 		saveData.CreateArrayField("entities");
 
+		// Pol comment to understand json::objects and json::arrays
 		// Array field = values
 		// Object field = kvm
-
-		json rootObj = json::object();
-		rootObj["uuid"] = m_rootEntity->GetUUID().Get();
-		rootObj["name"] = m_rootEntity->GetName();
-		saveData.AddArrayElement("entities", rootObj);
 		
 		for (const auto& [id, entity] : GetAllEntities())
 		{
@@ -47,55 +47,12 @@ namespace Loopie {
 			else
 				entityObj["parent_uuid"] = nullptr;
 
-			Transform* transform = entity->GetTransform();
-
-			entityObj["transform"] = json::object();
-			entityObj["transform"]["position"] = {
-				{"x", transform->GetLocalPosition().x},
-				{"y", transform->GetLocalPosition().y},
-				{"z", transform->GetLocalPosition().z}
-			};
-			entityObj["transform"]["rotation"] = {
-				{"x", transform->GetLocalRotation().x},
-				{"y", transform->GetLocalRotation().y},
-				{"z", transform->GetLocalRotation().z}
-			};
-			entityObj["transform"]["scale"] = {
-				{"x", transform->GetLocalScale().x},
-				{"y", transform->GetLocalScale().y},
-				{"z", transform->GetLocalScale().z}
-			};
-
 			// Creates an array of components
 			entityObj["components"] = json::array();
+
 			for (auto const& component : entity->GetComponents())
 			{
-				//if (component->GetTypeIDStatic() == Transform::GetTypeIDStatic())
-				json componentObj = json::object();
-				componentObj["uuid"] = component->GetUUID().Get();
-				componentObj["type"] = component->GetTypeID();
-
-				Transform* compTransform = component->GetTransform();
-
-
-				// index + uuid
-				componentObj["transform"] = json::object();
-				componentObj["transform"]["position"] = {
-					{"x", compTransform->GetLocalPosition().x},
-					{"y", compTransform->GetLocalPosition().y},
-					{"z", compTransform->GetLocalPosition().z}
-				};
-				componentObj["transform"]["rotation"] = {
-					{"x", compTransform->GetLocalRotation().x},
-					{"y", compTransform->GetLocalRotation().y},
-					{"z", compTransform->GetLocalRotation().z}
-				};
-				componentObj["transform"]["scale"] = {
-					{"x", compTransform->GetLocalScale().x},
-					{"y", compTransform->GetLocalScale().y},
-					{"z", compTransform->GetLocalScale().z}
-				};
-				entityObj["components"].push_back(componentObj);
+				entityObj["components"].push_back(component->Serialize());
 			}
 
 			saveData.AddArrayElement("entities", entityObj);
@@ -105,11 +62,29 @@ namespace Loopie {
 		Log::Info("Scene saved.");
 	}
 
-	std::shared_ptr<Entity>  Scene::CreateEntity(const std::string& name,
+	std::shared_ptr<Entity> Scene::CreateEntity(const std::string& name,
 												std::shared_ptr<Entity> parentEntity)
 	{
 		std::string uniqueName = GetUniqueName(parentEntity, name);
 		std::shared_ptr<Entity> entity = std::make_shared<Entity>(uniqueName);
+		if (!parentEntity)
+			m_rootEntity->AddChild(entity);
+		else
+			parentEntity->AddChild(entity);
+
+		entity->AddComponent<Transform>();
+
+		m_entities[entity->GetUUID()] = entity;
+		return entity;
+	}
+
+	std::shared_ptr<Entity> Scene::CreateEntity(const UUID& uuid, const std::string& name,
+												 std::shared_ptr<Entity> parentEntity)
+	{
+		std::string uniqueName = GetUniqueName(parentEntity, name);
+		std::shared_ptr<Entity> entity = std::make_shared<Entity>(uniqueName);
+		entity->SetUUID(uuid);
+
 		if (!parentEntity)
 			m_rootEntity->AddChild(entity);
 		else
@@ -236,14 +211,115 @@ namespace Loopie {
 		return siblingEntities;
 	}
 
-	void Scene::ReadAndLoadSceneFile()
+	void Scene::ReadAndLoadSceneFile(std::string filePath)
 	{
 		// TODO: This should read the serialized file and load the entities and their uuid
 		// We can use the hierarchy for this
+
+		m_entities.clear();
+
+		// TEMP
+		m_rootEntity = std::make_shared<Entity>("scene");
+		m_rootEntity->AddComponent<Transform>();
+		// END_TEMP
+		
+		//JsonData saveData = Json::ReadFromFile(*filePath);
+		JsonData saveData = Json::ReadFromFile("TESTSavedScene.json");
+
+		if (saveData.IsEmpty())
+		{
+			Log::Error("Failed to load scene file");
+			return;
+		}
+
+		json& rootNode = saveData.GetRoot();
+
+		if (!rootNode.contains("entities") || !rootNode["entities"].is_array())
+		{
+			Log::Error("No entities array in scene file.");
+			return;
+		}
+
+		json& entitiesArray = rootNode["entities"];
+
+		// Map used to store created entities by UUID for later linking
+
+		// First iteration: Create all entities
+		for (size_t i = 0; i < entitiesArray.size(); ++i)
+		{
+			json& entityJson = entitiesArray[i];
+
+			if (!entityJson.contains("uuid") || !entityJson.contains("name"))
+				continue;
+
+			UUID uuid = UUID(entityJson["uuid"].get<std::string>());
+			std::string name = entityJson["name"].get<std::string>();
+			bool active = entityJson["active"].get<bool>();
+
+			std::shared_ptr<Entity> entity = CreateEntity(uuid, name);
+			entity->SetIsActive(active);		}
+
+		// Second iteration: Link relationships and components
+		for (size_t i = 0; i < entitiesArray.size(); ++i)
+		{
+			json& entityJson = entitiesArray[i];
+
+			if (!entityJson.contains("uuid"))
+				continue;
+
+			UUID uuid = UUID(entityJson["uuid"].get<std::string>());
+			std::shared_ptr<Entity> entity = m_entities[uuid];
+
+			// Set parent if it exists
+			if (entityJson.contains("parent_uuid") && !entityJson["parent_uuid"].is_null())
+			{
+				UUID parentUUID = UUID(entityJson["parent_uuid"].get<std::string>());
+				if (m_entities.find(parentUUID) != m_entities.end())
+				{
+					entity->SetParent(m_entities[parentUUID]);
+				}
+			}
+
+			if (entityJson.contains("components") && entityJson["components"].is_array())
+			{
+				json& componentsArray = entityJson["components"];
+
+				for (size_t j = 0; j < componentsArray.size(); ++j)
+				{
+					json& componentJson = componentsArray[j];
+
+					// Check which component type it is - I don't know if we can do this more clean?
+					if (componentJson.contains("transform"))
+					{
+						entity->GetTransform()->Deserialize(componentJson["transform"]);
+					}
+					else if (componentJson.contains("camera"))
+					{
+						auto camera = entity->AddComponent<Camera>();
+						if (camera)
+						{
+							camera->Deserialize(componentJson["camera"]);
+						}
+					}
+					else if (componentJson.contains("meshrenderer"))
+					{
+						auto meshRenderer = entity->AddComponent<MeshRenderer>();
+						if (meshRenderer)
+						{
+							meshRenderer->Deserialize(componentJson["meshrenderer"]);
+						}
+					}
+				}
+			}
+		}
+		Log::Info("Scene loaded successfully");
 	}
 
 	std::string Scene::GetUniqueName(std::shared_ptr<Entity> parentEntity, const std::string& desiredName)
 	{
+		if (!parentEntity)
+			return desiredName;
+
 		std::unordered_set<std::string> existingNames;
 		for (const auto& sibling : GetAllSiblings(parentEntity))
 		{

@@ -11,7 +11,7 @@ namespace Loopie
 {
 	Camera* Camera::s_Main = nullptr;
 
-	Camera::Camera(float fov, float near_plane, float far_plane, bool canBeMainCamera): m_fov(fov), m_nearPlane(near_plane), m_farPlane(far_plane), m_canBeMainCamera(canBeMainCamera)
+	Camera::Camera(float fov, float near_plane, float far_plane, bool canBeMainCamera) : m_fov(fov), m_nearPlane(near_plane), m_farPlane(far_plane), m_canBeMainCamera(canBeMainCamera)
 	{
 		m_renderTarget = nullptr;
 		Renderer::RegisterCamera(*this);
@@ -23,7 +23,7 @@ namespace Loopie
 	Camera::~Camera() {
 		Renderer::UnregisterCamera(*this);
 
-		if (GetTransform())
+		if (GetOwner() && GetTransform())
 			GetTransform()->m_transformNotifier.RemoveObserver(this);
 
 		if (s_Main == this)
@@ -50,7 +50,7 @@ namespace Loopie
 
 	void Camera::OnNotify(const TransformNotification& id)
 	{
-		if(id == TransformNotification::OnDirty)
+		if (id == TransformNotification::OnDirty)
 			SetDirty();
 	}
 
@@ -112,7 +112,7 @@ namespace Loopie
 	}
 
 	const Frustum& Camera::GetFrustum() const {
-		CalculateMatrices(); 
+		CalculateMatrices();
 		return m_frustum;
 	}
 
@@ -121,7 +121,7 @@ namespace Loopie
 	{
 		if (!m_dirty)
 			return;
-		
+
 		auto transform = GetTransform();
 
 		const vec3 position = transform->GetPosition();
@@ -136,13 +136,22 @@ namespace Loopie
 		m_dirty = false;
 	}
 
-	void Camera::SetDirty() const{
+	void Camera::SetDirty() const {
 		m_dirty = true;
 	}
 
 	bool Camera::SetMainCamera(Camera* camera) {
-		if (camera->m_canBeMainCamera) {
+		if (!camera) {
+			if (s_Main)
+				s_Main->m_isMainCamera = false;
+			s_Main = nullptr;
+			return true;
+		}
+		else if (camera->m_canBeMainCamera) {
+			if (s_Main)
+				s_Main->m_isMainCamera = false;
 			s_Main = camera;
+			s_Main->m_isMainCamera = true;
 			camera->SetDirty();
 			return true;
 		}
@@ -153,5 +162,32 @@ namespace Loopie
 
 	bool Camera::SetAsMainCamera() {
 		return SetMainCamera(this);
+	}
+
+	json Camera::Serialize() const
+	{
+		json cameraObj = json::object();
+		cameraObj["is_main_camera"] = m_isMainCamera;
+		cameraObj["fov"] = m_fov;
+		cameraObj["near_plane"] = m_nearPlane;
+		cameraObj["far_plane"] = m_farPlane;
+
+		json componentWrapper = json::object();
+		componentWrapper["camera"] = cameraObj;
+
+		return componentWrapper;
+	}
+
+	void Camera::Deserialize(const json& data)
+	{
+		m_fov = data.value("fov", 60.0f);
+		m_nearPlane = data.value("near_plane", 0.1f);
+		m_farPlane = data.value("far_plane", 100.0f);
+		m_isMainCamera = data.value("is_main_camera", false);
+			
+		if (m_isMainCamera)
+		{
+			SetAsMainCamera();
+		}
 	}
 }

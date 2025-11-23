@@ -12,7 +12,7 @@ namespace Loopie
 	public:
 		DEFINE_TYPE(Camera)
 
-		Camera(float fov = 60.0f, float near_plane = 0.3f, float far_plane = 200.0f, bool canBeMainCamera = true);
+			Camera(float fov = 60.0f, float near_plane = 0.3f, float far_plane = 200.0f, bool canBeMainCamera = true);
 		~Camera();
 		void Init() override; //// From Component
 		void OnNotify(const TransformNotification& id) override;
@@ -45,19 +45,20 @@ namespace Loopie
 		bool SetAsMainCamera();
 		bool CanBeMainCamera() const { return m_canBeMainCamera; }
 		void SetIfBeMainCamera(bool canBe) { m_canBeMainCamera = canBe; }
+		bool IsMainCamera() { return m_isMainCamera; }
 
+		json Serialize() const override;
+		void Deserialize(const json& data);
 
-		
-		
 	private:
 		void CalculateMatrices() const;
 	private:
-		vec4 m_viewport = vec4(0,0,1,1);
+		vec4 m_viewport = vec4(0, 0, 1, 1);
 		mutable Frustum m_frustum;
 
-		float m_fov=60.0f;
+		float m_fov = 60.0f;
 		float m_nearPlane = 0.3f;
-		float m_farPlane=200.0f;
+		float m_farPlane = 200.0f;
 
 		mutable matrix4 m_viewMatrix = matrix4(1);
 		mutable matrix4 m_projectionMatrix = matrix4(1);
@@ -69,5 +70,6 @@ namespace Loopie
 
 		static Camera* s_Main;
 		bool m_canBeMainCamera = true;
+		bool m_isMainCamera = false;
 	};
 }

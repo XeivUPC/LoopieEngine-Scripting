@@ -10,6 +10,7 @@ namespace Loopie {
 		virtual ~Resource();
 
 		const UUID& GetUUID() { return m_uuid; }
+		//void SetUUID(const std::string uuid) { m_uuid = UUID(uuid); };
 
 		virtual void LoadFromFile(const std::string path) = 0;
 		virtual void Reload() = 0;

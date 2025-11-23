@@ -128,6 +128,11 @@ namespace Loopie {
 		m_uuid = UUID(uuid);
 	}
 
+	void Entity::SetUUID(UUID uuid)
+	{
+		m_uuid = uuid;
+	}
+
 	void Entity::SetName(const std::string& name)
 	{
 		m_name = name;

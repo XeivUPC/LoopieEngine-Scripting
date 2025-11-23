@@ -45,10 +45,15 @@ namespace Loopie {
 					Application::GetInstance().GetScene().SaveScene();
 				}
 
-				if (ImGui::MenuItem("Save as... [WIP]"))
+				//if (ImGui::MenuItem("Save as... [WIP]"))
+				//{
+				//	// TODO: save all scenes and config to a specific file
+				//	Application::GetInstance().GetScene().SaveScene();
+				//}
+
+				if (ImGui::MenuItem("Reload Scene... [WIP][TEMP]"))
 				{
-					// TODO: save all scenes and config to a specific file
-					Application::GetInstance().GetScene().SaveScene();
+					Application::GetInstance().GetScene().ReadAndLoadSceneFile("TESTSavedScene.json");
 				}
 
 				if (ImGui::MenuItem("Exit"))

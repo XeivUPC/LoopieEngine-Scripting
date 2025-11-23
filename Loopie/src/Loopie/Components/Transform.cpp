@@ -330,6 +330,75 @@ namespace Loopie
             if (child) child->GetTransform()->ForceRefreshMatrices();
     }
 
+    json Transform::Serialize() const
+    {
+        json transformObj = json::object();
+
+        transformObj["position"] =
+        {
+            {"x", m_localPosition.x },
+            {"y", m_localPosition.y},
+            {"z", m_localPosition.z}
+        };
+        transformObj["rotation"] =
+        {
+            {"x", m_localRotation.x },
+            {"y", m_localRotation.y},
+            {"z", m_localRotation.z}
+        };
+        transformObj["scale"] =
+        {
+            {"x", m_localScale.x},
+            {"y", m_localScale.y},
+            {"z", m_localScale.z}
+        };
+
+        vec3 localEulerAngles = GetLocalEulerAngles();
+        transformObj["local_euler_angles"] =
+        {
+
+            {"x", localEulerAngles.x},
+            {"y", localEulerAngles.y},
+            {"z", localEulerAngles.z}
+        };
+
+        json componentWrapper = json::object();
+        componentWrapper["transform"] = transformObj;
+
+        return componentWrapper;
+    }
+
+    void Transform::Deserialize(const json& data)
+    {
+        if (data.contains("position") && data["position"].is_object())
+        {
+            m_localPosition.x = data["position"].value("x", 0.0f); 
+            m_localPosition.y = data["position"].value("y", 0.0f);
+            m_localPosition.z = data["position"].value("z", 0.0f);
+        }
+
+        if (data.contains("rotation") && data["rotation"].is_object()) 
+        {
+            m_localRotation.x = data["rotation"].value("x", 0.0f);
+            m_localRotation.y = data["rotation"].value("y", 0.0f);
+            m_localRotation.z = data["rotation"].value("z", 0.0f);
+        }
+
+        if (data.contains("scale") && data["scale"].is_object()) 
+        {
+            m_localScale.x = data["scale"].value("x", 1.0f);
+            m_localScale.y = data["scale"].value("y", 1.0f);
+            m_localScale.z = data["scale"].value("z", 1.0f);
+        }
+
+        if (data.contains("local_euler_angles") && data["local_euler_angles"].is_object())
+        {
+            SetEulerAngles({data["local_euler_angles"].value("x", 0.0f),
+                            data["local_euler_angles"].value("y", 0.0f),
+                            data["local_euler_angles"].value("z", 0.0f) });
+        }
+    }
+
     void Transform::RefreshMatrices() const
     {
         if (!IsDirty()) return;
@@ -354,5 +423,4 @@ namespace Loopie
 
         m_transformNotifier.Notify(TransformNotification::OnChanged);
     }
-
 };

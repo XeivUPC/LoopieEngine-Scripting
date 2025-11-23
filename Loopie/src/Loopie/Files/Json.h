@@ -221,6 +221,11 @@ namespace Loopie {
         friend class JsonNode;
         friend class Json;
 
+        json& GetRoot()
+        {
+            return m_data;
+        }
+
         bool IsEmpty() const { return m_empty; }
 
         unsigned int Size() {
