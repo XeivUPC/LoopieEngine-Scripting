@@ -113,7 +113,6 @@ namespace Loopie
             vec3 newPos = pivotPos + offset;
             transform->SetPosition(newPos);
             transform->SetRotation(rotation);
-
         }
         else
         {
