@@ -3,6 +3,24 @@
 #include "Loopie/Math/MathUtils.h"
 
 namespace Loopie {
+    AABB::AABB()
+    {
+        MinPoint = vec3(0);
+        MaxPoint = vec3(0);
+    }
+
+    AABB::AABB(vec3 min, vec3 max)
+    {
+        MinPoint = min;
+        MaxPoint = max;
+    }
+
+    AABB::AABB(vec3 point)
+    {
+        MinPoint = point;
+        MaxPoint = point;
+    }
+
     void AABB::SetNegativeInfinity() {
         MinPoint = vec3(std::numeric_limits<float>::max());
         MaxPoint = vec3(std::numeric_limits<float>::lowest());
