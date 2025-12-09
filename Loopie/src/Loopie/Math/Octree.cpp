@@ -155,13 +155,7 @@ namespace Loopie
 		else
 		{
 			vec3 entityPosition = entity->GetTransform()->GetPosition();
-			AABB aabb;
-			aabb.MaxPoint = entityPosition;
-			aabb.MinPoint = entityPosition;
-
-			// This line is not working since it ecloses it between 0, 0, 0 and its position.
-			//AABB aabb;
-			//aabb.Enclose(entity->GetTransform()->GetPosition()); 
+			AABB aabb(entityPosition);
 			
 			return aabb;
 		}
@@ -327,9 +321,7 @@ namespace Loopie
 			childMax.y = (i & 2) ? max.y : center.y;
 			childMax.z = (i & 4) ? max.z : center.z;
 
-			AABB aabb;
-			aabb.MinPoint = childMin;
-			aabb.MaxPoint = childMax;
+			AABB aabb(childMin, childMax);
 			children[i] = aabb;
 		}
 
