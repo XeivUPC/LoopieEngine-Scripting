@@ -63,6 +63,14 @@ namespace Loopie {
 		Log::Info("Scene saved.");
 	}
 
+	// *** Octree rebuild TEMP *** - PSS 13/12/25
+	// The create entities functions are doing an m_octree->Rebuild();
+	// This is a temporal call to the function. The reason is because
+	// the after creating the entity, if the entity had no mesh originally
+	// it will create an AABB based on its transform. 
+	// This makes it so that the Octree will never be fully accurate because
+	// the last entity may not be accurate. 
+	// A rebuild / update of the entity should be called AFTER the entity gets its mesh.
 	std::shared_ptr<Entity> Scene::CreateEntity(const std::string& name,
 												std::shared_ptr<Entity> parentEntity)
 	{
@@ -77,6 +85,7 @@ namespace Loopie {
 		m_entities[entity->GetUUID()] = entity;
 		m_octree->Insert(entity);
 
+		m_octree->Rebuild();
 		return entity;
 	}
 
@@ -97,6 +106,7 @@ namespace Loopie {
 		m_entities[entity->GetUUID()] = entity;
 		m_octree->Insert(entity);
 
+		m_octree->Rebuild();
 		return entity;
 	}
 
@@ -113,6 +123,7 @@ namespace Loopie {
 		m_entities[entity->GetUUID()] = entity;
 		m_octree->Insert(entity);
 
+		m_octree->Rebuild();
 		return entity;
 	}
 
@@ -136,6 +147,7 @@ namespace Loopie {
 		m_entities[entity->GetUUID()] = entity;
 		m_octree->Insert(entity);
 
+		m_octree->Rebuild();
 		return entity;
 	}
 
@@ -145,8 +157,8 @@ namespace Loopie {
 		if (it == m_entities.end())
 			return;
 
-		m_octree->Remove(it->second);
 		RemoveEntityRecursive(it->second);
+		m_octree->Rebuild();
 	}
 
 	void Scene::RemoveEntity(std::shared_ptr<Entity> entity)
@@ -154,8 +166,8 @@ namespace Loopie {
 		if (!entity) 
 			return;
 
-		m_octree->Remove(entity);
 		RemoveEntityRecursive(entity);
+		m_octree->Rebuild();
 	}
 
 	void Scene::SetFilePath(std::string filePath)
@@ -406,6 +418,7 @@ namespace Loopie {
 			parent->RemoveChild(entity->GetUUID());
 		}
 
+		m_octree->Remove(entity);
 		m_entities.erase(entity->GetUUID());
 	}
 }
