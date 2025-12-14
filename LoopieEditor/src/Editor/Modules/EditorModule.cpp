@@ -6,6 +6,7 @@
 #include "Loopie/Core/Log.h"
 #include "Loopie/Render/Renderer.h"
 #include "Loopie/Render/Gizmo.h"
+#include "Loopie/Render/Colors.h"
 
 #include "Loopie/Math/MathTypes.h"
 
