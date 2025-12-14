@@ -187,7 +187,7 @@ namespace Loopie
 		Renderer::Clear();
 
 		// POST
-		std::vector<std::shared_ptr<Entity>> entities;
+		std::unordered_set<std::shared_ptr<Entity>> entities;
 		scene->GetOctree().CollectVisibleEntitiesFrustum(camera->GetFrustum(), entities);
 
 		std::vector<MeshRenderer*> renderers;
@@ -250,7 +250,7 @@ namespace Loopie
 				if(cam)
 					cam->RenderGizmo();
 			}
-			scene->GetOctree().DebugDraw(vec4{255, 0, 0, 255});
+			scene->GetOctree().DebugDraw(vec4{0, 255, 0, 255});
 		}
 	}
 

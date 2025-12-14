@@ -61,5 +61,6 @@ namespace Loopie {
 		std::unordered_map<UUID, std::shared_ptr<Entity>> m_entities; // Fast lookup
 		std::shared_ptr<Entity> m_rootEntity; // Hierarchy based
 		std::string m_filePath;
+		const AABB DEFAULT_WORLD_BOUNDS = AABB(vec3(-500, -450, -500), vec3(500, 550, 500));
 	};	
 }

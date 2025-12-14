@@ -19,8 +19,7 @@ namespace Loopie {
 		m_rootEntity = std::make_shared<Entity>("scene");
 		m_rootEntity->AddComponent<Transform>();
 
-		AABB worldBounds(vec3(-500, -500, -500), vec3(500, 500, 500));
-		m_octree = std::make_unique<Octree>(worldBounds);
+		m_octree = std::make_unique<Octree>(DEFAULT_WORLD_BOUNDS);
 
 	}
 
@@ -248,8 +247,7 @@ namespace Loopie {
 		m_entities.clear();
 		m_octree->Clear();
 
-		AABB worldBounds(vec3(-500, -500, -500), vec3(500, 500, 500));
-		m_octree = std::make_unique<Octree>(worldBounds);
+		m_octree = std::make_unique<Octree>(DEFAULT_WORLD_BOUNDS);
 
 		m_rootEntity = std::make_shared<Entity>("scene");
 		m_rootEntity->AddComponent<Transform>();
@@ -370,7 +368,7 @@ namespace Loopie {
 			}
 		}
 
-		
+		m_octree->Rebuild();
 	}
 
 	std::string Scene::GetUniqueName(std::shared_ptr<Entity> parentEntity, const std::string& desiredName)

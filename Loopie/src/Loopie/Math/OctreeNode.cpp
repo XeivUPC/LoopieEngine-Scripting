@@ -9,7 +9,7 @@ namespace Loopie
 {
 	OctreeNode::OctreeNode(std::shared_ptr<Entity> entity)
 	{
-		m_entities.push_back(entity);
+		m_entities.insert(entity);
 
 		auto meshRenderer = entity->GetComponent<MeshRenderer>();
 		if (meshRenderer)

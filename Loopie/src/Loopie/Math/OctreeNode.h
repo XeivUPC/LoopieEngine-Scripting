@@ -3,7 +3,7 @@
 
 #include <memory>
 #include <array>
-#include <vector>
+#include <unordered_set>
 
 namespace Loopie
 {
@@ -22,7 +22,8 @@ namespace Loopie
 
 	private:
 		AABB m_aabb;
-		std::vector<std::shared_ptr<Entity>> m_entities = {};
+		//std::vector<std::shared_ptr<Entity>> m_entities = {};
+		std::unordered_set<std::shared_ptr<Entity>> m_entities;
 
 		OctreeNode* m_parent = nullptr;
 		std::array<std::unique_ptr<OctreeNode>, MAX_ENTITIES_PER_NODE> m_children = {};
