@@ -522,7 +522,10 @@ namespace Loopie
 
 		for (const auto& entity : node->m_entities)
 		{
-			entities.insert(entity);
+			if (GetEntityAABB(entity).IntersectsRay(rayOrigin, rayDirection, rayHit))
+			{
+				entities.insert(entity);
+			}
 		}
 
 		if (node->m_isLeaf)
@@ -555,7 +558,10 @@ namespace Loopie
 
 		for (const auto& entity : node->m_entities)
 		{
-			entities.insert(entity);
+			if (GetEntityAABB(entity).Intersects(queryBox))
+			{
+				entities.insert(entity);
+			}
 		}
 
 		if (node->m_isLeaf)
@@ -588,7 +594,10 @@ namespace Loopie
 
 		for (const auto& entity : node->m_entities)
 		{
-			entities.insert(entity);
+			if (GetEntityAABB(entity).IntersectsSphere(center, radius))
+			{
+				entities.insert(entity);
+			}
 		}
 
 		if (node->m_isLeaf)
@@ -621,7 +630,10 @@ namespace Loopie
 
 		for (const auto& entity : node->m_entities)
 		{
-			visibleEntities.insert(entity);
+			if (frustum.Intersects(GetEntityAABB(entity)))
+			{
+				visibleEntities.insert(entity);
+			}
 		}
 
 		if (node->m_isLeaf)
