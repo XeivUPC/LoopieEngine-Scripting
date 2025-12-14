@@ -318,11 +318,15 @@ namespace Loopie {
 		Ray mouseRay = MouseRay();
 		float minDistance = std::numeric_limits<float>::max();
 		std::shared_ptr<Entity> selectedEntity;
+
 		std::vector<vec3> triVertexData;
 		triVertexData.reserve(3);
 		triVertexData.resize(3);
 		vec3 meshHitPoint;
-		for (const auto& [uuid, entity] : Application::GetInstance().GetScene().GetAllEntities())
+
+		std::unordered_set<std::shared_ptr<Entity>> possibleEntities;
+		Application::GetInstance().GetScene().GetOctree().CollectIntersectingObjectsWithRay(mouseRay.StartPoint(), mouseRay.Direction(), possibleEntities);
+		for (const auto& entity : possibleEntities)
 		{
 			if (!entity->GetIsActive())
 				continue;
@@ -330,8 +334,6 @@ namespace Loopie {
 			if (!renderer || !renderer->GetIsActive() || !renderer->GetMesh())
 				continue;
 			const AABB& aabb = renderer->GetWorldAABB();
-			if (!m_camera->GetCamera()->GetFrustum().Intersects(aabb))
-				continue;
 			if(!aabb.IntersectsRay(mouseRay.StartPoint(), mouseRay.EndPoint()))
 				continue;
 			const MeshData& meshData = renderer->GetMesh()->GetData();

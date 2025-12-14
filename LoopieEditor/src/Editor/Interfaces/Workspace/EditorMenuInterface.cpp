@@ -48,7 +48,9 @@ namespace Loopie {
 				// and a default save should be created for it.
 				// So saving should never create a pop-up, but instead save on the already
 				// existing save file.
-				if (ImGui::MenuItem("Save Scene [WIP]"))
+
+				bool existsPath = std::filesystem::exists(Application::GetInstance().GetScene().GetFilePath());
+				if (ImGui::MenuItem("Save Scene [WIP]", nullptr, false, existsPath))
 				{
 					Application::GetInstance().GetScene().SaveScene(Application::GetInstance().GetScene().GetFilePath());
 				}

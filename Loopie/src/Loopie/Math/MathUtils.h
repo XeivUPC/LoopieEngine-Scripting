@@ -24,9 +24,32 @@ namespace Loopie
 
         inline void DecomposeMatrix(const matrix4& matrix, vec3& position, quaternion& rotation, glm::vec3& scale)
         {
-            vec3 skew;
-            vec4 perspective;
-            decompose(matrix, scale, rotation, position, skew, perspective);
+            position = vec3(matrix[3]);
+            vec3 x_axis = vec3(matrix[0]);
+            vec3 y_axis = vec3(matrix[1]);
+            vec3 z_axis = vec3(matrix[2]);
+
+            vec3 magnitudeScale = vec3(glm::length(x_axis), glm::length(y_axis), glm::length(z_axis));
+
+            float determinant = glm::determinant(matrix3(matrix));
+            vec3 signScale = vec3(1.0f, 1.0f, 1.0f);
+
+            if (determinant < 0)
+                signScale.x = -1.0f;
+
+            const float min_scale = 0.0001f;
+
+            scale.x = signScale.x * glm::max(magnitudeScale.x, min_scale);
+            scale.y = signScale.y * glm::max(magnitudeScale.y, min_scale);
+            scale.z = signScale.z * glm::max(magnitudeScale.z, min_scale);
+
+            matrix3 rotationMatrix = matrix3(matrix);
+
+            rotationMatrix[0] = x_axis / scale.x;
+            rotationMatrix[1] = y_axis / scale.y;
+            rotationMatrix[2] = z_axis / scale.z;
+
+            rotation = Math::ToQuaternion(rotationMatrix);
         }
 
     }

@@ -256,7 +256,7 @@ namespace Loopie {
 
 		if (saveData.IsEmpty())
 		{
-			Log::Error("Failed to load scene file");
+			Log::Error("Failed to load scene file or scene does not exist, opening Default...");
 			return false;
 		}
 

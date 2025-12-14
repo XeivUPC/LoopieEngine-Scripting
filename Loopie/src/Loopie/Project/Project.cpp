@@ -20,7 +20,8 @@ namespace Loopie {
 		JsonData configData;	
 		std::filesystem::path scenePath = DirectoryManager::CreateFolder(m_assetsPath, "Scenes");
 		DirectoryManager::Copy("assets/scenes/DefaultScene.scene", scenePath/"DefaultScene.scene");
-		configData.CreateField<std::string>("last_scene", (scenePath / "DefaultScene.scene").string());
+		//configData.CreateField<std::string>("last_scene", (scenePath / "DefaultScene.scene").string());
+		configData.CreateField<std::string>("last_scene", "none");
 		Json::WriteToFileFromData(m_congifPath, configData, 4);
 
 		/// Maybe some config Files???? Once Scene Exists a default One
