@@ -63,8 +63,7 @@ namespace Loopie
 
         // Serialize & Deserialize
         JsonNode Serialize(JsonNode& parent) const override;
-        void Deserialize(const JsonNode& data) override;
-        
+        void Deserialize(const JsonNode& data) override;    
 
     private:
         vec3 GetWorldPosition() const;

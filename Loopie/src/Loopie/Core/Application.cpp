@@ -4,6 +4,7 @@
 #include "Loopie/Core/Log.h"
 #include "Loopie/Core/Time.h"
 #include "Loopie/Render/Renderer.h"
+#include "Loopie/Scripting/ScriptingManager.h"
 
 namespace Loopie {
 	Application* Application::s_Instance = nullptr;
@@ -17,6 +18,9 @@ namespace Loopie {
 		s_Instance = this;
 
 		Log::Info("Application Started");
+
+		ScriptingManager::Init();
+		Log::Info("Scripting created successfully.");
 
 		// Window Creation
 		m_window = new Window();
@@ -36,6 +40,8 @@ namespace Loopie {
 			delete(module);
 		}
 		m_modules.clear();
+
+		ScriptingManager::Shutdown();
 
 		//// Cleaning
 		delete(m_window); 

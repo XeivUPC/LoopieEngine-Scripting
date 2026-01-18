@@ -16,4 +16,24 @@ target_link_libraries(${PROJECT_NAME} PUBLIC loopie-core)
 
 
 file(COPY ${PROJECT_SOURCE_DIR}/assets DESTINATION ${OUTPUT_PATH})
-##file(COPY ${PROJECT_SOURCE_DIR}/imgui.ini DESTINATION ${OUTPUT_PATH})
+
+# Copy Mono DLL
+add_custom_command(TARGET LoopieEditor POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${MONO_BIN_DIR}/mono-2.0-sgen.dll"
+    $<TARGET_FILE_DIR:LoopieEditor>
+)
+
+# Copy Mono lib folder
+add_custom_command(TARGET LoopieEditor POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${MONO_ROOT}/lib"
+    $<TARGET_FILE_DIR:LoopieEditor>/mono/lib
+)
+
+# Copy Mono etc folder
+add_custom_command(TARGET LoopieEditor POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${MONO_ROOT}/etc"
+    $<TARGET_FILE_DIR:LoopieEditor>/mono/etc
+)
