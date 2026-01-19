@@ -27,3 +27,6 @@ bin
 /cmake-build-relwithdebinfo
 /Runtime/assets
 /vendor/vcpkg_cache
+
+LoopieScripting/bin/
+LoopieScripting/obj/

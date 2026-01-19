@@ -12,7 +12,7 @@ namespace Loopie
 	public:
 		DEFINE_TYPE(Camera)
 
-			Camera(float fov = 60.0f, float near_plane = 0.3f, float far_plane = 200.0f, bool canBeMainCamera = true);
+		Camera(float fov = 60.0f, float near_plane = 0.3f, float far_plane = 200.0f, bool canBeMainCamera = true);
 		~Camera();
 		void Init() override; //// From Component
 		void RenderGizmo() override;
