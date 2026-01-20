@@ -2,6 +2,7 @@
 #include <map>
 #include <unordered_map>
 #include <string> 
+#include <memory> 
 
 struct _MonoClass;
 struct _MonoObject;
@@ -68,6 +69,14 @@ namespace Loopie {
 		const std::string& GetClassName() const { return m_className; }
 		const std::string& GetClassNamespace() const { return m_classNamespace; }
 		const std::string GetFullName() const { return m_classNamespace + "." + m_className; }
+
+		bool IsSameType(std::shared_ptr<ScriptingClass> scriptingClass) const {
+			return GetFullName() == scriptingClass->GetFullName();
+		}
+
+		bool IsSameType(const std::string& type) const {
+			return GetFullName() == type;
+		}
 
 	private:
 		std::string m_classNamespace;

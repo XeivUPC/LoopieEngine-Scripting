@@ -94,6 +94,14 @@ namespace Loopie {
 			m_scriptFields[name].SetValue<T>(value);
 		}
 
+		bool IsSameType(std::shared_ptr<ScriptingClass> scriptingClass) const{
+			return m_scriptingClass->IsSameType(scriptingClass);
+		}
+
+		bool IsSameType(const std::string& type) const{
+			return m_scriptingClass->IsSameType(type);
+		}
+
 	private:
 
 		bool GetFieldValueInternal(const std::string& fieldName, void* buffer); /// Used to get data when mono is running
