@@ -54,6 +54,18 @@ namespace Loopie {
 		}
 
 		template<typename T, typename = std::enable_if_t<std::is_base_of_v<Component, T>>>
+		std::vector<T*> GetComponents() const
+		{
+			std::vector<T*> componentsOfType;
+			for (const auto& component : m_components) {
+				if (component->GetTypeID() == T::GetTypeIDStatic())
+					componentsOfType.emplace_back(static_cast<T*>(component.get()));
+			}
+
+			return componentsOfType;
+		}
+
+		template<typename T, typename = std::enable_if_t<std::is_base_of_v<Component, T>>>
 		bool HasComponent() const
 		{
 			return GetComponent<T>() != nullptr;

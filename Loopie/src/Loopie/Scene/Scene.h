@@ -5,11 +5,14 @@
 #include "Loopie/Math/MathTypes.h"
 #include "Loopie/Math/Octree.h"
 
+#include "Loopie/Events/IObserver.h"
+#include "Loopie/Events/EventTypes.h"
+
 #include <string>
 #include <unordered_map>
 	
 namespace Loopie {
-	class Scene
+	class Scene : public IObserver<EngineNotification>
 	{
 	public:
 		Scene(const std::string& filePath);
@@ -51,6 +54,7 @@ namespace Loopie {
 	public:
 
 	private:
+		void OnNotify(const EngineNotification& id) override;
 		std::string GetUniqueName(std::shared_ptr<Entity> parentEntity, const std::string& desiredName);
 		void CollectEntitiesRecursive(std::shared_ptr<Entity> entity,
 									  std::vector<std::shared_ptr<Entity>>& outEntities) const;

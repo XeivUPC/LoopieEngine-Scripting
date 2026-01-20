@@ -2,6 +2,7 @@
 
 #include "Loopie/Core/Log.h"
 #include "Loopie/Core/Application.h"
+#include "Loopie/Events/Event.h"
 
 #include <mono/metadata/mono-config.h>
 #include <mono/metadata/assembly.h>
@@ -92,6 +93,16 @@ namespace Loopie {
 		s_Data.AppAssembly = LoadAssembly(s_Data.AppAssemblyFilepath.c_str());
 		if(s_Data.AppAssembly)
 			s_Data.AppImage = mono_assembly_get_image(s_Data.AppAssembly);
+	}
+
+	void ScriptingManager::RuntimeStart()
+	{
+		Application::GetInstance().m_notifier.Notify(EngineNotification::OnRuntimeStart);
+	}
+
+	void ScriptingManager::RuntimeStop()
+	{
+		Application::GetInstance().m_notifier.Notify(EngineNotification::OnRuntimeStop);
 	}
 
 	void ScriptingManager::LoadScriptingClasses(_MonoImage* monoImage)

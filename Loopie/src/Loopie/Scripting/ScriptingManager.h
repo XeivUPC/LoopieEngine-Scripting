@@ -1,8 +1,10 @@
 #pragma once
 #include "Loopie/Scripting/ScriptingClass.h"
+
 #include <string>
 #include <memory>
 #include <unordered_map>
+
 
 struct _MonoDomain;
 struct _MonoAssembly;
@@ -40,14 +42,17 @@ namespace Loopie {
 		static void LoadCoreAssembly();
 		static void LoadAppAssembly();
 
+		static void RuntimeStart();
+		static void RuntimeStop();
+
 		static void LoadScriptingClasses(_MonoImage* monoImage);
 		static _MonoObject* InstantiateScriptingClass(_MonoClass* monoClass);
 		static bool ExistsScriptingClass(const std::string& monoClassName);
-		std::shared_ptr<ScriptingClass> GetScriptingClass(const std::string& monoClassName);
+		static std::shared_ptr<ScriptingClass> GetScriptingClass(const std::string& monoClassName);
 		const std::unordered_map<std::string, std::shared_ptr<ScriptingClass>>& GetScriptingClasses() { return s_Data.ScriptingClasses; }
 
+	public:
 		static ScriptingContext s_Data;
-
 	private:
 		static _MonoAssembly* LoadAssembly(const char* path);
 	};

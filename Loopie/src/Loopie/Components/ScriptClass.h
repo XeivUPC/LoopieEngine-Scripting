@@ -21,7 +21,7 @@ namespace Loopie {
 		}
 
 		template<typename T>
-		T GetValue()
+		T GetValue() const
 		{
 			return *(T*)m_buffer;
 		}
@@ -44,10 +44,13 @@ namespace Loopie {
 	public:
 		DEFINE_TYPE(ScriptClass)
 
-		ScriptClass(std::shared_ptr<ScriptingClass> scriptingClass);
+		ScriptClass(const std::string& className);
 		~ScriptClass();
 
+		void Init() override {};
+
 		void SetUp();
+		void DestroyInstance();
 
 		void InvokeOnCreate();
 		void InvokeOnUpdate();
@@ -76,12 +79,13 @@ namespace Loopie {
 		}
 
 		template<typename T>
-		T GetFieldValue(const std::string& name)
+		T GetFieldValue(const std::string& name) const
 		{
-			if(m_scriptFields.find(name) == m_scriptFields.end())
+			auto it = m_scriptFields.find(name);
+			if (it == m_scriptFields.end())
 				return T();
-			
-			return m_scriptFields[name].GetValue<T>();
+
+			return it->second.GetValue<T>();
 		}
 
 		template<typename T>
@@ -91,7 +95,6 @@ namespace Loopie {
 		}
 
 	private:
-		void DestroyInstance();
 
 		bool GetFieldValueInternal(const std::string& fieldName, void* buffer); /// Used to get data when mono is running
 		bool SetFieldValueInternal(const std::string& fieldName, const void* value); /// Used to change data when mono is running

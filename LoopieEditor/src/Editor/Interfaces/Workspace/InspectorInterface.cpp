@@ -2,14 +2,20 @@
 #include "Editor/Interfaces/Workspace/HierarchyInterface.h"
 #include "Editor/Interfaces/Workspace/AssetsExplorerInterface.h"
 
-#include "Loopie/Components/Transform.h"
 #include "Loopie/Core/Log.h"
 #include "Loopie/Math/MathTypes.h"
+
+#include "Loopie/Components/Transform.h"
 #include "Loopie/Components/Camera.h"
 #include "Loopie/Components/MeshRenderer.h"
+#include "Loopie/Components/ScriptClass.h"
+
+#include "Loopie/Scripting/ScriptingManager.h"
+
 #include "Loopie/Resources/AssetRegistry.h"
 
 #include <imgui.h>
+#include <unordered_map>
 
 namespace Loopie {
 
@@ -63,6 +69,9 @@ namespace Loopie {
 			}
 			else if (component->GetTypeID() == MeshRenderer::GetTypeIDStatic()) {
 				DrawMeshRenderer(static_cast<MeshRenderer*>(component));
+			}
+			else if (component->GetTypeID() == ScriptClass::GetTypeIDStatic()) {
+				DrawScriptClass(static_cast<ScriptClass*>(component));
 			}
 		}
 		AddComponent(entity);
@@ -382,6 +391,58 @@ namespace Loopie {
 		ImGui::PopID();
 	}
 
+	void InspectorInterface::DrawScriptClass(ScriptClass* scriptClass)
+	{
+		ImGui::PushID(scriptClass);
+
+		bool open = ImGui::CollapsingHeader(scriptClass->GetClassName().c_str());
+
+		if (RemoveComponent(scriptClass)) {
+			ImGui::PopID();
+			return;
+		}
+
+		if (open) {
+			/// Get Fields and show (one runtime version, and one editor version) -> For now, this is only editor version
+
+			std::shared_ptr<ScriptingClass> scriptingClass = scriptClass->GetScriptingClass();
+			const std::map<std::string, ScriptField>& fields = scriptingClass->GetFields();
+			for(const auto& field : fields)
+			{
+				const std::string& fieldName = field.first;
+				ScriptFieldType fieldType = field.second.Type;
+				switch (fieldType)
+				{
+					case ScriptFieldType::Float:
+					{
+						float value = scriptClass->GetFieldValue<float>(fieldName);
+						if (ImGui::DragFloat(fieldName.c_str(), &value, 0.1f))
+							scriptClass->SetFieldValue<float>(fieldName, value);
+						break;
+					}
+					case ScriptFieldType::Int:
+					{
+						int value = scriptClass->GetFieldValue<int>(fieldName);
+						if (ImGui::DragInt(fieldName.c_str(), &value, 1))
+							scriptClass->SetFieldValue<int>(fieldName, value);
+						break;
+					}
+					case ScriptFieldType::Bool:
+					{
+						bool value = scriptClass->GetFieldValue<bool>(fieldName);
+						if (ImGui::Checkbox(fieldName.c_str(), &value))
+							scriptClass->SetFieldValue<bool>(fieldName, value);
+						break;
+					}
+					default:
+						ImGui::Text("Unsupported Field Type for %s", fieldName.c_str());
+						break;
+				}
+			}
+		}
+		ImGui::PopID();
+	}
+
 	void InspectorInterface::AddComponent(const std::shared_ptr<Entity>& entity)
 	{
 		if (!entity)
@@ -420,6 +481,17 @@ namespace Loopie {
 			//    ImGui::EndCombo();
 			//    return;
 			//}
+
+			const std::unordered_map<std::string, std::shared_ptr<ScriptingClass>>& scriptingClasses = ScriptingManager::s_Data.ScriptingClasses;
+			for(const auto& scriptClass : scriptingClasses)
+			{
+				if (ImGui::Selectable(scriptClass.second->GetClassName().c_str()))
+				{
+					entity->AddComponent<ScriptClass>(scriptClass.first);
+					ImGui::EndCombo();
+					return;
+				}
+			}
 
 			
 

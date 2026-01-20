@@ -64,6 +64,11 @@ namespace Loopie {
 		_MonoObject* InvokeMethod(_MonoObject* instance, _MonoMethod* method, void** params = nullptr);
 		const std::map<std::string, ScriptField>& GetFields() const { return m_fields; }
 		std::map<std::string, ScriptField>& GetFields() { return m_fields; }
+
+		const std::string& GetClassName() const { return m_className; }
+		const std::string& GetClassNamespace() const { return m_classNamespace; }
+		const std::string GetFullName() const { return m_classNamespace + "." + m_className; }
+
 	private:
 		std::string m_classNamespace;
 		std::string m_className;

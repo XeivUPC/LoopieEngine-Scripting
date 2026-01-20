@@ -5,6 +5,7 @@
 #include "Loopie/Components/Transform.h"
 #include "Loopie/Components/Camera.h"
 #include "Loopie/Components/MeshRenderer.h"
+#include "Loopie/Components/ScriptClass.h"
 #include "Loopie/Helpers/LoopieHelpers.h"
 #include "Loopie/Resources/AssetRegistry.h"
 
@@ -21,10 +22,12 @@ namespace Loopie {
 
 		m_octree = std::make_unique<Octree>(DEFAULT_WORLD_BOUNDS);
 
+		Application::GetInstance().m_notifier.AddObserver(this);
 	}
 
 	Scene::~Scene()
 	{
+		Application::GetInstance().m_notifier.RemoveObserver(this);
 		m_entities.clear();
 	}
 
@@ -344,6 +347,15 @@ namespace Loopie {
 							meshRenderer->Deserialize(node);
 						}
 					}
+					else if (componentNode.Contains("script"))
+					{
+						JsonNode node = componentNode.Child("script");
+						auto scriptClass = entity->AddComponent<ScriptClass>("");
+						if (scriptClass)
+						{
+							scriptClass->Deserialize(node);
+						}
+					}
 				}
 			}
 		}
@@ -371,6 +383,32 @@ namespace Loopie {
 		m_octree->Rebuild();
 
 		return true;
+	}
+
+	void Scene::OnNotify(const EngineNotification& id)
+	{
+		if(id == EngineNotification::OnRuntimeStart)
+		{
+			for(const auto& [uuid, entity] : m_entities)
+			{
+				std::vector<ScriptClass*> scripts =entity->GetComponents<ScriptClass>();
+				for (size_t i = 0; i < scripts.size(); i++)
+				{
+					scripts[i]->SetUp();
+				}
+			}
+		}
+		else if (id == EngineNotification::OnRuntimeStop)
+		{
+			for (const auto& [uuid, entity] : m_entities)
+			{
+				std::vector<ScriptClass*> scripts = entity->GetComponents<ScriptClass>();
+				for (size_t i = 0; i < scripts.size(); i++)
+				{
+					scripts[i]->DestroyInstance();
+				}
+			}
+		}
 	}
 
 	std::string Scene::GetUniqueName(std::shared_ptr<Entity> parentEntity, const std::string& desiredName)
