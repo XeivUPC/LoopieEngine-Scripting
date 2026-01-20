@@ -45,6 +45,8 @@ namespace Loopie {
 		static void RuntimeStart();
 		static void RuntimeStop();
 
+		static void AttachCurrentThread();
+
 		static void LoadScriptingClasses(_MonoImage* monoImage);
 		static _MonoObject* InstantiateScriptingClass(_MonoClass* monoClass);
 		static bool ExistsScriptingClass(const std::string& monoClassName);

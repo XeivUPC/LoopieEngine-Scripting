@@ -6,6 +6,8 @@
 #include <mono/metadata/object.h>
 #include <mono/metadata/class.h>
 #include <mono/metadata/assembly.h>
+#include <mono/metadata/threads.h>
+#include <mono/jit/jit.h>
 
 namespace Loopie
 {
@@ -27,8 +29,14 @@ namespace Loopie
 		m_OnCreate = m_scriptingClass->GetMethod("OnCreate", 0);
 		m_OnUpdate = m_scriptingClass->GetMethod("OnUpdate", 1);
 
-		for (const auto& [name, fieldData] : m_scriptFields)
-			SetFieldValueInternal(name, fieldData.GetBuffer());
+		for (const auto& [name, field] : m_scriptingClass->GetFields())
+		{
+			const ScriptFieldData& fieldData = m_scriptFields[name];
+			if (field.Type == ScriptFieldType::String)
+				SetRuntimeFieldString(name, fieldData.GetString());
+			else
+				SetFieldValueInternal(name, fieldData.GetBuffer());
+		}
 	}
 
 	void ScriptClass::DestroyInstance()
@@ -53,6 +61,55 @@ namespace Loopie
 	void ScriptClass::SetClass(const std::string& fullName)
 	{
 		m_className = fullName;
+	}
+
+	std::string ScriptClass::GetRuntimeFieldString(const std::string& name)
+	{
+		const auto& fields = m_scriptingClass->GetFields();
+		auto it = fields.find(name);
+		if (it == fields.end())
+			return {};
+
+		const ScriptField& field = it->second;
+
+		MonoString* monoStr = nullptr;
+		mono_field_get_value(m_instance, field.ClassField, &monoStr);
+
+		if (!monoStr)
+			return {};
+
+		char* utf8 = mono_string_to_utf8(monoStr);
+		std::string result = utf8;
+		mono_free(utf8);
+
+		return result;
+	}
+
+	void ScriptClass::SetRuntimeFieldString(const std::string& name, const std::string& value)
+	{
+		const auto& fields = m_scriptingClass->GetFields();
+		auto it = fields.find(name);
+		if (it == fields.end())
+			return;
+
+		const ScriptField& field = it->second;
+
+		MonoString* monoStr = mono_string_new(mono_domain_get(), value.c_str());
+		mono_field_set_value(m_instance, field.ClassField, monoStr);
+	}
+
+	std::string ScriptClass::GetFieldString(const std::string& name) const
+	{
+		auto it = m_scriptFields.find(name);
+		if (it == m_scriptFields.end())
+			return "";
+
+		return it->second.GetString();
+	}
+
+	void ScriptClass::SetFieldString(const std::string& name, const std::string& value)
+	{
+		m_scriptFields[name].SetString(value);
 	}
 
 	bool ScriptClass::GetFieldValueInternal(const std::string& fieldName, void* buffer)
@@ -129,6 +186,9 @@ namespace Loopie
 			case ScriptFieldType::ULong:
 				node.CreateField(name, (uint64_t)GetFieldValue<uint64_t>(name));
 				break;
+			case ScriptFieldType::String:
+				node.CreateField(name, m_scriptFields.at(name).GetString());
+				break;
 				// more types ...
 
 			default:
@@ -193,6 +253,9 @@ namespace Loopie
 				break;
 			case ScriptFieldType::ULong:
 				fieldData.SetValue<uint64_t>(node.GetValue<uint64_t>(name, 0).Result);
+				break;
+			case ScriptFieldType::String:
+				fieldData.SetString(node.GetValue<std::string>(name, "").Result);
 				break;
 				// more types...
 

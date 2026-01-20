@@ -7,6 +7,7 @@
 #include <mono/metadata/mono-config.h>
 #include <mono/metadata/assembly.h>
 #include <mono/jit/jit.h>
+#include <mono/metadata/threads.h>
 #include <mono/metadata/attrdefs.h>
 
 namespace Loopie {
@@ -107,6 +108,12 @@ namespace Loopie {
 	{
 		s_IsRunning = false;
 		Application::GetInstance().m_notifier.Notify(EngineNotification::OnRuntimeStop);
+	}
+
+	void ScriptingManager::AttachCurrentThread()
+	{
+		if (!mono_thread_current())
+			mono_thread_attach(mono_domain_get());
 	}
 
 	void ScriptingManager::LoadScriptingClasses(_MonoImage* monoImage)

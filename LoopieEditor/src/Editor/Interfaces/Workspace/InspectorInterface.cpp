@@ -469,6 +469,20 @@ namespace Loopie {
 					break;
 				}
 
+				case ScriptFieldType::String:
+				{
+					std::string value = isRuntime ? scriptClass->GetRuntimeFieldString(name) :  scriptClass->GetFieldString(name);
+
+					char buffer[256];
+					memset(buffer, 0, sizeof(buffer));
+					strncpy(buffer, value.c_str(), sizeof(buffer) - 1);
+
+					if (ImGui::InputText(name.c_str(), buffer, sizeof(buffer)))
+						isRuntime ? scriptClass->SetRuntimeFieldString(name, std::string(buffer)) : scriptClass->SetFieldString(name, std::string(buffer));
+
+					break;
+				}
+
 				default:
 					ImGui::Text("Unsupported Field: %s", name.c_str());
 					break;

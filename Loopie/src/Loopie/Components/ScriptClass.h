@@ -8,6 +8,7 @@
 struct _MonoObject;
 struct _MonoClass;
 struct _MonoMethod;
+struct _MonoString;
 
 namespace Loopie {
 
@@ -23,20 +24,25 @@ namespace Loopie {
 		template<typename T>
 		T GetValue() const
 		{
-			return *(T*)m_buffer;
+			return *(const T*)m_buffer;
 		}
 
 		template<typename T>
 		void SetValue(T value)
 		{
+			static_assert(sizeof(T) <= sizeof(m_buffer));
 			memcpy(m_buffer, &value, sizeof(T));
 		}
+
+		const std::string& GetString() const { return m_string; }
+		void SetString(const std::string& value) { m_string = value; }
 
 		void* GetBuffer() { return m_buffer; }
 		const void* GetBuffer() const { return m_buffer; }
 
 	private:
 		uint8_t m_buffer[16];
+		std::string m_string;
 	};
 
 	class ScriptClass : public Component
@@ -93,6 +99,12 @@ namespace Loopie {
 		{
 			m_scriptFields[name].SetValue<T>(value);
 		}
+
+		std::string GetRuntimeFieldString(const std::string& name);
+		void SetRuntimeFieldString(const std::string& name, const std::string& value);
+
+		std::string GetFieldString(const std::string& name) const;
+		void SetFieldString(const std::string& name, const std::string& value);
 
 		bool IsSameType(std::shared_ptr<ScriptingClass> scriptingClass) const{
 			return m_scriptingClass->IsSameType(scriptingClass);

@@ -28,6 +28,7 @@ namespace Loopie {
 		UShort,
 		UInt,
 		ULong,
+		String
 	};
 
 	static std::unordered_map<std::string, ScriptFieldType> s_ScriptFieldTypeMap =
@@ -43,6 +44,7 @@ namespace Loopie {
 		{ "System.UInt16", ScriptFieldType::UShort },
 		{ "System.UInt32", ScriptFieldType::UInt },
 		{ "System.UInt64", ScriptFieldType::ULong },
+		{ "System.String",  ScriptFieldType::String }
 	};
 
 	
