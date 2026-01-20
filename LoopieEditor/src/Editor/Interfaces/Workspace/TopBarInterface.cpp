@@ -43,13 +43,9 @@ namespace Loopie
             m_actualMode = DEACTIVATED;
             return;
         }
-        for (const auto& [uuid, entity] : Application::GetInstance().GetScene().GetAllEntities())
-        {
-            for (auto& component : entity->GetComponents())
-            {
-                component->Update();
-            }
-        }
+        
+        //// Update ScriptClass components + caching
+
         if (m_actualMode == NEXTFRAME)
             m_actualMode = PAUSE;
     }
