@@ -53,7 +53,6 @@ namespace Loopie {
 		void DrawPathBar();
 		void DrawFolderContent();
 		void DrawFooter();
-		void DrawRenamePopup();	
 
 		void DragFile(const std::string& from);
 		void DropFile(const std::string& to);
@@ -74,6 +73,7 @@ namespace Loopie {
 		std::string CreateFolder(const std::filesystem::path& directory, const std::string& name);
 		std::string CreateMaterial(const std::filesystem::path& directory, const std::string& name);
 		std::string CreateScene(const std::filesystem::path& directory, const std::string& name);
+		std::string CreateSript(const std::filesystem::path& directory, const std::string& name);
 
 	
 	public:

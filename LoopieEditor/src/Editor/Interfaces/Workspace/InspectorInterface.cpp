@@ -402,80 +402,77 @@ namespace Loopie {
 			return;
 		}
 
+		bool isRuntime = ScriptingManager::IsRunning();
+
 		if (open) {
 			/// Get Fields and show (one runtime version, and one editor version) -> For now, this is only editor version
-			if (!ScriptingManager::IsRunning()) {
-				std::shared_ptr<ScriptingClass> scriptingClass = scriptClass->GetScriptingClass();
-				const std::map<std::string, ScriptField>& fields = scriptingClass->GetFields();
-				for (const auto& [name, field] : fields)
+			std::shared_ptr<ScriptingClass> scriptingClass = scriptClass->GetScriptingClass();
+			const std::map<std::string, ScriptField>& fields = scriptingClass->GetFields();
+			for (const auto& [name, field] : fields)
+			{
+				switch (field.Type)
 				{
-					switch (field.Type)
-					{
-					case ScriptFieldType::Float:
-					{
-						float v = scriptClass->GetFieldValue<float>(name);
-						if (ImGui::DragFloat(name.c_str(), &v, 0.1f))
-							scriptClass->SetFieldValue(name, v);
-						break;
-					}
-					case ScriptFieldType::Double:
-					{
-						double v = scriptClass->GetFieldValue<double>(name);
-						if (ImGui::DragScalar(name.c_str(), ImGuiDataType_Double, &v, 0.1))
-							scriptClass->SetFieldValue(name, v);
-						break;
-					}
-					case ScriptFieldType::Bool:
-					{
-						bool v = scriptClass->GetFieldValue<bool>(name);
-						if (ImGui::Checkbox(name.c_str(), &v))
-							scriptClass->SetFieldValue(name, v);
-						break;
-					}
-					case ScriptFieldType::Char:
-					{
-						int v = scriptClass->GetFieldValue<char>(name);
-						if (ImGui::DragInt(name.c_str(), &v, 1, 0, 255))
-							scriptClass->SetFieldValue(name, (char)v);
-						break;
-					}
-
-					case ScriptFieldType::Byte:
-					{
-						int v = scriptClass->GetFieldValue<uint8_t>(name);
-						if (ImGui::DragInt(name.c_str(), &v, 1, 0, 255))
-							scriptClass->SetFieldValue(name, (uint8_t)v);
-						break;
-					}
-
-					case ScriptFieldType::Short:
-					case ScriptFieldType::UShort:
-					case ScriptFieldType::Int:
-					case ScriptFieldType::UInt:
-					{
-						int v = scriptClass->GetFieldValue<int>(name);
-						if (ImGui::DragInt(name.c_str(), &v))
-							scriptClass->SetFieldValue(name, v);
-						break;
-					}
-
-					case ScriptFieldType::Long:
-					case ScriptFieldType::ULong:
-					{
-						int64_t v = scriptClass->GetFieldValue<int64_t>(name);
-						if (ImGui::DragScalar(name.c_str(), ImGuiDataType_S64, &v))
-							scriptClass->SetFieldValue(name, v);
-						break;
-					}
-
-					default:
-						ImGui::Text("Unsupported Field: %s", name.c_str());
-						break;
-					}
+				case ScriptFieldType::Float:
+				{
+					float v = isRuntime ? scriptClass->GetRuntimeFieldValue<float>(name) : scriptClass->GetFieldValue<float>(name);
+					if (ImGui::DragFloat(name.c_str(), &v, 0.1f))
+						isRuntime ? scriptClass->SetRuntimeFieldValue(name, v) : scriptClass->SetFieldValue(name, v);
+					break;
 				}
-			}
-			else {
+				case ScriptFieldType::Double:
+				{
+					double v = isRuntime ? scriptClass->GetRuntimeFieldValue<double>(name) : scriptClass->GetFieldValue<double>(name);
+					if (ImGui::DragScalar(name.c_str(), ImGuiDataType_Double, &v, 0.1))
+						isRuntime ? scriptClass->SetRuntimeFieldValue(name, v) : scriptClass->SetFieldValue(name, v);
+					break;
+				}
+				case ScriptFieldType::Bool:
+				{
+					bool v = isRuntime ? scriptClass->GetRuntimeFieldValue<bool>(name) : scriptClass->GetFieldValue<bool>(name);
+					if (ImGui::Checkbox(name.c_str(), &v))
+						isRuntime ? scriptClass->SetRuntimeFieldValue(name, v) : scriptClass->SetFieldValue(name, v);
+					break;
+				}
+				case ScriptFieldType::Char:
+				{
+					int v = isRuntime ? scriptClass->GetRuntimeFieldValue<char>(name) : scriptClass->GetFieldValue<char>(name);
+					if (ImGui::DragInt(name.c_str(), &v, 1, 0, 255))
+						isRuntime ? scriptClass->SetRuntimeFieldValue(name, (char)v) : scriptClass->SetFieldValue(name, (char)v);
+					break;
+				}
 
+				case ScriptFieldType::Byte:
+				{
+					int v = isRuntime ? scriptClass->GetRuntimeFieldValue<uint8_t>(name) : scriptClass->GetFieldValue<uint8_t>(name);
+					if (ImGui::DragInt(name.c_str(), &v, 1, 0, 255))
+						isRuntime ? scriptClass->SetRuntimeFieldValue(name, (uint8_t)v) : scriptClass->SetFieldValue(name, (uint8_t)v);
+					break;
+				}
+
+				case ScriptFieldType::Short:
+				case ScriptFieldType::UShort:
+				case ScriptFieldType::Int:
+				case ScriptFieldType::UInt:
+				{
+					int v = isRuntime ? scriptClass->GetRuntimeFieldValue<int>(name) : scriptClass->GetFieldValue<int>(name);
+					if (ImGui::DragInt(name.c_str(), &v))
+						isRuntime ? scriptClass->SetRuntimeFieldValue(name, v) : scriptClass->SetFieldValue(name, v);
+					break;
+				}
+
+				case ScriptFieldType::Long:
+				case ScriptFieldType::ULong:
+				{
+					int64_t v = isRuntime ? scriptClass->GetRuntimeFieldValue<int64_t>(name) : scriptClass->GetFieldValue<int64_t>(name);
+					if (ImGui::DragScalar(name.c_str(), ImGuiDataType_S64, &v))
+						isRuntime ? scriptClass->SetRuntimeFieldValue(name, v) : scriptClass->SetFieldValue(name, v);
+					break;
+				}
+
+				default:
+					ImGui::Text("Unsupported Field: %s", name.c_str());
+					break;
+				}
 			}
 		}
 		ImGui::PopID();

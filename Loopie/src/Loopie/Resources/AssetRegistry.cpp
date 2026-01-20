@@ -8,6 +8,7 @@
 #include "Loopie/Importers/TextureImporter.h"
 #include "Loopie/Importers/MeshImporter.h"
 #include "Loopie/Importers/MaterialImporter.h"
+#include "Loopie/Importers/ScriptImporter.h"
 
 #include <filesystem>
 #include <unordered_set>
@@ -65,8 +66,12 @@ namespace Loopie {
 					updated = true;
 				}
 			}
-			else if (metadata.Type == ResourceType::SCRIPT) {
-				scriptReloadRequired = true;
+			else if (metadata.Type == ResourceType::SCRIPT || ScriptImporter::CheckIfIsScript(pathString.c_str())) {
+				if (metadata.IsOutdated) {
+					ScriptImporter::ImportScript(pathString, metadata);
+					updated = true;
+					scriptReloadRequired = true;
+				}
 			}
 
 			///

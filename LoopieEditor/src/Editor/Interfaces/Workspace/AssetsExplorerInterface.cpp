@@ -725,6 +725,10 @@ namespace Loopie {
 		{
 			CreateScene(m_currentDirectory, "NewScene");
 		}
+		if (ImGui::MenuItem("Create Script"))
+		{
+			CreateSript(m_currentDirectory, "NewScript");
+		}
 
 		ImGui::Separator();
 
@@ -771,6 +775,18 @@ namespace Loopie {
 		filePath += ".scene";
 		if (!DirectoryManager::Contains(filePath)) {
 			DirectoryManager::Copy("assets/scenes/DefaultScene.scene", filePath);
+			Refresh();
+		}
+		return filePath.string();
+	}
+	std::string AssetsExplorerInterface::CreateSript(const std::filesystem::path& directory, const std::string& name)
+	{
+		std::vector<std::string> names;
+		Helper::GetPathExistingNames(directory, names);
+		std::filesystem::path filePath = directory / Helper::MakeUniqueName(name, names);
+		filePath += ".cs";
+		if (!DirectoryManager::Contains(filePath)) {
+			DirectoryManager::Copy("assets/scripts/DefaultScript.cs", filePath);
 			Refresh();
 		}
 		return filePath.string();

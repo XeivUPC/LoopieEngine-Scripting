@@ -64,7 +64,8 @@ namespace Loopie {
 		}	
 	}
 
-	void ScriptingManager::Reload() {
+	void ScriptingManager::Reload() { /// Fix Errro, crash when reload and start runtime
+
 		Log::Info("Reloading scripting domain");
 
 		mono_domain_set(s_Data.RootDomain, false);
