@@ -28,6 +28,8 @@ namespace Loopie {
 
 		m_imguiManager.Init();
 
+		m_notifier.AddObserver(this);
+
 	}
 
 	Application::~Application()
@@ -46,6 +48,8 @@ namespace Loopie {
 		//// Cleaning
 		delete(m_window); 
 		m_window = nullptr;
+
+		m_notifier.RemoveObserver(this);
 
 		Log::Info("Application Closed");
 	}
@@ -156,6 +160,15 @@ namespace Loopie {
 			{
 				Close();
 			}
+		}
+	}
+
+	void Application::OnNotify(const EngineNotification& id)
+	{
+		if(id == EngineNotification::OnAssemblyReloadRequiered)
+		{
+			ScriptingManager::Reload();
+			Log::Info("Scripting Reloaded Successfully.");
 		}
 	}
 

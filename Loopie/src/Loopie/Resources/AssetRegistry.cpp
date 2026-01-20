@@ -35,6 +35,8 @@ namespace Loopie {
 		ScanEngineDirectory();
 		ScanAssetDirectory();
 
+		bool scriptReloadRequired = false;
+
 		for (auto& [key, metadata] : s_Assets) {
 			
 			const std::string& pathString = s_UUIDToPath[metadata.UUID];
@@ -63,6 +65,9 @@ namespace Loopie {
 					updated = true;
 				}
 			}
+			else if (metadata.Type == ResourceType::SCRIPT) {
+				scriptReloadRequired = true;
+			}
 
 			///
 			if (updated) {
@@ -76,6 +81,10 @@ namespace Loopie {
 		
 
 		Application::GetInstance().m_notifier.Notify(EngineNotification::OnAssetRegistryReload);
+
+		if (scriptReloadRequired) {
+			Application::GetInstance().m_notifier.Notify(EngineNotification::OnAssemblyReloadRequiered);
+		}
 	}
 
 	void AssetRegistry::Clear() {
