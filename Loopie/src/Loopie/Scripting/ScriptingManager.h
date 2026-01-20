@@ -51,10 +51,15 @@ namespace Loopie {
 		static std::shared_ptr<ScriptingClass> GetScriptingClass(const std::string& monoClassName);
 		const std::unordered_map<std::string, std::shared_ptr<ScriptingClass>>& GetScriptingClasses() { return s_Data.ScriptingClasses; }
 
+		const static bool IsRunning() { return s_IsRunning; }
+
 	public:
 		static ScriptingContext s_Data;
 	private:
 		static _MonoAssembly* LoadAssembly(const char* path);
+
+	private:
+		static bool s_IsRunning;
 	};
 	
 }

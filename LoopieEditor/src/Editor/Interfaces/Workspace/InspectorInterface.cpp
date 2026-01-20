@@ -404,15 +404,15 @@ namespace Loopie {
 
 		if (open) {
 			/// Get Fields and show (one runtime version, and one editor version) -> For now, this is only editor version
-
-			std::shared_ptr<ScriptingClass> scriptingClass = scriptClass->GetScriptingClass();
-			const std::map<std::string, ScriptField>& fields = scriptingClass->GetFields();
-			for(const auto& field : fields)
-			{
-				const std::string& fieldName = field.first;
-				ScriptFieldType fieldType = field.second.Type;
-				switch (fieldType)
+			if (!ScriptingManager::IsRunning()) {
+				std::shared_ptr<ScriptingClass> scriptingClass = scriptClass->GetScriptingClass();
+				const std::map<std::string, ScriptField>& fields = scriptingClass->GetFields();
+				for (const auto& field : fields)
 				{
+					const std::string& fieldName = field.first;
+					ScriptFieldType fieldType = field.second.Type;
+					switch (fieldType)
+					{
 					case ScriptFieldType::Float:
 					{
 						float value = scriptClass->GetFieldValue<float>(fieldName);
@@ -437,7 +437,11 @@ namespace Loopie {
 					default:
 						ImGui::Text("Unsupported Field Type for %s", fieldName.c_str());
 						break;
+					}
 				}
+			}
+			else {
+
 			}
 		}
 		ImGui::PopID();

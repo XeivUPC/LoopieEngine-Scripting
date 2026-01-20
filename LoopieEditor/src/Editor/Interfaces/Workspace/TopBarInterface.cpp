@@ -4,6 +4,7 @@
 #include "Loopie/Resources/AssetRegistry.h"
 #include "Loopie/Importers/TextureImporter.h"
 #include "Loopie/Resources/ResourceManager.h"
+#include "Loopie/Scripting/ScriptingManager.h"
 #include "Loopie/Components/Component.h"
 #include "Loopie/Core/Log.h"
 
@@ -82,6 +83,7 @@ namespace Loopie
         {
             if (ImGui::ImageButton("play", (ImTextureID)m_playIcon->GetRendererId(), ImVec2(15, 15)))
             {
+				ScriptingManager::RuntimeStart();
                 Application::GetInstance().GetScene().SaveScene("recoverScene.scene");
                 m_actualMode = PLAY;
             }
@@ -90,6 +92,7 @@ namespace Loopie
         {
             if (ImGui::ImageButton("stop", (ImTextureID)m_stopIcon->GetRendererId(), ImVec2(15, 15)))
             {
+				ScriptingManager::RuntimeStop();
                 m_actualMode = STOP;
             }
         }

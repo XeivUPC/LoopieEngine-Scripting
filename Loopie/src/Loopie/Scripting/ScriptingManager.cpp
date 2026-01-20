@@ -11,6 +11,7 @@
 
 namespace Loopie {
 	ScriptingContext ScriptingManager::s_Data;
+	bool ScriptingManager::s_IsRunning;
 
 	static ScriptFieldType MonoTypeToScriptFieldType(_MonoType* monoType)
 	{
@@ -97,11 +98,13 @@ namespace Loopie {
 
 	void ScriptingManager::RuntimeStart()
 	{
+		s_IsRunning = true;
 		Application::GetInstance().m_notifier.Notify(EngineNotification::OnRuntimeStart);
 	}
 
 	void ScriptingManager::RuntimeStop()
 	{
+		s_IsRunning = false;
 		Application::GetInstance().m_notifier.Notify(EngineNotification::OnRuntimeStop);
 	}
 
