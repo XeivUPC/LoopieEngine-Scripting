@@ -28,5 +28,15 @@ namespace Loopie
         {
             Console.WriteLine($"C# says: {message}");
         }
+        
+        public void OnCreate()
+        {
+            Console.WriteLine($"Creating");
+        }
+
+        public void OnUpdate()
+        {
+            Console.WriteLine($"Updating");
+        }
     }
 }

@@ -27,7 +27,7 @@ namespace Loopie
 		m_instance = m_scriptingClass->Instantiate();
 
 		m_OnCreate = m_scriptingClass->GetMethod("OnCreate", 0);
-		m_OnUpdate = m_scriptingClass->GetMethod("OnUpdate", 1);
+		m_OnUpdate = m_scriptingClass->GetMethod("OnUpdate", 0);
 
 		for (const auto& [name, field] : m_scriptingClass->GetFields())
 		{
