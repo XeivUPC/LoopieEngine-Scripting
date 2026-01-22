@@ -53,9 +53,9 @@ namespace Loopie
 		bool m_readOnly;
 		int m_tabSize;
 
-		Coordinates m_cursorPosition;
-		Coordinates m_selectionStart;
-		Coordinates m_selectionEnd;
+		LineIndex m_cursorPosition;
+		LineIndex m_selectionStart;
+		LineIndex m_selectionEnd;
 
 		// Undo/Redo
 		std::vector<UndoRecord> m_undoBuffer;
