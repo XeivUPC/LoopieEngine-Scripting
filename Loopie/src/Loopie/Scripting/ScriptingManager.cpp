@@ -1,5 +1,7 @@
 #include "ScriptingManager.h"
 
+#include "Loopie/Scripting/ScriptGlue.h"
+
 #include "Loopie/Core/Log.h"
 #include "Loopie/Core/Application.h"
 #include "Loopie/Events/Event.h"
@@ -43,6 +45,8 @@ namespace Loopie {
 
 		s_Data.CoreAssemblyFilepath = "Scripting/Loopie.Core.dll";
 		s_Data.AppAssemblyFilepath = "Scripting/Game.dll";
+
+		ScriptGlue::RegisterFunctions();
 
 		LoadCoreAssembly();
 		LoadAppAssembly(); 

@@ -11,6 +11,7 @@ namespace Loopie
         public Main()
         {
             Console.WriteLine("Main constructor!");
+            InternalCalls.NativeLog("Hola");
         }
 
         public void PrintMessage()

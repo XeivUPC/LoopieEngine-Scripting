@@ -61,7 +61,6 @@ namespace Loopie
 
         void ForceRefreshMatrices();
 
-        // Serialize & Deserialize
         JsonNode Serialize(JsonNode& parent) const override;
         void Deserialize(const JsonNode& data) override;    
 
