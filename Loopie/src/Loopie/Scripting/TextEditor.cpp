@@ -253,6 +253,148 @@ namespace Loopie {
 
 	std::string TextEditor::GetSelectedText() const
 	{
+		if (!HasSelection())
+		{
+			return "";
+		}
+
+		LineIndex start = m_selectionStart;
+		LineIndex end = m_selectionEnd;
+
+		// Swap lines if the start selection is after the end one
+		if (start.line > end.line || (start.line == end.line && start.column > end.column))
+		{
+			start = m_selectionEnd;
+			end = m_selectionStart;
+		}
+
+		if (start.line == end.line)
+		{
+			return m_lines[start.line].substr(start.column, end.column - start.column);
+		}
+
+		std::string selectedText;
+		selectedText = m_lines[start.line].substr(start.column) + "\n";
+
+		for (int i = start.line + 1; i < end.line; ++i)
+		{
+			selectedText += m_lines[i] + "\n";
+		}
+
+		selectedText += m_lines[end.line].substr(0, end.column);
+		return selectedText;
+	}
+
+	void TextEditor::DeleteSelection()
+	{
+		if (!HasSelection())
+		{
+			return;
+		}
+
+		AddUndo();
+
+		LineIndex start = m_selectionStart;
+		LineIndex end = m_selectionEnd;
+
+		// Swap lines if the start selection is after the end one
+		if (start.line > end.line || (start.line == end.line && start.column > end.column))
+		{
+			start = m_selectionEnd;
+			end = m_selectionStart;
+		}
+
+		if (start.line == end.line)
+		{
+			std::string& line = m_lines[start.line];
+			line.erase(start.column, end.column - start.column);
+		}
+		else
+		{
+			std::string& firstLine = m_lines[start.line];
+			std::string& lastLine = m_lines[end.line];
+
+			firstLine = firstLine.substr(0, start.column) + lastLine.substr(end.column);
+			m_lines.erase(m_lines.begin() + start.line + 1, m_lines.begin() + end.line + 1);
+		}
+
+		m_cursorPosition = start;
+		m_selectionStart = m_cursorPosition;
+		m_selectionEnd = m_cursorPosition;
+		m_isModified = true;
+	}
+
+	// Text modification
+	void TextEditor::InsertChar(char c)
+	{
+		if (m_readOnly)
+		{
+			return;
+		}
+
+		if (HasSelection())
+		{
+			DeleteSelection();
+		}
+
+		AddUndo();
+
+		std::string& line = m_lines[m_cursorPosition.line];
+		line.insert(m_cursorPosition.column, 1, c);
+		m_cursorPosition.column++;
+		m_selectionStart = m_cursorPosition;
+		m_selectionEnd = m_cursorPosition;
+		m_isModified = true;
+	}
+
+	void TextEditor::Backspace()
+	{
+		if (m_readOnly)
+		{
+			return;
+		}
+
+		if (HasSelection())
+		{
+			DeleteSelection();
+			return;
+		}
+
+		if (m_cursorPosition.column == 0 && m_cursorPosition.line == 0)
+		{
+			return;
+		}
+
+		AddUndo();
+
+		if (m_cursorPosition.column > 0)
+		{
+			std::string& line = m_lines[m_cursorPosition.line];
+			line.erase(m_cursorPosition.column - 1, 1);
+			m_cursorPosition.column--;
+		}
+		else
+		{
+			std::string& prevLine = m_lines[m_cursorPosition.line - 1];
+			std::string& currLine = m_lines[m_cursorPosition.line];
+			m_cursorPosition.column = (int)prevLine.length();
+			prevLine += currLine;
+			m_lines.erase(m_lines.begin() + m_cursorPosition.line);
+			m_cursorPosition.line--;
+		}
+
+		m_selectionStart = m_cursorPosition;
+		m_selectionEnd = m_cursorPosition;
+		m_isModified = true;
+	}
+
+	void TextEditor::Delete()
+	{
+
+	}
+
+	void TextEditor::EnterChar(char c)
+	{
 
 	}
 

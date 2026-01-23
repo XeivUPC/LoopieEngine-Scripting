@@ -73,6 +73,13 @@ namespace Loopie {
 		void SetCursorPosition(const LineIndex& position);
 		bool HasSelection() const;
 		std::string GetSelectedText() const;
+		void DeleteSelection();
+
+		// Text modification
+		void InsertChar(char c);
+		void Backspace();
+		void Delete();
+		void EnterChar(char c);
 
 		// State
 		void SetReadOnly(bool value);
@@ -92,7 +99,7 @@ namespace Loopie {
 	private:
 		std::vector<std::string> m_lines;
 		std::string m_currentFilePath;
-		bool m_isModified;
+		bool m_isModified = false;
 		bool m_readOnly;
 		int m_tabSize;
 
