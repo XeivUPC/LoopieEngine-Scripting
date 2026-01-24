@@ -56,31 +56,31 @@ namespace Loopie
             internal extern static void Transform_SetLocalScale(string id, Vector3 scale);
 
             [MethodImplAttribute(MethodImplOptions.InternalCall)]
-            internal extern static void Transform_Translate(string id, Vector3 translation, Space objectSpace);
+            internal extern static void Transform_Translate(string id, Vector3 translation, Transform.Space objectSpace);
             
             [MethodImplAttribute(MethodImplOptions.InternalCall)]
-            internal extern static void Transform_Rotate(string id, Vector3 eulerAngles, Space objectSpace);
+            internal extern static void Transform_Rotate(string id, Vector3 eulerAngles, Transform.Space objectSpace);
 
             [MethodImplAttribute(MethodImplOptions.InternalCall)]
             internal extern static void Transform_LookAt(string id, Vector3 target, Vector3 worldUp);
 
             [MethodImplAttribute(MethodImplOptions.InternalCall)]
-            internal extern static void Transform_Forward(string id, Vector3 forward);
+            internal extern static void Transform_Forward(string id, out Vector3 forward);
             
             [MethodImplAttribute(MethodImplOptions.InternalCall)]
-            internal extern static void Transform_Back(string id, Vector3 back);
+            internal extern static void Transform_Back(string id, out Vector3 back);
             
             [MethodImplAttribute(MethodImplOptions.InternalCall)]
-            internal extern static void Transform_Up(string id, Vector3 up);
+            internal extern static void Transform_Up(string id, out Vector3 up);
             
             [MethodImplAttribute(MethodImplOptions.InternalCall)]
-            internal extern static void Transform_Down(string id, Vector3 down);
+            internal extern static void Transform_Down(string id, out Vector3 down);
             
             [MethodImplAttribute(MethodImplOptions.InternalCall)]
-            internal extern static void Transform_Left(string id, Vector3 left);
+            internal extern static void Transform_Left(string id, out Vector3 left);
             
             [MethodImplAttribute(MethodImplOptions.InternalCall)]
-            internal extern static void Transform_Right(string id, Vector3 right);
+            internal extern static void Transform_Right(string id, out Vector3 right);
         #endregion
         #region Input
         [MethodImplAttribute(MethodImplOptions.InternalCall)]

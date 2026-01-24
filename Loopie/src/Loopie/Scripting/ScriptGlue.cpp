@@ -271,7 +271,7 @@ namespace Loopie
 		UUID uuid(Utils::MonoStringToString(id));
 		Scene* scene = &Application::GetInstance().GetScene();
 		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
-		forward = &entity->GetTransform()->Up();
+		*forward = entity->GetTransform()->Forward();
 	}
 
 	static void Transform_Back(MonoString* id, vec3* back)
@@ -279,7 +279,7 @@ namespace Loopie
 		UUID uuid(Utils::MonoStringToString(id));
 		Scene* scene = &Application::GetInstance().GetScene();
 		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
-		back = &entity->GetTransform()->Up();
+		*back = entity->GetTransform()->Back();
 	}
 
 	static void Transform_Up(MonoString* id, vec3* up)
@@ -287,7 +287,7 @@ namespace Loopie
 		UUID uuid(Utils::MonoStringToString(id));
 		Scene* scene = &Application::GetInstance().GetScene();
 		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
-		up = &entity->GetTransform()->Up();
+		*up = entity->GetTransform()->Up();
 	}
 
 	static void Transform_Down(MonoString* id, vec3* down)
@@ -295,7 +295,7 @@ namespace Loopie
 		UUID uuid(Utils::MonoStringToString(id));
 		Scene* scene = &Application::GetInstance().GetScene();
 		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
-		down = &entity->GetTransform()->Up();
+		*down = entity->GetTransform()->Down();
 	}
 
 	static void Transform_Left(MonoString* id, vec3* left)
@@ -303,7 +303,7 @@ namespace Loopie
 		UUID uuid(Utils::MonoStringToString(id));
 		Scene* scene = &Application::GetInstance().GetScene();
 		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
-		left = &entity->GetTransform()->Up();
+		*left = entity->GetTransform()->Left();
 	}
 
 	static void Transform_Right(MonoString* id, vec3* right)
@@ -311,7 +311,7 @@ namespace Loopie
 		UUID uuid(Utils::MonoStringToString(id));
 		Scene* scene = &Application::GetInstance().GetScene();
 		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
-		right = &entity->GetTransform()->Up();
+		*right = entity->GetTransform()->Right();
 	}
 #pragma endregion
 

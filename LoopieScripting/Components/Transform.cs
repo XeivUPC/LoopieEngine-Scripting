@@ -2,8 +2,17 @@ using System;
 
 namespace Loopie
 {
+
+    
+
     public class Transform : Component
 	{
+        public enum Space
+        {
+            LocalSpace,
+            WorldSpace
+        }
+
         public Vector3 position
 		{ 
 			get { return GetPosition(); }
@@ -102,58 +111,58 @@ namespace Loopie
 			InternalCalls.Transform_LookAt(entity.ID, target, up_vector);
 		}
 
-		public Vector3 forward
-		{ get {return Forward()}; }
+		public Vector3 Forward
+		{ get { return GetForward(); } }
 
-		public Vector3 back
-		{ get {return Back()}; }
+		public Vector3 Back
+		{ get { return GetBack(); } }
 
-		public Vector3 up
-		{ get {return Up()}; }
+		public Vector3 Up
+		{ get { return GetUp(); } }
 
-		public Vector3 down
-		{ get {return Down()}; }
+		public Vector3 Down
+		{ get { return GetDown(); } }
 
-		public Vector3 left
-		{ get {return Left()}; }
+		public Vector3 Left
+		{ get { return GetLeft(); } }
 
-		public Vector3 right
-		{ get {return Right()}; }
+		public Vector3 Right
+		{ get { return GetRight(); } }
 
-		private Vector3 Forward()
+		private Vector3 GetForward()
 		{
-			Vector3 vector = Vector3.Forward;
-			InternalCalls.Transform_Forward(entity.ID, vector);
+			Vector3 vector = Vector3.Zero;
+			InternalCalls.Transform_Forward(entity.ID, out vector);
 			return vector;
 		}
-		private Vector3 Back()
+		private Vector3 GetBack()
 		{
-            Vector3 vector = -Vector3.Forward;
-            InternalCalls.Transform_Back(entity.ID, vector);
+            Vector3 vector = Vector3.Zero;
+            InternalCalls.Transform_Back(entity.ID, out vector);
             return vector;
         }
-		private Vector3 Up()
+		private Vector3 GetUp()
 		{
-            Vector3 vector = Vector3.Up;
-            InternalCalls.Transform_Up(entity.ID, vector);
+            Vector3 vector = Vector3.Zero;
+            InternalCalls.Transform_Up(entity.ID, out vector);
             return vector;
         }
-		private Vector3 Down()
+		private Vector3 GetDown()
 		{
-            Vector3 vector = -Vector3.Up;
-            InternalCalls.Transform_Down(entity.ID, vector);
+            Vector3 vector = Vector3.Zero;
+            InternalCalls.Transform_Down(entity.ID, out vector);
             return vector;
         }
-		private Vector3 Left()
+		private Vector3 GetLeft()
 		{
-            Vector3 vector = -Vector3.Right;
-            InternalCalls.Transform_Left(entity.ID, vector);
+            Vector3 vector = Vector3.Zero;
+            InternalCalls.Transform_Left(entity.ID, out vector);
             return vector;
         }
-		private Vector3 Right()
+		private Vector3 GetRight()
 		{
-            Vector3 vector = Vector3.Right;
-            InternalCalls.Transform_Right(entity.ID, vector);
+            Vector3 vector = Vector3.Zero;
+            InternalCalls.Transform_Right(entity.ID, out vector);
             return vector;
         }
 	}
