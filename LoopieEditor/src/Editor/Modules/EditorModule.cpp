@@ -29,6 +29,10 @@ namespace Loopie
 	void EditorModule::OnLoad()
 	{
 		AssetRegistry::Initialize();
+
+		ScriptingManager::Init();
+		Log::Info("Scripting created successfully.");
+
 		Application::GetInstance().GetWindow().SetResizable(true);
 
 		/////SCENE
@@ -64,9 +68,6 @@ namespace Loopie
 		m_hierarchy.SetScene(m_currentScene);
 
 		Application::GetInstance().m_notifier.AddObserver(this);
-
-		ScriptingManager::Init();
-		Log::Info("Scripting created successfully.");
 
 	}
 

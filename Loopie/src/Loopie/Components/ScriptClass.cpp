@@ -30,14 +30,37 @@ namespace Loopie
 		m_OnCreate = m_scriptingClass->GetMethod("OnCreate", 0);
 		m_OnUpdate = m_scriptingClass->GetMethod("OnUpdate", 0);
 
+		/*MonoClass* componentClass =
+			mono_class_from_name(
+				ScriptingManager::s_Data.CoreImage,
+				"Loopie",
+				"Component"
+			);
+
+		*/
+
+		MonoProperty* entityProperty =
+			mono_class_get_property_from_name(ScriptingManager::s_Data.ComponentClass->GetMonoClass() , "entity");
+
+		MonoObject* entityInstance =
+			ScriptingManager::CreateManagedEntity(GetUUID());
+
+		void* args[1] = { entityInstance };
+		mono_property_set_value(entityProperty, m_instance, args, nullptr);
+
+		// Restore fields
 		for (const auto& [name, field] : m_scriptingClass->GetFields())
 		{
 			const ScriptFieldData& fieldData = m_scriptFields[name];
+
 			if (field.Type == ScriptFieldType::String)
 				SetRuntimeFieldString(name, fieldData.GetString());
 			else
 				SetFieldValueInternal(name, fieldData.GetBuffer());
 		}
+
+		if (m_OnCreate)
+			m_scriptingClass->InvokeMethod(m_instance, m_OnCreate);
 	}
 
 	void ScriptClass::DestroyInstance()

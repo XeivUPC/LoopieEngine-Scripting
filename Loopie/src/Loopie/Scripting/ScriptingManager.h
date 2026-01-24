@@ -1,5 +1,6 @@
 #pragma once
 #include "Loopie/Scripting/ScriptingClass.h"
+#include "Loopie/Core/UUID.h"
 
 #include <string>
 #include <memory>
@@ -30,6 +31,7 @@ namespace Loopie {
 		std::string AppAssemblyFilepath;
 		std::string CompilerAssemblyFilepath;
 
+		std::shared_ptr<ScriptingClass> ComponentClass;
 
 		std::unordered_map<std::string, std::shared_ptr<ScriptingClass>> ScriptingClasses;
 
@@ -58,6 +60,7 @@ namespace Loopie {
 		static bool ExistsScriptingClass(const std::string& monoClassName);
 		static std::shared_ptr<ScriptingClass> GetScriptingClass(const std::string& monoClassName);
 		const std::unordered_map<std::string, std::shared_ptr<ScriptingClass>>& GetScriptingClasses() { return s_Data.ScriptingClasses; }
+		static _MonoObject* CreateManagedEntity(const UUID& uuid);
 
 		const static bool IsRunning() { return s_IsRunning; }
 

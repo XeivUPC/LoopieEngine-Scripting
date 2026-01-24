@@ -58,6 +58,9 @@ namespace Loopie {
 		LoadAppAssembly(); 
 
 		LoadScriptingClasses(s_Data.AppImage);
+
+		s_Data.ComponentClass = std::make_shared<ScriptingClass>("Loopie", "Component", true);
+
 		s_Initialized = true;
 
 	}
@@ -109,6 +112,9 @@ namespace Loopie {
 
 		LoadAppAssembly();
 		LoadScriptingClasses(s_Data.AppImage);
+
+		s_Data.ComponentClass = std::make_shared<ScriptingClass>("Loopie", "Component", true);
+
 		s_Data.Dirty = false;
 	}
 
@@ -159,6 +165,7 @@ namespace Loopie {
 		//// Load Scripting Classes
 		const MonoTableInfo* typeDefinitionsTable = mono_image_get_table_info(monoImage, MONO_TABLE_TYPEDEF);
 		int32_t numTypes = mono_table_info_get_rows(typeDefinitionsTable);
+		MonoClass* component = mono_class_from_name(s_Data.CoreImage, "Loopie", "Component");
 
 		for (int32_t i = 0; i < numTypes; i++)
 		{
@@ -174,6 +181,13 @@ namespace Loopie {
 				fullName = className;
 
 			MonoClass* monoClass = mono_class_from_name(monoImage, nameSpace, className);
+
+			if (monoClass == component)
+				continue;
+
+			bool isComponent = mono_class_is_subclass_of(monoClass, component, false);
+			if (!isComponent)
+				continue;
 
 			std::shared_ptr<ScriptingClass> scriptClass = std::make_shared<ScriptingClass>(nameSpace, className, false);
 			s_Data.ScriptingClasses[fullName] = scriptClass;
@@ -215,6 +229,51 @@ namespace Loopie {
 			return nullptr;
 
 		return s_Data.ScriptingClasses.at(monoClassName);
+	}
+
+	_MonoObject* ScriptingManager::CreateManagedEntity(const UUID& uuid)
+	{
+		// Get Loopie.Entity class
+		MonoClass* entityClass =
+			mono_class_from_name(s_Data.CoreImage, "Loopie", "Entity");
+
+		if (!entityClass)
+		{
+			Log::Error("Failed to find Loopie.Entity class");
+			return nullptr;
+		}
+
+		// Create the managed object
+		MonoObject* entityObject =
+			mono_object_new(s_Data.AppDomain, entityClass);
+
+		// Get constructor: internal Entity(string id)
+		MonoMethod* ctor =
+			mono_class_get_method_from_name(entityClass, ".ctor", 1);
+
+		if (!ctor)
+		{
+			Log::Error("Failed to find Entity constructor");
+			return nullptr;
+		}
+
+		// Convert UUID -> string -> MonoString
+		std::string idStr = uuid.Get();
+		MonoString* monoID =
+			mono_string_new(s_Data.AppDomain, idStr.c_str());
+
+		void* args[1] = { monoID };
+
+		MonoObject* exception = nullptr;
+		mono_runtime_invoke(ctor, entityObject, args, &exception);
+
+		if (exception)
+		{
+			mono_print_unhandled_exception(exception);
+			return nullptr;
+		}
+
+		return entityObject;
 	}
 
 	_MonoAssembly* ScriptingManager::LoadAssembly(const char* path)
