@@ -27,6 +27,8 @@ namespace Loopie {
 		~InputEventManager();
 
 		void Update();
+		void Initialize();
+
 		bool HasEvent(SDL_EventType eventType) const { return m_events[eventType]; }
 
 		KeyState GetKeyStatus(SDL_Scancode keyCode) const;

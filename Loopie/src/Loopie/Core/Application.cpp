@@ -26,6 +26,8 @@ namespace Loopie {
 		m_window = new Window();
 		Log::Info("Window created successfully.");
 
+		m_inputEvent.Initialize();
+
 		m_imguiManager.Init();
 
 		m_notifier.AddObserver(this);

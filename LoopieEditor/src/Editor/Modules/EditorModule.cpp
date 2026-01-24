@@ -64,6 +64,7 @@ namespace Loopie
 		m_game.Init();
 		m_scene.Init();
 		m_mainMenu.Init();
+		m_textEditor.Init();
 
 		m_hierarchy.SetScene(m_currentScene);
 
@@ -182,6 +183,7 @@ namespace Loopie
 		m_assetsExplorer.Render();
 		m_game.Render();
 		m_scene.Render();
+		m_textEditor.Render();
 	}
 
 	void EditorModule::RenderWorld(Camera* camera)

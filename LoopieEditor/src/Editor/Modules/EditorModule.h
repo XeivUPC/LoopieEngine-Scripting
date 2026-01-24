@@ -12,6 +12,7 @@
 #include "Editor/Interfaces/Workspace/EditorMenuInterface.h"
 #include "Editor/Interfaces/Workspace/AssetsExplorerInterface.h"
 #include "Editor/Interfaces/Workspace/TopBarInterface.h"
+#include "Editor/Interfaces/Workspace/TextEditorInterface.h"
 
 namespace Loopie {
 
@@ -48,6 +49,7 @@ namespace Loopie {
 		EditorMenuInterface m_mainMenu;
 		AssetsExplorerInterface m_assetsExplorer;
 		TopBarInterface m_topBar;
+		TextEditorInterface m_textEditor;
 
 		Scene* m_currentScene = nullptr;
 		std::shared_ptr<Material> m_selectedObjectMaterial;
