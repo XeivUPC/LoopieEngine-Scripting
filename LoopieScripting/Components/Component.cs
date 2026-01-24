@@ -4,6 +4,9 @@ namespace Loopie
 {
     public abstract class Component
     {
-        protected Entity entity {  get; internal set; }
+        public Entity entity { get; internal set; }
+        public Transform transform => entity.transform;
+
+        protected Component() { }
     }
 }

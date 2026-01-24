@@ -56,20 +56,17 @@ namespace Loopie {
 		LoadCoreAssembly();
 		LoadCompilerAssembly();
 
-		//LoadScriptingClasses(s_Data.CompilerImage);
-
 		CompileGameAssembly();
 
 		LoadAppAssembly(); 
 
-		ScriptGlue::RegisterFunctions();
 		LoadScriptingClasses(s_Data.AppImage);
 
 		s_Data.ComponentClass = std::make_shared<ScriptingClass>("Loopie", "Component", true);
 
 		s_Initialized = true;
+		ScriptGlue::RegisterFunctions();
 
-		LoadScriptingClasses(s_Data.CoreImage); // ChangeToGame
 	}
 
 	void ScriptingManager::Shutdown() {

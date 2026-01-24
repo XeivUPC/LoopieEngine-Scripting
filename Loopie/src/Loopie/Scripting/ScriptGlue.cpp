@@ -98,74 +98,84 @@ namespace Loopie
 #pragma endregion
 
 #pragma region Transform
-	static void Transform_GetPosition(UUID id, vec3* position)
+	static void Transform_GetPosition(MonoString* id, vec3* position)
 	{
+		UUID uuid(Utils::MonoStringToString(id));
 		Scene* scene = &Application::GetInstance().GetScene();
-		std::shared_ptr<Entity> entity = scene->GetEntity(id);
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
 		*position = entity->GetTransform()->GetPosition();
 	}
 
-	static void Transform_SetPosition(UUID id, vec3* position)
+	static void Transform_SetPosition(MonoString* id, vec3* position)
 	{
+		UUID uuid(Utils::MonoStringToString(id));
 		Scene* scene = &Application::GetInstance().GetScene();
-		std::shared_ptr<Entity> entity = scene->GetEntity(id);
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
 		entity->GetTransform()->SetPosition(*position);
 	}
 
-	static void Transform_GetLocalPosition(UUID id, vec3* position)
+	static void Transform_GetLocalPosition(MonoString* id, vec3* position)
 	{
+		UUID uuid(Utils::MonoStringToString(id));
 		Scene* scene = &Application::GetInstance().GetScene();
-		std::shared_ptr<Entity> entity = scene->GetEntity(id);
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
 		*position = entity->GetTransform()->GetLocalPosition();
 	}
 
-	static void Transform_SetLocalPosition(UUID id, vec3* position)
+	static void Transform_SetLocalPosition(MonoString* id, vec3* position)
 	{
+		UUID uuid(Utils::MonoStringToString(id));
 		Scene* scene = &Application::GetInstance().GetScene();
-		std::shared_ptr<Entity> entity = scene->GetEntity(id);
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
 		entity->GetTransform()->SetLocalPosition(*position);
 	}
 
-	static void Transform_GetRotation(UUID id, vec3* rotation)
+	static void Transform_GetRotation(MonoString* id, vec3* rotation)
 	{
+		UUID uuid(Utils::MonoStringToString(id));
 		Scene* scene = &Application::GetInstance().GetScene();
-		std::shared_ptr<Entity> entity = scene->GetEntity(id);
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
 		*rotation = entity->GetTransform()->GetEulerAngles();
 	}
 
-	static void Transform_SetRotation(UUID id, vec3* rotation)
+	static void Transform_SetRotation(MonoString* id, vec3* rotation)
 	{
+		UUID uuid(Utils::MonoStringToString(id));
 		Scene* scene = &Application::GetInstance().GetScene();
-		std::shared_ptr<Entity> entity = scene->GetEntity(id);
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
 		entity->GetTransform()->SetEulerAngles(*rotation);
 	}
 
-	static void Transform_GetLocalRotation(UUID id, vec3* rotation)
+	static void Transform_GetLocalRotation(MonoString* id, vec3* rotation)
 	{
+		UUID uuid(Utils::MonoStringToString(id));
 		Scene* scene = &Application::GetInstance().GetScene();
-		std::shared_ptr<Entity> entity = scene->GetEntity(id);
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
 		*rotation = entity->GetTransform()->GetLocalEulerAngles();
 	}
 
-	static void Transform_SetLocalRotation(UUID id, vec3* rotation)
+	static void Transform_SetLocalRotation(MonoString* id, vec3* rotation)
 	{
+		UUID uuid(Utils::MonoStringToString(id));
 		Scene* scene = &Application::GetInstance().GetScene();
-		std::shared_ptr<Entity> entity = scene->GetEntity(id);
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
 		entity->GetTransform()->SetLocalEulerAngles(*rotation);
 	}
 
-	static void Transform_GetLocalScale(UUID id, vec3* scale)
+	static void Transform_GetLocalScale(MonoString* id, vec3* position)
 	{
+		UUID uuid(Utils::MonoStringToString(id));
 		Scene* scene = &Application::GetInstance().GetScene();
-		std::shared_ptr<Entity> entity = scene->GetEntity(id);
-		*scale = entity->GetTransform()->GetLocalScale();
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		*position = entity->GetTransform()->GetLocalScale();
 	}
 
-	static void Transform_SetLocalScale(UUID id, vec3* scale)
+	static void Transform_SetLocalScale(MonoString* id, vec3* position)
 	{
+		UUID uuid(Utils::MonoStringToString(id));
 		Scene* scene = &Application::GetInstance().GetScene();
-		std::shared_ptr<Entity> entity = scene->GetEntity(id);
-		entity->GetTransform()->SetLocalScale(*scale);
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		entity->GetTransform()->SetLocalScale(*position);
 	}
 #pragma endregion
 

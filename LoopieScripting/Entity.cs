@@ -5,12 +5,14 @@ namespace Loopie
 {
     public class Entity
     {
-        protected Entity() { ID = ""; }
         internal Entity(string id)
         {
             ID = id;
+            transform = new Transform();
+            transform.entity = this;
         }
         public readonly string ID;
+        public Transform transform { get; }
 
         //public bool HasComponent<T>() where T: Component, new()
         //{
