@@ -1,21 +1,19 @@
 #pragma once
 
-#include <string>
-#include <vector>
+#include "Editor/Interfaces/Interface.h"
+#include "Loopie/Events/IObserver.h"
+#include "Editor/Events/EditorEventTypes.h"
 
-#define MAX_UNDO_BUFFER_SIZE = 1000
-/* PSS: How the text editor should be implemented
-Engine: funciones y structs para manipulacion de texto.
+#define MAX_UNDO_BUFFER_SIZE 1000
 
-Editor: que se encarga de los inputs del mouse y teclado para poder usar las funciones de engine.
-
-UI: renderizado de la interfaz del editor.
-
-Core: temas de transformación de carácteres y asserts
-*/
+// TODO PSS 24/01/25: Implement command pattern.
+// Right now a snapshot is being done with each AddUndo().
+// This uses a lot of memory. Command pattern instead focuses
+// on storing which actions were done at which moment. 
+// This should heavily reduce memory stored.
 
 namespace Loopie {
-	class TextEditor
+	class TextEditorInterface : public Interface, public IObserver<OnEntityOrFileNotification>
 	{
 	public:
 		struct LineIndex
@@ -28,7 +26,7 @@ namespace Loopie {
 				return (line == otherLine.line && column == otherLine.column);
 			}
 
-			bool operator!=(const LineIndex& o) const 
+			bool operator!=(const LineIndex& otherLine) const
 			{
 				return (line != otherLine.line || column != otherLine.column);
 			}
@@ -40,8 +38,10 @@ namespace Loopie {
 			LineIndex cursorPosition;
 		};
 
-		TextEditor();
-		~TextEditor();
+		TextEditorInterface();
+		~TextEditorInterface();
+		void Init() override;
+		void Render() override;
 
 		// File Operations
 		bool LoadFile(const std::string& filepath);
@@ -65,9 +65,6 @@ namespace Loopie {
 		bool CanUndo() const;
 		bool CanRedo() const;
 
-		// Rendering -> IDK if this will have to be called from here
-		// void Render(const char* title, const ImVec2& size = ImVec2(), bool border = false);
-
 		// Cursor & Selection
 		LineIndex GetCursorPosition() const;
 		void SetCursorPosition(const LineIndex& position);
@@ -87,33 +84,35 @@ namespace Loopie {
 		void SetTabSize(int spaces); // Should be 4 by default
 
 	private:
-		// Input Handling (there might already be something within the event processing)
+		// Input Handling
 		void HandleKeyboardInputs();
 		void HandleMouseInputs();
-		void ProcessShortcuts();
 
-
+		// Helper functions
 		LineIndex SanitizeLineIndex(const LineIndex& lineIndex) const;
+		void GetOrderedSelection(LineIndex& start, LineIndex& end) const;
 
+		// Inherited via IObserver
+		void OnNotify(const OnEntityOrFileNotification& id) override;
 
 	private:
 		std::vector<std::string> m_lines;
 		std::string m_currentFilePath;
 		bool m_isModified = false;
-		bool m_readOnly;
-		int m_tabSize;
+		bool m_readOnly = false;
+		int m_tabSize = 4;
 
 		LineIndex m_cursorPosition;
 		LineIndex m_selectionStart;
 		LineIndex m_selectionEnd;
-		bool m_hasCursorPositionChanged = false;
+		
 
-		// Undo/Redo
 		std::vector<UndoRecord> m_undoBuffer;
-		int m_undoIndex;
+		int m_undoIndex = 0;
 
-		// Scrolling
-		float m_scrollX, m_scrollY;
+		float m_scrollX = 0.0f;
+		float m_scrollY = 0.0f;
+		bool m_hasCursorPositionChanged = false;
 
 	};
 }
