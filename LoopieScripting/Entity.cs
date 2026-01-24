@@ -14,32 +14,39 @@ namespace Loopie
         public readonly string ID;
         public Transform transform { get; }
 
-        //public bool HasComponent<T>() where T: Component, new()
-        //{
-        //    Type componentType = typeof(T);
-        //    return Internal.Entity_HasComponent(ID, componentType);
-        //}
+        public bool HasComponent<T>() where T : Component, new()
+        {
+            Type componentType = typeof(T);
+            return InternalCalls.Entity_HasComponent (ID, componentType);
+        }
 
-        //public T GetComponent<T>() where T : Component, new()
-        //{
-        //    if (!HasComponent<T>())
-        //        return null;
-        //    Type componentType = typeof(T);
-        //    return Internal.Entity_GetComponent(ID, componentType);
-        //}
+        public T GetComponent<T>() where T : Component, new()
+        {
+            if (HasComponent<T>())
+            {
+                T component = new T();
+                component.entity = this;
+                return component;
+            }
 
-        //public Entity FindEntityByName(string name)
-        //{
-        //    ulong entityID = Internal.Entity_FindEntityByName(name);
-        //    if (entityID == 0)
-        //        return null;
+            string typeName = typeof(T).FullName;
+            object scriptInstance = InternalCalls.Entity_GetScriptInstance(ID, typeName);
 
-        //    return entityID;
-        //}
+            return scriptInstance as T;
+        }
+
+        public Entity FindEntityByName(string name)
+        {
+            string entityID = InternalCalls.Entity_FindEntityByName(name);
+            if (entityID == "")
+                return null;
+
+            return new Entity(entityID);
+        }
 
         //public Entity Instantiate(string )
         //{
-        //    ulong entityID = Internal.Entity_FindEntityByName(name);
+        //    ulong entityID = InternalCalls.Entity_FindEntityByName(name);
         //    if (entityID == 0)
         //        return null;
 

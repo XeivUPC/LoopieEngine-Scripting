@@ -2,10 +2,8 @@ using System;
 
 namespace Loopie
 {
-    public sealed class Transform
+    public class Transform : Component
 	{
-        internal Entity entity;
-
         public Vector3 position
 		{ 
 			get { return GetPosition(); }

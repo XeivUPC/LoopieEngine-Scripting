@@ -53,6 +53,8 @@ namespace Loopie {
 		s_Data.AppAssemblyFilepath = "Scripting/Game.dll";
 		s_Data.CompilerAssemblyFilepath = "../LoopieCompiler/Loopie.ScriptCompiler.dll";
 
+		ScriptGlue::RegisterFunctions();
+
 		LoadCoreAssembly();
 		LoadCompilerAssembly();
 
@@ -62,10 +64,11 @@ namespace Loopie {
 
 		LoadScriptingClasses(s_Data.AppImage);
 
+		ScriptGlue::RegisterComponents();
+
 		s_Data.ComponentClass = std::make_shared<ScriptingClass>("Loopie", "Component", true);
 
 		s_Initialized = true;
-		ScriptGlue::RegisterFunctions();
 
 	}
 
@@ -116,6 +119,8 @@ namespace Loopie {
 
 		LoadAppAssembly();
 		LoadScriptingClasses(s_Data.AppImage);
+
+		ScriptGlue::RegisterComponents();
 
 		s_Data.ComponentClass = std::make_shared<ScriptingClass>("Loopie", "Component", true);
 
@@ -237,7 +242,6 @@ namespace Loopie {
 
 	_MonoObject* ScriptingManager::CreateManagedEntity(const UUID& uuid)
 	{
-		// Get Loopie.Entity class
 		MonoClass* entityClass =
 			mono_class_from_name(s_Data.CoreImage, "Loopie", "Entity");
 
@@ -247,11 +251,9 @@ namespace Loopie {
 			return nullptr;
 		}
 
-		// Create the managed object
 		MonoObject* entityObject =
 			mono_object_new(s_Data.AppDomain, entityClass);
 
-		// Get constructor: internal Entity(string id)
 		MonoMethod* ctor =
 			mono_class_get_method_from_name(entityClass, ".ctor", 1);
 
@@ -261,7 +263,6 @@ namespace Loopie {
 			return nullptr;
 		}
 
-		// Convert UUID -> string -> MonoString
 		std::string idStr = uuid.Get();
 		MonoString* monoID =
 			mono_string_new(s_Data.AppDomain, idStr.c_str());

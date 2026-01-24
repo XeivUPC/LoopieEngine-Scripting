@@ -68,6 +68,8 @@ namespace Loopie {
 		const std::string& GetClassName() const { return m_className; }
 		std::shared_ptr<ScriptingClass> GetScriptingClass() const { return m_scriptingClass; }
 
+		_MonoObject* GetInstance() const { return m_instance; }
+
 		template<typename T>
 		T GetRuntimeFieldValue(const std::string& name)
 		{

@@ -2,7 +2,10 @@
 #include "Loopie/Scripting/ScriptingManager.h"
 #include "Loopie/Components/ScriptClass.h"
 
+#include "Loopie/Components/Component.h"
 #include "Loopie/Components/Transform.h"
+#include "Loopie/Components/Camera.h"
+#include "Loopie/Components/MeshRenderer.h"
 
 #include "Loopie/Core/UUID.h"
 #include "Loopie/Core/InputEventManager.h"
@@ -19,6 +22,8 @@
 
 namespace Loopie
 {
+	static std::unordered_map<_MonoType*, std::function<bool(std::shared_ptr<Entity>)>> s_EntityHasComponentFuncs;
+
 	namespace Utils {
 		std::string MonoStringToString(MonoString* string)
 		{
@@ -65,21 +70,44 @@ namespace Loopie
 #pragma endregion
 
 #pragma region Components
-	/*static bool Entity_HasComponent(UUID entityID, MonoReflectionType* componentType)
+	static MonoObject* Entity_GetScriptInstance(MonoString* entityID, MonoString* componentFullName)
 	{
+		UUID uuid(Utils::MonoStringToString(entityID));
 		Scene* scene = &Application::GetInstance().GetScene();
 		ASSERT(scene == nullptr, "Scene not found");
-		std::shared_ptr<Entity> entity = scene->GetEntity(entityID);
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		ASSERT(entity == nullptr, "Entity not found");
+
+		std::vector<ScriptClass*> scriptComponents = entity->GetComponents<ScriptClass>();
+
+		for (ScriptClass* script : scriptComponents)
+		{
+			if (!script || !script->GetScriptingClass())
+				continue;
+
+			if (script->IsSameType(Utils::MonoStringToString(componentFullName)))
+			{
+				return script->GetInstance();
+			}
+		}
+
+		return nullptr;
+	}
+
+	static bool Entity_HasComponent(MonoString* entityID, MonoReflectionType* componentType)
+	{
+		UUID uuid(Utils::MonoStringToString(entityID));
+		Scene* scene = &Application::GetInstance().GetScene();
+		ASSERT(scene == nullptr, "Scene not found");
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
 		ASSERT(entity == nullptr, "Entity not found");
 
 		MonoType* managedType = mono_reflection_type_get_type(componentType);
-		ASSERT(entity->HasComponent<ScriptClass>(), "{0} has no {1} component", entity->GetName(), managedType);
-		std::vector<ScriptClass*> components = entity->GetComponents<ScriptClass>();
-		for (size_t i = 0; i < components.size(); i++)
-		{
 
-		}
-	}*/
+		if (s_EntityHasComponentFuncs.find(managedType) == s_EntityHasComponentFuncs.end())
+			return false;
+		return s_EntityHasComponentFuncs.at(managedType)(entity);
+	}
 
 	static MonoString* Entity_FindEntityByName(MonoString* name)
 	{
@@ -247,10 +275,33 @@ namespace Loopie
 	}
 #pragma endregion
 
-	/*void ScriptGlue::RegisterComponents()
+	template<typename Comp, typename = std::enable_if_t<std::is_base_of_v<Component, Comp>>>
+	static void RegisterComponent()
 	{
+		([]()
+			{
+				std::string_view typeName = Comp::GetIdentificableName();
+				std::string managedTypename = fmt::format("Loopie.{}", typeName);
 
-	}*/
+				MonoType* managedType = mono_reflection_type_from_name(managedTypename.data(), ScriptingManager::s_Data.CoreImage);
+				if (!managedType)
+				{
+					Log::Warn("Could not find component type {}", managedTypename);
+					return;
+				}
+				s_EntityHasComponentFuncs[managedType] = [](std::shared_ptr<Entity> entity) { return entity->HasComponent<Comp>(); };
+			}());
+	}
+
+
+	void ScriptGlue::RegisterComponents()
+	{
+		s_EntityHasComponentFuncs.clear();
+		RegisterComponent<Transform>();
+		RegisterComponent<Camera>();
+		RegisterComponent<MeshRenderer>();
+	}
+
 
 	void ScriptGlue::RegisterFunctions()
 	{
@@ -260,7 +311,9 @@ namespace Loopie
 		ADD_INTERNAL_CALL(NativeLog_Vector2);
 		ADD_INTERNAL_CALL(NativeLog_Vector3);
 
+		ADD_INTERNAL_CALL(Entity_GetScriptInstance);
 		ADD_INTERNAL_CALL(Entity_FindEntityByName);
+		ADD_INTERNAL_CALL(Entity_HasComponent);
 
 		ADD_INTERNAL_CALL(Transform_GetPosition);
 		ADD_INTERNAL_CALL(Transform_SetPosition);
