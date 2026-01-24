@@ -5,12 +5,12 @@ namespace Loopie
 {
     public class Entity
     {
-        protected Entity() { ID = 0; }
-        internal Entity(ulong id)
+        protected Entity() { ID = ""; }
+        internal Entity(string id)
         {
             ID = id;
         }
-        public readonly ulong ID;
+        public readonly string ID;
 
         //public bool HasComponent<T>() where T: Component, new()
         //{

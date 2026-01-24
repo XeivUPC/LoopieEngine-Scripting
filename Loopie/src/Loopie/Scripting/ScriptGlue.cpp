@@ -48,17 +48,17 @@ namespace Loopie
 		Log::Warn("{0}", parameter);
 	}
 
-	static void NativeLog_Vector2(glm::vec2* parameter)
+	static void NativeLog_Vector2(vec2* parameter)
 	{
 		Log::Warn("{0} {1}", parameter->x, parameter->y);
 	}
 
-	static void NativeLog_Vector3(glm::vec3* parameter)
+	static void NativeLog_Vector3(vec3* parameter)
 	{
 		Log::Warn("{0} {1} {2}", parameter->x, parameter->y, parameter->z);
 	}
 
-	static void NativeLog_Vector4(glm::vec4* parameter)
+	static void NativeLog_Vector4(vec4* parameter)
 	{
 		Log::Warn("{0} {1} {2} {3}", parameter->x, parameter->y, parameter->z, parameter->w);
 	}
@@ -110,6 +110,62 @@ namespace Loopie
 		Scene* scene = &Application::GetInstance().GetScene();
 		std::shared_ptr<Entity> entity = scene->GetEntity(id);
 		entity->GetTransform()->SetPosition(*position);
+	}
+
+	static void Transform_GetLocalPosition(UUID id, vec3* position)
+	{
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(id);
+		*position = entity->GetTransform()->GetLocalPosition();
+	}
+
+	static void Transform_SetLocalPosition(UUID id, vec3* position)
+	{
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(id);
+		entity->GetTransform()->SetLocalPosition(*position);
+	}
+
+	static void Transform_GetRotation(UUID id, vec3* rotation)
+	{
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(id);
+		*rotation = entity->GetTransform()->GetEulerAngles();
+	}
+
+	static void Transform_SetRotation(UUID id, vec3* rotation)
+	{
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(id);
+		entity->GetTransform()->SetEulerAngles(*rotation);
+	}
+
+	static void Transform_GetLocalRotation(UUID id, vec3* rotation)
+	{
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(id);
+		*rotation = entity->GetTransform()->GetLocalEulerAngles();
+	}
+
+	static void Transform_SetLocalRotation(UUID id, vec3* rotation)
+	{
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(id);
+		entity->GetTransform()->SetLocalEulerAngles(*rotation);
+	}
+
+	static void Transform_GetLocalScale(UUID id, vec3* position)
+	{
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(id);
+		*position = entity->GetTransform()->GetLocalScale();
+	}
+
+	static void Transform_SetLocalScale(UUID id, vec3* position)
+	{
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(id);
+		entity->GetTransform()->SetLocalScale(*position);
 	}
 #pragma endregion
 
@@ -164,6 +220,21 @@ namespace Loopie
 	{
 		return Time::GetDeltaTime();
 	}
+
+	static float Time_GetFixedDeltaTime()
+	{
+		return Time::GetFixedDeltaTime();
+	}
+
+	static float Time_GetTimeScale()
+	{
+		return Time::GetTimeScale();
+	}
+
+	static void Time_SetTimeScale(float scale)
+	{
+		Time::SetTimeScale(scale);
+	}
 #pragma endregion
 
 	/*void ScriptGlue::RegisterComponents()
@@ -183,6 +254,14 @@ namespace Loopie
 
 		ADD_INTERNAL_CALL(Transform_GetPosition);
 		ADD_INTERNAL_CALL(Transform_SetPosition);
+		ADD_INTERNAL_CALL(Transform_GetLocalPosition);
+		ADD_INTERNAL_CALL(Transform_SetLocalPosition);
+		ADD_INTERNAL_CALL(Transform_GetRotation);
+		ADD_INTERNAL_CALL(Transform_SetRotation);
+		ADD_INTERNAL_CALL(Transform_GetLocalRotation);
+		ADD_INTERNAL_CALL(Transform_SetLocalRotation);
+		ADD_INTERNAL_CALL(Transform_GetLocalScale);
+		ADD_INTERNAL_CALL(Transform_SetLocalScale);
 
 		ADD_INTERNAL_CALL(Input_IsKeyDown);
 		ADD_INTERNAL_CALL(Input_IsKeyUp);
@@ -195,5 +274,8 @@ namespace Loopie
 		ADD_INTERNAL_CALL(Input_IsGamepadButtonPressed);
 
 		ADD_INTERNAL_CALL(Time_GetDeltaTime);
+		ADD_INTERNAL_CALL(Time_GetFixedDeltaTime);
+		ADD_INTERNAL_CALL(Time_GetTimeScale);
+		ADD_INTERNAL_CALL(Time_SetTimeScale);
 	}
 }
