@@ -11,10 +11,12 @@
 #include <mono/jit/jit.h>
 #include <mono/metadata/threads.h>
 #include <mono/metadata/attrdefs.h>
+#include <mono/metadata/mono-gc.h>
 
 namespace Loopie {
 	ScriptingContext ScriptingManager::s_Data;
-	bool ScriptingManager::s_IsRunning;
+	bool ScriptingManager::s_IsRunning = false;
+	bool ScriptingManager::s_Initialized = false;
 
 	static ScriptFieldType MonoTypeToScriptFieldType(_MonoType* monoType)
 	{
@@ -33,6 +35,7 @@ namespace Loopie {
 		return mono_string_new(s_Data.AppDomain, string);
 	}
 	void ScriptingManager::Init() {
+		mono_set_assemblies_path("mono/lib/mono/4.5");
 		mono_set_dirs("mono/lib", "mono/etc");
 		mono_config_parse(NULL);
 
@@ -46,49 +49,82 @@ namespace Loopie {
 		mono_domain_set(s_Data.AppDomain, true);
 
 
-		s_Data.CoreAssemblyFilepath = "Scripting/Loopie.Core.dll";
+		s_Data.CoreAssemblyFilepath = "../LoopieScripting/Loopie.Core.dll";
 		s_Data.AppAssemblyFilepath = "Scripting/Game.dll";
+		s_Data.CompilerAssemblyFilepath = "../LoopieCompiler/Loopie.ScriptCompiler.dll";
 
 		LoadCoreAssembly();
+		LoadCompilerAssembly();
+
+		//LoadScriptingClasses(s_Data.CompilerImage);
+
+		CompileGameAssembly();
+
 		LoadAppAssembly(); 
 
 		ScriptGlue::RegisterFunctions();
+		LoadScriptingClasses(s_Data.AppImage);
+
+		s_Data.ComponentClass = std::make_shared<ScriptingClass>("Loopie", "Component", true);
+
+		s_Initialized = true;
 
 		LoadScriptingClasses(s_Data.CoreImage); // ChangeToGame
 	}
 
 	void ScriptingManager::Shutdown() {
+		if (!s_Initialized) return;
 
-		mono_domain_set(mono_get_root_domain(), false);
+		// Switch to root
+		mono_domain_set(s_Data.RootDomain, false);
 
 		if (s_Data.AppDomain) {
 			mono_domain_unload(s_Data.AppDomain);
 			s_Data.AppDomain = nullptr;
 		}
+
 		if (s_Data.RootDomain) {
 			mono_jit_cleanup(s_Data.RootDomain);
 			s_Data.RootDomain = nullptr;
-		}	
+		}
+		s_Initialized = false;
 	}
 
-	void ScriptingManager::Reload() { /// Fix Errro, crash when reload and start runtime
+	void ScriptingManager::Reload() {
+		if (!s_Initialized) return;
 
 		Log::Info("Reloading scripting domain");
+		if (s_IsRunning) RuntimeStop();
+
+		if (!mono_thread_current())
+			mono_thread_attach(s_Data.RootDomain);
 
 		mono_domain_set(s_Data.RootDomain, false);
-		mono_domain_unload(s_Data.AppDomain);
 
-		s_Data.AppDomain = mono_domain_create_appdomain((char*)"LoopieAppDomain", nullptr);
+		if (s_Data.AppDomain) {
+			mono_domain_unload(s_Data.AppDomain);
+			s_Data.AppDomain = nullptr;
+		}
+
+		s_Data.AppDomain = mono_domain_create_appdomain("LoopieAppDomain", nullptr);
 		mono_domain_set(s_Data.AppDomain, true);
 
-		// Reload assemblies
 		LoadCoreAssembly();
-		LoadAppAssembly();
+		LoadCompilerAssembly();
 
-		LoadScriptingClasses(s_Data.CoreImage); // ChangeToGame
+		if (!CompileGameAssembly()) {
+			Log::Error("Script compilation failed. Aborting reload.");
+			return;
+		}
+
+		LoadAppAssembly();
+		LoadScriptingClasses(s_Data.AppImage);
+
+		s_Data.ComponentClass = std::make_shared<ScriptingClass>("Loopie", "Component", true);
 
 		s_Data.Dirty = false;
 	}
+
 
 	void ScriptingManager::LoadCoreAssembly()
 	{
@@ -102,6 +138,13 @@ namespace Loopie {
 		s_Data.AppAssembly = LoadAssembly(s_Data.AppAssemblyFilepath.c_str());
 		if(s_Data.AppAssembly)
 			s_Data.AppImage = mono_assembly_get_image(s_Data.AppAssembly);
+	}
+
+	void ScriptingManager::LoadCompilerAssembly()
+	{
+		s_Data.CompilerAssembly = LoadAssembly(s_Data.CompilerAssemblyFilepath.c_str());
+		if (s_Data.CompilerAssembly)
+			s_Data.CompilerImage = mono_assembly_get_image(s_Data.CompilerAssembly);
 	}
 
 	void ScriptingManager::RuntimeStart()
@@ -129,6 +172,7 @@ namespace Loopie {
 		//// Load Scripting Classes
 		const MonoTableInfo* typeDefinitionsTable = mono_image_get_table_info(monoImage, MONO_TABLE_TYPEDEF);
 		int32_t numTypes = mono_table_info_get_rows(typeDefinitionsTable);
+		MonoClass* component = mono_class_from_name(s_Data.CoreImage, "Loopie", "Component");
 
 		for (int32_t i = 0; i < numTypes; i++)
 		{
@@ -145,7 +189,14 @@ namespace Loopie {
 
 			MonoClass* monoClass = mono_class_from_name(monoImage, nameSpace, className);
 
-			std::shared_ptr<ScriptingClass> scriptClass = std::make_shared<ScriptingClass>(nameSpace, className, true);
+			if (monoClass == component)
+				continue;
+
+			bool isComponent = mono_class_is_subclass_of(monoClass, component, false);
+			if (!isComponent)
+				continue;
+
+			std::shared_ptr<ScriptingClass> scriptClass = std::make_shared<ScriptingClass>(nameSpace, className, false);
 			s_Data.ScriptingClasses[fullName] = scriptClass;
 
 			int fieldCount = mono_class_num_fields(monoClass);
@@ -187,11 +238,80 @@ namespace Loopie {
 		return s_Data.ScriptingClasses.at(monoClassName);
 	}
 
+	_MonoObject* ScriptingManager::CreateManagedEntity(const UUID& uuid)
+	{
+		// Get Loopie.Entity class
+		MonoClass* entityClass =
+			mono_class_from_name(s_Data.CoreImage, "Loopie", "Entity");
+
+		if (!entityClass)
+		{
+			Log::Error("Failed to find Loopie.Entity class");
+			return nullptr;
+		}
+
+		// Create the managed object
+		MonoObject* entityObject =
+			mono_object_new(s_Data.AppDomain, entityClass);
+
+		// Get constructor: internal Entity(string id)
+		MonoMethod* ctor =
+			mono_class_get_method_from_name(entityClass, ".ctor", 1);
+
+		if (!ctor)
+		{
+			Log::Error("Failed to find Entity constructor");
+			return nullptr;
+		}
+
+		// Convert UUID -> string -> MonoString
+		std::string idStr = uuid.Get();
+		MonoString* monoID =
+			mono_string_new(s_Data.AppDomain, idStr.c_str());
+
+		void* args[1] = { monoID };
+
+		MonoObject* exception = nullptr;
+		mono_runtime_invoke(ctor, entityObject, args, &exception);
+
+		if (exception)
+		{
+			mono_print_unhandled_exception(exception);
+			return nullptr;
+		}
+
+		return entityObject;
+	}
+
 	_MonoAssembly* ScriptingManager::LoadAssembly(const char* path)
 	{
 		_MonoAssembly* assembly = mono_domain_assembly_open(s_Data.AppDomain, path);
 		if (!assembly)
 			Log::Error("Failed to load assembly: {}", path);
 		return assembly;
+	}
+
+	bool ScriptingManager::CompileGameAssembly()
+	{
+		MonoClass* compilerClass = mono_class_from_name(s_Data.CompilerImage, "Loopie", "ScriptCompiler"); 
+		MonoMethod* compileMethod = mono_class_get_method_from_name(compilerClass, "Compile", 4); 
+		MonoString* sourceDir = mono_string_new(s_Data.AppDomain, Application::GetInstance().m_activeProject.GetAssetsPath().string().c_str());
+		MonoString* outputDll = mono_string_new(s_Data.AppDomain, s_Data.AppAssemblyFilepath.c_str());
+		MonoString* coreDll = mono_string_new(s_Data.AppDomain, s_Data.CoreAssemblyFilepath.c_str());
+		MonoString* errorString = nullptr; void* args[4] = { sourceDir, outputDll, coreDll, &errorString }; 
+		MonoObject* exception = nullptr; MonoObject* result = mono_runtime_invoke(compileMethod, nullptr, args, &exception); 
+		if (exception) 
+		{ 
+			mono_print_unhandled_exception(exception); 
+			return false; 
+		} 
+		bool success = *(bool*)mono_object_unbox(result); 
+		if (!success) 
+		{ 
+			char* err = mono_string_to_utf8(errorString); 
+			Log::Error("Script compile error:\n{}", err); 
+			mono_free(err); 
+		} 
+		return success;
 	}
 }

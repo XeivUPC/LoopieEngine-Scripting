@@ -130,6 +130,7 @@ namespace Loopie {
 		_MonoObject* m_instance = nullptr;
 		_MonoMethod* m_OnCreate = nullptr;
 		_MonoMethod* m_OnUpdate = nullptr;
+		_MonoMethod* m_Constructor = nullptr;
 
 		
 	};

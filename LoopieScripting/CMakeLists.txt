@@ -1,27 +1,16 @@
 cmake_minimum_required(VERSION 3.10)
 project("LoopieScripting" NONE)
 
-find_program(DOTNET_EXECUTABLE dotnet REQUIRED)
+set(CS_PROJECT "${CMAKE_CURRENT_SOURCE_DIR}/LoopieScripting.csproj")
 
-set(LOOPIE_SCRIPTING_PROJECT
-    ${CMAKE_CURRENT_SOURCE_DIR}/LoopieScripting.csproj
-)
-
-set(LOOPIE_SCRIPTING_OUTPUT
-    ${CMAKE_BINARY_DIR}/Loopie.Core.dll
-)
-
-# Construye DLL de C# independiente
-add_custom_command(
-    OUTPUT ${LOOPIE_SCRIPTING_OUTPUT}
-    COMMAND ${DOTNET_EXECUTABLE} build
-            ${LOOPIE_SCRIPTING_PROJECT}
-            -c $<CONFIG>
-            -o ${CMAKE_BINARY_DIR}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMENT "Building LoopieScripting (C#)"
+set(CS_OUTPUT_DIR
+    ${CMAKE_BINARY_DIR}/LoopieScripting
 )
 
 add_custom_target(LoopieScriptingBuild ALL
-    DEPENDS ${LOOPIE_SCRIPTING_OUTPUT}
+    COMMAND dotnet build "${CS_PROJECT}"
+        -c $<CONFIG>
+        -o "${CS_OUTPUT_DIR}"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    COMMENT "Building LoopieScripting (C#)"
 )

@@ -10,6 +10,8 @@
 
 #include "Loopie/Math/MathTypes.h"
 
+#include "Loopie/Scripting/ScriptingManager.h"
+
 #include "Loopie/Resources/ResourceManager.h"
 #include "Loopie/Importers/TextureImporter.h"
 #include "Loopie/Math/Ray.h"
@@ -27,6 +29,10 @@ namespace Loopie
 	void EditorModule::OnLoad()
 	{
 		AssetRegistry::Initialize();
+
+		ScriptingManager::Init();
+		Log::Info("Scripting created successfully.");
+
 		Application::GetInstance().GetWindow().SetResizable(true);
 
 		/////SCENE

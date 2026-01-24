@@ -72,6 +72,8 @@ namespace Loopie {
 		const std::string& GetClassNamespace() const { return m_classNamespace; }
 		const std::string GetFullName() const { return m_classNamespace + "." + m_className; }
 
+		_MonoClass* GetMonoClass() const { return m_monoClass; }
+
 		bool IsSameType(std::shared_ptr<ScriptingClass> scriptingClass) const {
 			return GetFullName() == scriptingClass->GetFullName();
 		}

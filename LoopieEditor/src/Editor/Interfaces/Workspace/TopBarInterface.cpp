@@ -107,8 +107,19 @@ namespace Loopie
         }
         else
         {
-            if (ImGui::ImageButton("stop", (ImTextureID)m_stopIcon->GetRendererId(), ImVec2(15, 15)))
+            if (ImGui::ImageButton("stop", (ImTextureID)m_stopIcon->GetRendererId(), ImVec2(15, 15)) || !ScriptingManager::IsRunning())
             {
+
+                for (const auto& [uuid, entity] : Application::GetInstance().GetScene().GetAllEntities())
+                {
+                    if (!entity->HasComponent<ScriptClass>())
+                        continue;
+                    for (auto& component : entity->GetComponents<ScriptClass>())
+                    {
+                        component->DestroyInstance();
+                    }
+                }        
+
 				ScriptingManager::RuntimeStop();
                 m_actualMode = STOP;
             }

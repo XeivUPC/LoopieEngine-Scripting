@@ -30,3 +30,6 @@ out
 
 LoopieScripting/bin/
 LoopieScripting/obj/
+
+LoopieCompiler/bin/
+LoopieCompiler/obj/
