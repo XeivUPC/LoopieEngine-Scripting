@@ -31,7 +31,7 @@ namespace Loopie
         }
         private void SetTimeScale(float scale)
         {
-            InternalCalls.Time_SetTimeScale();
+            InternalCalls.Time_SetTimeScale(scale);
         }
     }
 }
