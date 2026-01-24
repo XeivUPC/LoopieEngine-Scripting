@@ -2,9 +2,11 @@ using System;
 
 namespace Loopie
 {
-	public class Transform : Component
+    public sealed class Transform
 	{
-		public Vector3 position
+        internal Entity entity;
+
+        public Vector3 position
 		{ 
 			get { return GetPosition(); }
 			set { SetPosition(value); }
@@ -13,7 +15,7 @@ namespace Loopie
 		private Vector3 GetPosition()
 		{
 			Vector3 entityPosition = Vector3.Zero;
-			InternalCalls.Transform_GetPosition(entity.ID, entityPosition);
+			InternalCalls.Transform_GetPosition(entity.ID, out entityPosition);
 			return entityPosition;
 		}
 		private void SetPosition(Vector3 position)
@@ -30,7 +32,7 @@ namespace Loopie
 		private Vector3 GetLocalPosition()
 		{
 			Vector3 entityPosition = Vector3.Zero;
-			InternalCalls.Transform_GetLocalPosition(entity.ID, entityPosition);
+			InternalCalls.Transform_GetLocalPosition(entity.ID, out entityPosition);
 			return entityPosition;
 		}
 		private void SetLocalPosition(Vector3 position)
@@ -47,7 +49,7 @@ namespace Loopie
 		private Vector3 GetRotation()
 		{
 			Vector3 entityPosition = Vector3.Zero;
-			InternalCalls.Transform_GetRotation(entity.ID, entityPosition);
+			InternalCalls.Transform_GetRotation(entity.ID, out entityPosition);
 			return entityPosition;
 		}
 		private void SetRotation(Vector3 position)
@@ -64,7 +66,7 @@ namespace Loopie
 		private Vector3 GetLocalRotation()
 		{
 			Vector3 entityPosition = Vector3.Zero;
-			InternalCalls.Transform_GetLocalRotation(entity.ID, entityPosition);
+			InternalCalls.Transform_GetLocalRotation(entity.ID, out entityPosition);
 			return entityPosition;
 		}
 		private void SetLocalRotation(Vector3 position)
@@ -81,7 +83,7 @@ namespace Loopie
 		private Vector3 GetLocalScale()
 		{
 			Vector3 entityPosition = Vector3.Zero;
-			InternalCalls.Transform_GetLocalScale(entity.ID, entityPosition);
+			InternalCalls.Transform_GetLocalScale(entity.ID, out entityPosition);
 			return entityPosition;
 		}
 		private void SetLocalScale(Vector3 position)

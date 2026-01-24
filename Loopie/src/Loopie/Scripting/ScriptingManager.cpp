@@ -56,8 +56,6 @@ namespace Loopie {
 		LoadCoreAssembly();
 		LoadCompilerAssembly();
 
-		//LoadScriptingClasses(s_Data.CompilerImage);
-
 		CompileGameAssembly();
 
 		LoadAppAssembly(); 
@@ -69,7 +67,6 @@ namespace Loopie {
 		s_Initialized = true;
 		ScriptGlue::RegisterFunctions();
 
-		LoadScriptingClasses(s_Data.CoreImage); // ChangeToGame
 	}
 
 	void ScriptingManager::Shutdown() {

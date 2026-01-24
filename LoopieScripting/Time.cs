@@ -6,7 +6,7 @@ namespace Loopie
         {
             get { return GetDeltaTime(); }
         }
-        private float GetDeltaTime()
+        private static float GetDeltaTime()
         {
             return InternalCalls.Time_GetDeltaTime();
         }
@@ -15,7 +15,7 @@ namespace Loopie
         {
             get { return GetFixedDeltaTime(); }
         }
-        private float GetFixedDeltaTime()
+        private static float GetFixedDeltaTime()
         {
             return InternalCalls.Time_GetFixedDeltaTime();
         }
@@ -25,13 +25,13 @@ namespace Loopie
             get { return GetTimeScale(); }
             set { SetTimeScale(value); }
         }
-        private float GetTimeScale()
+        private static float GetTimeScale()
         {
             return InternalCalls.Time_GetTimeScale();
         }
-        private void SetTimeScale(float scale)
+        private static void SetTimeScale(float scale)
         {
-            InternalCalls.Time_SetTimeScale();
+            InternalCalls.Time_SetTimeScale(scale);
         }
     }
 }

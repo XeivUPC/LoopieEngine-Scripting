@@ -41,6 +41,7 @@ namespace Loopie
                 // Add the engine's core DLL if provided
                 if (!string.IsNullOrEmpty(coreDll) && File.Exists(coreDll))
                 {
+                    Console.WriteLine("Adding Loopie.Core...");
                     references.Add(MetadataReference.CreateFromFile(coreDll));
                 }
 

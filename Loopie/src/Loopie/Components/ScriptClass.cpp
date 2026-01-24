@@ -1,6 +1,7 @@
 #include "ScriptClass.h"
 
 #include "Loopie/Scripting/ScriptingManager.h"
+#include "Loopie/Scene/Entity.h"
 #include "Loopie/Core/Log.h"
 
 #include <mono/metadata/object.h>
@@ -43,7 +44,7 @@ namespace Loopie
 			mono_class_get_property_from_name(ScriptingManager::s_Data.ComponentClass->GetMonoClass() , "entity");
 
 		MonoObject* entityInstance =
-			ScriptingManager::CreateManagedEntity(GetUUID());
+			ScriptingManager::CreateManagedEntity(GetOwner()->GetUUID());
 
 		void* args[1] = { entityInstance };
 		mono_property_set_value(entityProperty, m_instance, args, nullptr);
