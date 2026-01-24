@@ -36,7 +36,11 @@ namespace Loopie
 
         public void OnUpdate()
         {
-            Console.WriteLine($"Updating");
+            if (Input.IsGamepadButtonDown(GamepadButton.GAMEPAD_A))
+            {
+                InternalCalls.NativeLog_Float(Time.deltaTime);
+                Console.WriteLine($"Updating");
+            }
         }
     }
 }

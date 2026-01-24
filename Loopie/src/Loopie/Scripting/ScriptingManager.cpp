@@ -28,7 +28,10 @@ namespace Loopie {
 
 		return it->second;
 	}
-
+	MonoString* ScriptingManager::CreateString(const char* string)
+	{
+		return mono_string_new(s_Data.AppDomain, string);
+	}
 	void ScriptingManager::Init() {
 		mono_set_dirs("mono/lib", "mono/etc");
 		mono_config_parse(NULL);
@@ -46,13 +49,12 @@ namespace Loopie {
 		s_Data.CoreAssemblyFilepath = "Scripting/Loopie.Core.dll";
 		s_Data.AppAssemblyFilepath = "Scripting/Game.dll";
 
-		ScriptGlue::RegisterFunctions();
-
 		LoadCoreAssembly();
 		LoadAppAssembly(); 
 
-		LoadScriptingClasses(s_Data.CoreImage); // ChangeToGame
+		ScriptGlue::RegisterFunctions();
 
+		LoadScriptingClasses(s_Data.CoreImage); // ChangeToGame
 	}
 
 	void ScriptingManager::Shutdown() {

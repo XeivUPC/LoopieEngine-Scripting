@@ -11,6 +11,7 @@ struct _MonoAssembly;
 struct _MonoImage;
 struct _MonoObject;
 struct _MonoClass;
+struct _MonoString;
 
 namespace Loopie {
 	struct ScriptingContext {
@@ -52,8 +53,8 @@ namespace Loopie {
 		static bool ExistsScriptingClass(const std::string& monoClassName);
 		static std::shared_ptr<ScriptingClass> GetScriptingClass(const std::string& monoClassName);
 		const std::unordered_map<std::string, std::shared_ptr<ScriptingClass>>& GetScriptingClasses() { return s_Data.ScriptingClasses; }
-
 		const static bool IsRunning() { return s_IsRunning; }
+		static _MonoString* CreateString(const char* string);
 
 	public:
 		static ScriptingContext s_Data;
