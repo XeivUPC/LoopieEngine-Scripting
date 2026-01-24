@@ -2,7 +2,7 @@ using System;
 
 namespace Loopie
 {
-	enum Space
+	public enum Space
 	{
 		localSpace,
 		worldSpace

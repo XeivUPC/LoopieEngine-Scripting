@@ -295,6 +295,21 @@ namespace Loopie
 	{
 		return Application::GetInstance().GetInputEvent().GetGamepadButtonStatus((SDL_GamepadButton)gamepadButton) == KeyState::REPEAT;
 	}
+
+	static void Input_GetMousePosition(vec2* mousePosition)
+	{
+		*mousePosition = Application::GetInstance().GetInputEvent().GetMousePosition();
+	}
+
+	static void Input_GetMouseDelta(vec2* mouseDelta)
+	{
+		*mouseDelta = Application::GetInstance().GetInputEvent().GetMouseDelta();
+	}
+
+	static void Input_GetScrollDelta(vec2* scrollDelta)
+	{
+		*scrollDelta = Application::GetInstance().GetInputEvent().GetScrollDelta();
+	}
 #pragma endregion
 
 #pragma region Time
@@ -363,6 +378,9 @@ namespace Loopie
 		ADD_INTERNAL_CALL(Input_IsGamepadButtonDown);
 		ADD_INTERNAL_CALL(Input_IsGamepadButtonUp);
 		ADD_INTERNAL_CALL(Input_IsGamepadButtonPressed);
+		ADD_INTERNAL_CALL(Input_GetMousePosition);
+		ADD_INTERNAL_CALL(Input_GetMouseDelta);
+		ADD_INTERNAL_CALL(Input_GetScrollDelta);
 
 		ADD_INTERNAL_CALL(Time_GetDeltaTime);
 		ADD_INTERNAL_CALL(Time_GetFixedDeltaTime);
