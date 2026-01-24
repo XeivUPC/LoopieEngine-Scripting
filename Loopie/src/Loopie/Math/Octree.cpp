@@ -11,27 +11,11 @@
 
 namespace Loopie
 {
-	// *** World Bounds as a constructor *** - PSS 14/12/2025
-	// Scene holds DEFAULT_WORLD_BOUNDS which holds the bounds for the world
-	// Keep in mind - it should be best to avoid the exact center, otherwise
-	// if we place things at height 0, it will collide with all quadrants.
-	Octree::Octree(const AABB& rootBounds)
+	Octree::Octree(const AABB& worldBounds) : m_worldBounds(worldBounds)
 	{
-		m_rootNode = std::make_unique<OctreeNode>(rootBounds);
+		m_rootNode = std::make_unique<OctreeNode>(worldBounds);
 	}
 
-	// *** Steps of Insert *** - PSS 14/12/2025
-	// 1. From the root node it goes downwards and inspects the node's children's AABB
-	//    and does a test with the Entity's AABB.
-	//    If there's a collision, it does this recursively with that child.
-	//    If multiple children collide with that entity's AABB, the parent keeps the entity and 
-	//    we stop recursion.
-	// 2. If you run out of Bucket Space and you are a leaf, subdivide node
-	//	  into 8 child nodes and add them in the parent node's list.
-	// 3. Redistribute all GameObjects to proper childs based on their
-	//    position in space.
-	// 4. If it reaches maximum depth, stop subdividing and add the object in
-	//    the list of entities of the node even we are over max entities (8) capacity.
 	void Octree::Insert(std::shared_ptr<Entity> entity)
 	{
 		AABB entityAABB = GetEntityAABB(entity);
@@ -44,7 +28,6 @@ namespace Loopie
 		RemoveRecursively(m_rootNode.get(), entity, entityAABB);
 	}
 
-	// This can be optimized if it's too slow
 	void Octree::Update(std::shared_ptr<Entity> entity)
 	{
 		Remove(entity);
@@ -53,29 +36,15 @@ namespace Loopie
 
 	void Octree::Clear()
 	{
-		if (m_rootNode)
-		{
-			m_rootNode.reset();
-		}
+		m_rootNode = std::make_unique<OctreeNode>(m_worldBounds);
 	}
 
-	// *** How Rebuild works *** - PSS 14/12/2025
-	// This allows us to rebalance the tree if it becomes too unbalanced, for example
-	// if internal nodes hold too many children.
-	// Right now it has to be called manually, but we could get the statistics
-	// of the Octree and rebuild automatically given a certain statistic,
-	// for example after X frames, or if an internal node holds too many entities.
 	void Octree::Rebuild()
 	{
-		AABB rootBounds = m_rootNode->m_aabb;
-		//std::vector<std::shared_ptr<Entity>> allEntities;
 		std::unordered_set<std::shared_ptr<Entity>> allEntities;
-		CollectAllEntitiesFromNode(m_rootNode.get(), allEntities);
+		CollectAllEntities(allEntities);
 
 		Clear();
-
-		m_rootNode = std::make_unique<OctreeNode>(rootBounds);
-		m_rootNode->m_isLeaf = true;
 
 		for (auto& entity : allEntities)
 		{
@@ -83,62 +52,16 @@ namespace Loopie
 		}
 	}
 
-	// *** Debug Draw *** - PSS 14/12/2025
-	// This debug draws the whole Octree. We might consider doing optimizations, 
-	// like frustrum, and expand it to debug from a certain Octree downwards
-	void Octree::DebugDraw(const vec4& color)
+	AABB Octree::GetEntityAABB(const std::shared_ptr<Entity>& entity) const
 	{
-		if (m_shouldDraw)
+		auto meshRenderer = entity->GetComponent<MeshRenderer>();
+		if (meshRenderer != nullptr)
 		{
-			DebugDrawRecursively(m_rootNode.get(), color, 0);
-		}
+			return meshRenderer->GetWorldAABB();
+		} 
+		AABB aabb(entity->GetTransform()->GetPosition());
 	}
 
-	void Octree::DebugPrintOctreeStatistics()
-	{
-		OctreeStatistics statistics = GetStatistics();
-		Log::Info("==========================");
-		Log::Info("Printing Octree Statistics");
-		Log::Info("==========================");
-		Log::Info("Total Nodes = {0}", statistics.totalNodes);
-		Log::Info("Leaf Nodes = {0}", statistics.leafNodes);
-		Log::Info("Internal Nodes = {0}", statistics.internalNodes);
-		Log::Info("Total Entities = {0}", statistics.totalEntities);
-		// The line below could be implemented with a few changes.
-		//Log::Info("Total Visible Entities = {0}", statistics.totalEntities); 
-		Log::Info("Max Depth = {0}", statistics.maxDepth);
-		Log::Info("Min Entities Per Node = {0}", statistics.minEntitiesPerNode);
-		Log::Info("Max Entities Per Node = {0}", statistics.maxEntitiesPerNode);
-		Log::Info("Average Entities Per Node = {0}", statistics.averageEntitiesPerNode);
-		Log::Info("Empty Leaves = {0}", statistics.emptyNodes);
-		Log::Info("Overfilled Leaves = {0}", statistics.overfilledNodes);
-	}
-	
-	void Octree::DebugPrintOctreeHierarchy()
-	{
-		Log::Info("==========================");
-		Log::Info("Printing Octree Hierarchy");
-		Log::Info("==========================");
-		
-		DebugPrintOctreeHierarchyRecursively(m_rootNode.get(), 0);
-	}
-
-	OctreeStatistics Octree::GetStatistics() const
-	{
-		OctreeStatistics stats;
-		GatherStatisticsRecursively(m_rootNode.get(), stats, 0);
-
-		if (stats.leafNodes > 0)
-		{
-			stats.averageEntitiesPerNode = static_cast<float>(stats.totalEntities) / stats.leafNodes;
-		}
-
-		return stats;
-	}
-
-	// *** Variable rayHit does nothing at the moment *** - PSS 14/12/25
-	// I haven't programmed the rayhit to return any meaningful value at the moment or to do anything with it
-	// I will have to check on it at some point
 	void Octree::CollectIntersectingObjectsWithRay(vec3 rayOrigin, vec3 rayDirection,
 												   std::unordered_set<std::shared_ptr<Entity>>& entities)
 	{
@@ -184,37 +107,17 @@ namespace Loopie
 		return m_shouldDraw;
 	}
 
-	AABB Octree::GetEntityAABB(const std::shared_ptr<Entity>& entity) const
-	{
-		auto meshRenderer = entity->GetComponent<MeshRenderer>();
-		if (meshRenderer)
-		{
-			return meshRenderer->GetWorldAABB();
-		}
-		else
-		{
-			vec3 entityPosition = entity->GetTransform()->GetPosition();
-			AABB aabb(entityPosition);
-			
-			return aabb;
-		}
-	}
+	
 	
 	void Octree::InsertRecursively(OctreeNode* node, std::shared_ptr<Entity> entity, const AABB& entityAABB, int depth)
 	{
-		if (!node)
-		{
-			return;
-		}
-
-		// If the node is a leaf, add entity and check for entities and depth.
-		// If max capacity has reached and hasn't reached max depth, 
-		// it will subdivide the node and redistribute all entities.
+		if (!node)return;
 		if (node->m_isLeaf)
 		{
 			node->m_entities.insert(entity);
 
-			if (node->m_entities.size() > MAX_ENTITIES_PER_NODE && depth < MAXIMUM_DEPTH)
+			if (node->m_entities.size() > MAX_ENTITIES_PER_NODE &&
+				depth < MAXIMUM_DEPTH)
 			{
 				Subdivide(node);
 				RedistributeEntities(node, depth);
@@ -222,87 +125,52 @@ namespace Loopie
 			return;
 		}
 
-		// If it entity intersects with multiple children, put entity on their parent node
-		int totalNodesIntersecting = 0;
-		int nodeNumberFound = -1;
+		int intersectingChildren = 0;
+		int childIndex = -1;
 
-		for (int i = 0; i < MAX_ENTITIES_PER_NODE; ++i)
+		for (int i = 0; i < OCTREE_CHILD_COUNT; ++i)
 		{
-			if (node->m_children[i] && node->m_children[i]->m_aabb.Intersects(entityAABB))
+			if (node->m_children[i]->m_aabb.Intersects(entityAABB))
 			{
-				totalNodesIntersecting++;
-				if (totalNodesIntersecting > 1)
+				intersectingChildren++;
+				childIndex = i;
+				if (intersectingChildren > 1)
 				{
 					node->m_entities.insert(entity);
 					return;
 				}
-				nodeNumberFound = i;
 			}
 		}
 
-		// If found a node intersecting with entity and hasn't been inserted yet, 
-		// try to insert below that node
-		if (totalNodesIntersecting == 1)
-		{
-			InsertRecursively(node->m_children[nodeNumberFound].get(), entity, entityAABB, depth + 1);
-		}
+		if (intersectingChildren == 1)
+			InsertRecursively(node->m_children[childIndex].get(), entity, entityAABB, depth + 1);
 		else
-		{
-			// No children intersect - store at this node (edge case)
 			node->m_entities.insert(entity);
-		}
 	}
 
 	void Octree::RemoveRecursively(OctreeNode* node, std::shared_ptr<Entity> entity, const AABB& entityAABB)
 	{
-		if (!node)
-		{
+		if (!node || !node->m_aabb.Intersects(entityAABB))
 			return;
-		}
-		
-		// Early exit - if the entities' AABB doesn't intersect with this node's AABB, skip it and its children.
-		if (!entityAABB.Intersects(node->m_aabb))
-		{
+
+		if (node->m_entities.erase(entity))
 			return;
-		}
 
-		auto it = node->m_entities.find(entity);
-		bool foundEntity = (it != node->m_entities.end());
-
-		if (foundEntity)
-		{
-			node->m_entities.erase(entity);
+		if (node->m_isLeaf)
 			return;
-		}
 
-		int totalNodesIntersecting = 0;
-		int nodeNumberFound = -1;
-
-		for (int i = 0; i < MAX_ENTITIES_PER_NODE; ++i)
-		{
-			if (node->m_children[i] && node->m_children[i]->m_aabb.Intersects(entityAABB))
-			{
-				totalNodesIntersecting++;
-				nodeNumberFound = i;
-			}
-		}
-
-		if (totalNodesIntersecting == 1)
-		{
-			RemoveRecursively(node->m_children[nodeNumberFound].get(), entity, entityAABB);
-		}
+		for (int i = 0; i < OCTREE_CHILD_COUNT; ++i)
+			RemoveRecursively(node->m_children[i].get(), entity, entityAABB);
 	}
 
 	void Octree::Subdivide(OctreeNode* node)
 	{
-		// Subdivide node into 8 different nodes
-		std::array<AABB, MAX_ENTITIES_PER_NODE> childAABBs = ComputeChildAABBs(node->m_aabb);
+		auto childAABBs = ComputeChildAABBs(node->m_aabb);
 
-		for (int i = 0; i < MAX_ENTITIES_PER_NODE; ++i)
+		for (int i = 0; i < OCTREE_CHILD_COUNT; ++i)
 		{
 			node->m_children[i] = std::make_unique<OctreeNode>(childAABBs[i]);
 			node->m_children[i]->m_parent = node;
-			node->m_children[i]->m_isLeaf = true;
 		}
 
 		node->m_isLeaf = false;
@@ -310,83 +178,34 @@ namespace Loopie
 
 	void Octree::RedistributeEntities(OctreeNode* node, int depth)
 	{
-		// Redistribute entities into those 8 different nodes
-		if (node->m_isLeaf)
-		{
-			return;
-		}
+		auto entities = std::move(node->m_entities);
 
-		std::unordered_set<std::shared_ptr<Entity>> entitiesToRedistribute = std::move(node->m_entities);
-
-		for (auto& entity : entitiesToRedistribute)
-		{
-			AABB entityAABB = GetEntityAABB(entity);
-
-
-			// If it entity intersects with multiple children, put entity on their parent node
-			int totalNodesIntersecting = 0;
-			int nodeNumberFound = -1;
-
-			for (int i = 0; i < MAX_ENTITIES_PER_NODE; ++i)
-			{
-				if (node->m_children[i] && node->m_children[i]->m_aabb.Intersects(entityAABB))
-				{
-					totalNodesIntersecting++;
-					if (totalNodesIntersecting > 1)
-					{
-						break;
-					}
-					nodeNumberFound = i;
-				}
-			}
-
-			if (totalNodesIntersecting > 1)
-			{
-				node->m_entities.insert(entity);
-			}
-			else if (totalNodesIntersecting == 1)
-			{
-				node->m_children[nodeNumberFound]->m_entities.insert(entity);
-			}
-			else
-			{
-				// Intersects with no children (edge case) -> Parent keeps entity
-				node->m_entities.insert(entity);
-			}
-		}
-
-		// After redistribution, check each child if it needs further subdivision
-		for (int i = 0; i < MAX_ENTITIES_PER_NODE; ++i)
-		{
-			if (node->m_children[i] && node->m_children[i]->m_entities.size() > MAX_ENTITIES_PER_NODE
-				&& depth + 1 < MAXIMUM_DEPTH)
-			{
-				Subdivide(node->m_children[i].get());
-				RedistributeEntities(node->m_children[i].get(), depth + 1);
-			}
-		}
+		for (auto& entity : entities)
+			InsertRecursively(node, entity, GetEntityAABB(entity), depth);
 	}
 
-	std::array<AABB, MAX_ENTITIES_PER_NODE> Octree::ComputeChildAABBs(const AABB& parentAABB) const
+	std::array<AABB, OCTREE_CHILD_COUNT> Octree::ComputeChildAABBs(const AABB& parentAABB) const
 	{
-		std::array<AABB, MAX_ENTITIES_PER_NODE> children;
+		std::array<AABB, OCTREE_CHILD_COUNT> children;
 		vec3 center = parentAABB.GetCenter();
 		vec3 min = parentAABB.MinPoint;
 		vec3 max = parentAABB.MaxPoint;
 
-		for (int i = 0; i < MAX_ENTITIES_PER_NODE; ++i)
+		for (int i = 0; i < OCTREE_CHILD_COUNT; ++i)
 		{
-			// This generates all octants by using bit-wise operations
-			vec3 childMin, childMax;
-			childMin.x = (i & 1) ? center.x : min.x;
-			childMin.y = (i & 2) ? center.y : min.y;
-			childMin.z = (i & 4) ? center.z : min.z;
-			childMax.x = (i & 1) ? max.x : center.x;
-			childMax.y = (i & 2) ? max.y : center.y;
-			childMax.z = (i & 4) ? max.z : center.z;
+			vec3 childMin{
+				(i & 1) ? center.x : min.x,
+				(i & 2) ? center.y : min.y,
+				(i & 4) ? center.z : min.z
+			};
 
-			AABB aabb(childMin, childMax);
-			children[i] = aabb;
+			vec3 childMax{
+				(i & 1) ? max.x : center.x,
+				(i & 2) ? max.y : center.y,
+				(i & 4) ? max.z : center.z
+			};
+
+			children[i] = AABB(childMin, childMax);
 		}
 
 		return children;
@@ -648,5 +467,55 @@ namespace Loopie
 				CollectVisibleEntitiesFrustumRecursively(node->m_children[i].get(), frustum, visibleEntities);
 			}
 		}
+	}
+
+	void Octree::DebugDraw(const vec4& color)
+	{
+		if (m_shouldDraw)
+		{
+			DebugDrawRecursively(m_rootNode.get(), color, 0);
+		}
+	}
+
+	void Octree::DebugPrintOctreeStatistics()
+	{
+		OctreeStatistics statistics = GetStatistics();
+		Log::Info("==========================");
+		Log::Info("Printing Octree Statistics");
+		Log::Info("==========================");
+		Log::Info("Total Nodes = {0}", statistics.totalNodes);
+		Log::Info("Leaf Nodes = {0}", statistics.leafNodes);
+		Log::Info("Internal Nodes = {0}", statistics.internalNodes);
+		Log::Info("Total Entities = {0}", statistics.totalEntities);
+		// The line below could be implemented with a few changes.
+		//Log::Info("Total Visible Entities = {0}", statistics.totalEntities); 
+		Log::Info("Max Depth = {0}", statistics.maxDepth);
+		Log::Info("Min Entities Per Node = {0}", statistics.minEntitiesPerNode);
+		Log::Info("Max Entities Per Node = {0}", statistics.maxEntitiesPerNode);
+		Log::Info("Average Entities Per Node = {0}", statistics.averageEntitiesPerNode);
+		Log::Info("Empty Leaves = {0}", statistics.emptyNodes);
+		Log::Info("Overfilled Leaves = {0}", statistics.overfilledNodes);
+	}
+
+	void Octree::DebugPrintOctreeHierarchy()
+	{
+		Log::Info("==========================");
+		Log::Info("Printing Octree Hierarchy");
+		Log::Info("==========================");
+
+		DebugPrintOctreeHierarchyRecursively(m_rootNode.get(), 0);
+	}
+
+	OctreeStatistics Octree::GetStatistics() const
+	{
+		OctreeStatistics stats;
+		GatherStatisticsRecursively(m_rootNode.get(), stats, 0);
+
+		if (stats.leafNodes > 0)
+		{
+			stats.averageEntitiesPerNode = static_cast<float>(stats.totalEntities) / stats.leafNodes;
+		}
+
+		return stats;
 	}
 }

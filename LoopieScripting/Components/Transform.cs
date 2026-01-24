@@ -110,56 +110,56 @@ namespace Loopie
 		}
 
 		public Vector3 forward
-		{ get {return Forward()}; }
+		{ get { return Forward(); } }
 
 		public Vector3 back
-		{ get {return Back()}; }
+		{ get { return Back(); } }
 
 		public Vector3 up
-		{ get {return Up()}; }
+		{ get { return Up(); } }
 
 		public Vector3 down
-		{ get {return Down()}; }
+		{ get { return Down(); } }
 
 		public Vector3 left
-		{ get {return Left()}; }
+		{ get { return Left(); } }
 
 		public Vector3 right
-		{ get {return Right()}; }
+		{ get { return Right(); } }
 
 		private Vector3 Forward()
 		{
-			Vector3 vector = Vector3.Forward;
+			Vector3 vector = Vector3.Zero;
 			InternalCalls.Transform_Forward(entity.ID, vector);
 			return vector;
 		}
 		private Vector3 Back()
 		{
-            Vector3 vector = -Vector3.Forward;
+            Vector3 vector = Vector3.Zero;
             InternalCalls.Transform_Back(entity.ID, vector);
             return vector;
         }
 		private Vector3 Up()
 		{
-            Vector3 vector = Vector3.Up;
+            Vector3 vector = Vector3.Zero;
             InternalCalls.Transform_Up(entity.ID, vector);
             return vector;
         }
 		private Vector3 Down()
 		{
-            Vector3 vector = -Vector3.Up;
+            Vector3 vector = Vector3.Zero;
             InternalCalls.Transform_Down(entity.ID, vector);
             return vector;
         }
 		private Vector3 Left()
 		{
-            Vector3 vector = -Vector3.Right;
+            Vector3 vector = Vector3.Zero;
             InternalCalls.Transform_Left(entity.ID, vector);
             return vector;
         }
 		private Vector3 Right()
 		{
-            Vector3 vector = Vector3.Right;
+            Vector3 vector = Vector3.Zero;
             InternalCalls.Transform_Right(entity.ID, vector);
             return vector;
         }

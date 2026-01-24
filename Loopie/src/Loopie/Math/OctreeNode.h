@@ -7,7 +7,7 @@
 
 namespace Loopie
 {
-	constexpr int MAX_ENTITIES_PER_NODE = 8;
+	constexpr int OCTREE_CHILD_COUNT = 8;
 
 	class Entity;
 
@@ -15,9 +15,7 @@ namespace Loopie
 	{
 	friend class Octree;
 	public:
-		// explicit added to prevent accidental conversions
-		explicit OctreeNode(std::shared_ptr<Entity> entity);
-		explicit OctreeNode(const AABB& aabb);
+		explicit OctreeNode(const AABB& bounds);
 		~OctreeNode() = default;
 
 	private:
@@ -26,7 +24,7 @@ namespace Loopie
 		std::unordered_set<std::shared_ptr<Entity>> m_entities;
 
 		OctreeNode* m_parent = nullptr;
-		std::array<std::unique_ptr<OctreeNode>, MAX_ENTITIES_PER_NODE> m_children = {};
+		std::array<std::unique_ptr<OctreeNode>, OCTREE_CHILD_COUNT> m_children = {};
 		bool m_isLeaf = true;
 	};
 }

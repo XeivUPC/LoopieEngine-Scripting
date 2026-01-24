@@ -7,25 +7,5 @@
 
 namespace Loopie
 {
-	OctreeNode::OctreeNode(std::shared_ptr<Entity> entity)
-	{
-		m_entities.insert(entity);
-
-		auto meshRenderer = entity->GetComponent<MeshRenderer>();
-		if (meshRenderer)
-		{
-			m_aabb = meshRenderer->GetWorldAABB();
-		}
-		else
-		{
-			m_aabb.Enclose(entity->GetTransform()->GetPosition());
-		}
-	}
-
-	OctreeNode::OctreeNode(const AABB& aabb)
-	{
-		m_aabb = aabb;
-	}
+	OctreeNode::OctreeNode(const AABB& bounds):m_aabb(bounds){}
 }
-
-
