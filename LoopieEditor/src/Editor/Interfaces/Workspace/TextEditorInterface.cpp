@@ -519,11 +519,14 @@ namespace Loopie {
 			}
 		}
 
+		file.close();
+		if(m_isModified)
+			AssetRegistry::RefreshAssetRegistry();
+
 		m_currentFilePath = filepath;
 		m_isModified = false;
 
-		file.close();
-		AssetRegistry::RefreshAssetRegistry();
+		
 		return true;
 	}
 

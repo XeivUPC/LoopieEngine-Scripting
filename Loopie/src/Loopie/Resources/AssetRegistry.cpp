@@ -37,6 +37,7 @@ namespace Loopie {
 		ScanAssetDirectory();
 
 		bool scriptReloadRequired = false;
+		int scriptFiles = 0;
 
 		for (auto& [key, metadata] : s_Assets) {
 			
@@ -72,6 +73,7 @@ namespace Loopie {
 					updated = true;
 					scriptReloadRequired = true;
 				}
+				scriptFiles++;
 			}
 
 			///
@@ -87,9 +89,17 @@ namespace Loopie {
 
 		Application::GetInstance().m_notifier.Notify(EngineNotification::OnAssetRegistryReload);
 
+		if (scriptFiles <= 1) /// DefualtScript Avoid
+		{
+			if (DirectoryManager::Delete(Application::GetInstance().m_activeProject.GetGameDLLPath()))
+				scriptReloadRequired = true;
+		}
+
+
 		if (scriptReloadRequired) {
 			Application::GetInstance().m_notifier.Notify(EngineNotification::OnAssemblyReloadRequiered);
 		}
+		
 	}
 
 	void AssetRegistry::Clear() {

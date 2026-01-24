@@ -19,6 +19,7 @@ namespace Loopie {
 		const std::filesystem::path& GetAssetsPath() const { return m_assetsPath; }
 		const std::filesystem::path& GetChachePath() const { return m_cachePath; }
 		const std::filesystem::path& GetConfigPath() const { return m_congifPath; }
+		const std::filesystem::path& GetGameDLLPath() const { return m_gameDLLPath; }
 
 	private:
 		const void CreateDefaultPaths();
@@ -28,5 +29,6 @@ namespace Loopie {
 		std::filesystem::path m_cachePath;
 
 		std::filesystem::path m_congifPath;
+		std::filesystem::path m_gameDLLPath;
 	};
 }

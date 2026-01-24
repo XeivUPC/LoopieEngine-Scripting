@@ -48,9 +48,10 @@ namespace Loopie {
 		s_Data.AppDomain = mono_domain_create_appdomain("LoopieAppDomain", nullptr);
 		mono_domain_set(s_Data.AppDomain, true);
 
+		std::string projectDir = Application::GetInstance().m_activeProject.GetGameDLLPath().string();
 
 		s_Data.CoreAssemblyFilepath = "../LoopieScripting/Loopie.Core.dll";
-		s_Data.AppAssemblyFilepath = "Scripting/Game.dll";
+		s_Data.AppAssemblyFilepath = projectDir;
 		s_Data.CompilerAssemblyFilepath = "../LoopieCompiler/Loopie.ScriptCompiler.dll";
 
 		ScriptGlue::RegisterFunctions();
@@ -62,7 +63,10 @@ namespace Loopie {
 
 		LoadAppAssembly(); 
 
-		LoadScriptingClasses(s_Data.AppImage);
+		if (s_Data.AppImage != nullptr)
+			LoadScriptingClasses(s_Data.AppImage);
+		else
+			s_Data.ScriptingClasses.clear();
 
 		ScriptGlue::RegisterComponents();
 
@@ -118,7 +122,10 @@ namespace Loopie {
 		}
 
 		LoadAppAssembly();
-		LoadScriptingClasses(s_Data.AppImage);
+		if(s_Data.AppImage!=nullptr)
+			LoadScriptingClasses(s_Data.AppImage);
+		else
+			s_Data.ScriptingClasses.clear();
 
 		ScriptGlue::RegisterComponents();
 
@@ -307,7 +314,11 @@ namespace Loopie {
 		if (!success) 
 		{ 
 			char* err = mono_string_to_utf8(errorString); 
+			std::string errorStr(err);
 			Log::Error("Script compile error:\n{}", err); 
+			if (errorStr == "No C# files found in source directory.") {
+				s_Data.ScriptingClasses.clear();
+			}
 			mono_free(err); 
 		} 
 		return success;
