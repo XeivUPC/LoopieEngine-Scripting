@@ -177,6 +177,78 @@ namespace Loopie
 		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
 		entity->GetTransform()->SetLocalScale(*position);
 	}
+
+	static void Transform_Translate(MonoString* id, vec3* translation, ObjectSpace space)
+	{
+		UUID uuid(Utils::MonoStringToString(id));
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		entity->GetTransform()->Translate(*translation, (ObjectSpace)space);
+	}
+
+	static void Transform_Rotate(MonoString* id, vec3* eulerAngles, ObjectSpace space)
+	{
+		UUID uuid(Utils::MonoStringToString(id));
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		entity->GetTransform()->Rotate(*eulerAngles, (ObjectSpace)space);
+	}
+
+	static void Transform_LookAt(MonoString* id, vec3* target, vec3* worldUp)
+	{
+		UUID uuid(Utils::MonoStringToString(id));
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		entity->GetTransform()->LookAt(*target, *worldUp);
+	}
+
+	static void Transform_Forward(MonoString* id, vec3* forward)
+	{
+		UUID uuid(Utils::MonoStringToString(id));
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		forward = &entity->GetTransform()->Up();
+	}
+
+	static void Transform_Back(MonoString* id, vec3* back)
+	{
+		UUID uuid(Utils::MonoStringToString(id));
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		back = &entity->GetTransform()->Up();
+	}
+
+	static void Transform_Up(MonoString* id, vec3* up)
+	{
+		UUID uuid(Utils::MonoStringToString(id));
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		up = &entity->GetTransform()->Up();
+	}
+
+	static void Transform_Down(MonoString* id, vec3* down)
+	{
+		UUID uuid(Utils::MonoStringToString(id));
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		down = &entity->GetTransform()->Up();
+	}
+
+	static void Transform_Left(MonoString* id, vec3* left)
+	{
+		UUID uuid(Utils::MonoStringToString(id));
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		left = &entity->GetTransform()->Up();
+	}
+
+	static void Transform_Right(MonoString* id, vec3* right)
+	{
+		UUID uuid(Utils::MonoStringToString(id));
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		right = &entity->GetTransform()->Up();
+	}
 #pragma endregion
 
 #pragma region Input
@@ -272,6 +344,15 @@ namespace Loopie
 		ADD_INTERNAL_CALL(Transform_SetLocalRotation);
 		ADD_INTERNAL_CALL(Transform_GetLocalScale);
 		ADD_INTERNAL_CALL(Transform_SetLocalScale);
+		ADD_INTERNAL_CALL(Transform_Translate);
+		ADD_INTERNAL_CALL(Transform_Rotate);
+		ADD_INTERNAL_CALL(Transform_LookAt);
+		ADD_INTERNAL_CALL(Transform_Forward);
+		ADD_INTERNAL_CALL(Transform_Back);
+		ADD_INTERNAL_CALL(Transform_Up);
+		ADD_INTERNAL_CALL(Transform_Down);
+		ADD_INTERNAL_CALL(Transform_Left);
+		ADD_INTERNAL_CALL(Transform_Right);
 
 		ADD_INTERNAL_CALL(Input_IsKeyDown);
 		ADD_INTERNAL_CALL(Input_IsKeyUp);

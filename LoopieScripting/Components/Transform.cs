@@ -2,12 +2,17 @@ using System;
 
 namespace Loopie
 {
-    public sealed class Transform
+	enum Space
 	{
-        internal Entity entity;
+		localSpace,
+		worldSpace
+	}
+	public sealed class Transform
+	{
+		internal Entity entity;
 
-        public Vector3 position
-		{ 
+		public Vector3 position
+		{
 			get { return GetPosition(); }
 			set { SetPosition(value); }
 		}
@@ -24,7 +29,7 @@ namespace Loopie
 		}
 
 		public Vector3 local_position
-		{ 
+		{
 			get { return GetLocalPosition(); }
 			set { SetLocalPosition(value); }
 		}
@@ -41,7 +46,7 @@ namespace Loopie
 		}
 
 		public Vector3 rotation
-		{ 
+		{
 			get { return GetRotation(); }
 			set { SetRotation(value); }
 		}
@@ -58,7 +63,7 @@ namespace Loopie
 		}
 
 		public Vector3 local_rotation
-		{ 
+		{
 			get { return GetLocalRotation(); }
 			set { SetLocalRotation(value); }
 		}
@@ -74,8 +79,8 @@ namespace Loopie
 			InternalCalls.Transform_SetLocalRotation(entity.ID, position);
 		}
 
-		public Vector3 local_scale
-		{ 
+		public Vector3 scale
+		{
 			get { return GetLocalScale(); }
 			set { SetLocalScale(value); }
 		}
@@ -90,5 +95,73 @@ namespace Loopie
 		{
 			InternalCalls.Transform_SetLocalScale(entity.ID, position);
 		}
+
+		public void Translate(Vector3 translation, Space space)
+		{
+			InternalCalls.Transform_Translate(entity.ID, translation, space);
+		}
+		public void Rotate(Vector3 eulerAngles, Space space)
+		{
+			InternalCalls.Transform_Rotate(entity.ID, eulerAngles, space);
+		}
+		public void LookAt(Vector3 target, Vector3 up_vector)
+		{
+			InternalCalls.Transform_LookAt(entity.ID, target, up_vector);
+		}
+
+		public Vector3 forward
+		{ get {return Forward()}; }
+
+		public Vector3 back
+		{ get {return Back()}; }
+
+		public Vector3 up
+		{ get {return Up()}; }
+
+		public Vector3 down
+		{ get {return Down()}; }
+
+		public Vector3 left
+		{ get {return Left()}; }
+
+		public Vector3 right
+		{ get {return Right()}; }
+
+		private Vector3 Forward()
+		{
+			Vector3 vector = Vector3.Forward;
+			InternalCalls.Transform_Forward(entity.ID, vector);
+			return vector;
+		}
+		private Vector3 Back()
+		{
+            Vector3 vector = -Vector3.Forward;
+            InternalCalls.Transform_Back(entity.ID, vector);
+            return vector;
+        }
+		private Vector3 Up()
+		{
+            Vector3 vector = Vector3.Up;
+            InternalCalls.Transform_Up(entity.ID, vector);
+            return vector;
+        }
+		private Vector3 Down()
+		{
+            Vector3 vector = -Vector3.Up;
+            InternalCalls.Transform_Down(entity.ID, vector);
+            return vector;
+        }
+		private Vector3 Left()
+		{
+            Vector3 vector = -Vector3.Right;
+            InternalCalls.Transform_Left(entity.ID, vector);
+            return vector;
+        }
+		private Vector3 Right()
+		{
+            Vector3 vector = Vector3.Right;
+            InternalCalls.Transform_Right(entity.ID, vector);
+            return vector;
+        }
 	}
 }
