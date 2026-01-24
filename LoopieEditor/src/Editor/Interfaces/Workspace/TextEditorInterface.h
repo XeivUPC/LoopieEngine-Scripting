@@ -86,7 +86,7 @@ namespace Loopie {
 	private:
 		// Input Handling
 		void HandleKeyboardInputs();
-		void HandleMouseInputs();
+		void HandleMouseInputs(const vec2& childPos, const vec2& childSize, float scrollX, float scrollY, float textStart);
 
 		// Helper functions
 		LineIndex SanitizeLineIndex(const LineIndex& lineIndex) const;

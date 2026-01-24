@@ -1,5 +1,6 @@
 #include "TextEditorInterface.h"
 
+#include "Loopie/Resources/AssetRegistry.h"
 #include "Editor/Interfaces/Workspace/HierarchyInterface.h"
 #include "Editor/Interfaces/Workspace/AssetsExplorerInterface.h"
 
@@ -55,16 +56,23 @@ namespace Loopie {
 			float scrollX = ImGui::GetScrollX();
 			float scrollY = ImGui::GetScrollY();
 
+			
+
 			// Calculate visible lines
 			int lineStart = (int)floor(scrollY / lineHeight);
 			int lineEnd = std::min((int)m_lines.size(), lineStart + (int)ceil(contentSize.y / lineHeight) + 1);
 			lineStart = std::max(0, lineStart);
+
+			// Absolute position of the child window
+			ImVec2 childPos = ImGui::GetWindowPos(); // <- FIX: use window pos instead of cursor
 
 			// Line number margin
 			char lineNumBuf[16];
 			snprintf(lineNumBuf, 16, " %d ", (int)m_lines.size());
 			float lineNumberWidth = ImGui::CalcTextSize(lineNumBuf).x;
 			float textStart = lineNumberWidth + 10.0f;
+
+			HandleMouseInputs({ childPos.x, childPos.y }, { contentSize.x, contentSize.y }, scrollX, scrollY, textStart);
 
 			// Colors
 			ImU32 lineNumberColor = IM_COL32(100, 100, 100, 255);
@@ -402,10 +410,55 @@ namespace Loopie {
 		}
 	}
 
-	void TextEditorInterface::HandleMouseInputs()
+	void TextEditorInterface::HandleMouseInputs(const vec2& childPos, const vec2& childSize, float scrollX, float scrollY, float textStart)
 	{
-		// TODO: Implement mouse selection
+		ImGuiIO& io = ImGui::GetIO();
+
+		if (!ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows))
+			return;
+
+		ImVec2 mousePos = io.MousePos;
+
+		// Position relative to child + scroll offset
+		float relativeX = mousePos.x - childPos.x + scrollX - textStart;
+		float relativeY = mousePos.y - childPos.y + scrollY;
+
+		// Character metrics
+		ImVec2 charAdvance = ImGui::CalcTextSize(" ");
+		float lineHeight = ImGui::GetTextLineHeightWithSpacing();
+
+		// Determine line and column
+		int clickedLine = (int)(relativeY / lineHeight);
+		clickedLine = std::clamp(clickedLine, 0, (int)m_lines.size() - 1);
+
+		int clickedColumn = (int)(relativeX / charAdvance.x);
+		clickedColumn = std::clamp(clickedColumn, 0, (int)m_lines[clickedLine].length());
+
+		LineIndex clickedPos = { clickedLine, clickedColumn };
+
+		// Left click sets cursor
+		if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+		{
+			m_cursorPosition = SanitizeLineIndex(clickedPos);
+			if (io.KeyShift)
+				m_selectionEnd = m_cursorPosition;
+			else
+				m_selectionStart = m_selectionEnd = m_cursorPosition;
+
+			m_hasCursorPositionChanged = true;
+		}
+
+		// Drag selection
+		if (ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+		{
+			m_cursorPosition = SanitizeLineIndex(clickedPos);
+			m_selectionEnd = m_cursorPosition;
+			m_hasCursorPositionChanged = true;
+		}
 	}
+
+
+
 
 
 	// File Operations
@@ -468,6 +521,9 @@ namespace Loopie {
 
 		m_currentFilePath = filepath;
 		m_isModified = false;
+
+		file.close();
+		AssetRegistry::RefreshAssetRegistry();
 		return true;
 	}
 

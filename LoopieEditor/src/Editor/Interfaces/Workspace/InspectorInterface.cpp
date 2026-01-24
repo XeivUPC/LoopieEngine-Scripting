@@ -406,7 +406,8 @@ namespace Loopie {
 
 		if (open) {
 			/// Get Fields and show (one runtime version, and one editor version) -> For now, this is only editor version
-			std::shared_ptr<ScriptingClass> scriptingClass = scriptClass->GetScriptingClass();
+
+			std::shared_ptr<ScriptingClass> scriptingClass = ScriptingManager::s_Data.ScriptingClasses[scriptClass->GetClassName()];
 			const std::map<std::string, ScriptField>& fields = scriptingClass->GetFields();
 			for (const auto& [name, field] : fields)
 			{
