@@ -1,5 +1,7 @@
 #include "ScriptingManager.h"
 
+#include "Loopie/Scripting/ScriptGlue.h"
+
 #include "Loopie/Core/Log.h"
 #include "Loopie/Core/Application.h"
 #include "Loopie/Events/Event.h"
@@ -28,7 +30,10 @@ namespace Loopie {
 
 		return it->second;
 	}
-
+	MonoString* ScriptingManager::CreateString(const char* string)
+	{
+		return mono_string_new(s_Data.AppDomain, string);
+	}
 	void ScriptingManager::Init() {
 		mono_set_assemblies_path("mono/lib/mono/4.5");
 		mono_set_dirs("mono/lib", "mono/etc");
@@ -62,7 +67,9 @@ namespace Loopie {
 		s_Data.ComponentClass = std::make_shared<ScriptingClass>("Loopie", "Component", true);
 
 		s_Initialized = true;
+		ScriptGlue::RegisterFunctions();
 
+		LoadScriptingClasses(s_Data.CoreImage); // ChangeToGame
 	}
 
 	void ScriptingManager::Shutdown() {

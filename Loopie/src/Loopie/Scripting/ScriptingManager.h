@@ -12,6 +12,7 @@ struct _MonoAssembly;
 struct _MonoImage;
 struct _MonoObject;
 struct _MonoClass;
+struct _MonoString;
 
 namespace Loopie {
 	struct ScriptingContext {
@@ -63,6 +64,7 @@ namespace Loopie {
 		static _MonoObject* CreateManagedEntity(const UUID& uuid);
 
 		const static bool IsRunning() { return s_IsRunning; }
+		static _MonoString* CreateString(const char* string);
 
 	public:
 		static ScriptingContext s_Data;
