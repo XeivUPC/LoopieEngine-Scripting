@@ -154,18 +154,18 @@ namespace Loopie
 		entity->GetTransform()->SetLocalEulerAngles(*rotation);
 	}
 
-	static void Transform_GetLocalScale(UUID id, vec3* position)
+	static void Transform_GetLocalScale(UUID id, vec3* scale)
 	{
 		Scene* scene = &Application::GetInstance().GetScene();
 		std::shared_ptr<Entity> entity = scene->GetEntity(id);
-		*position = entity->GetTransform()->GetLocalScale();
+		*scale = entity->GetTransform()->GetLocalScale();
 	}
 
-	static void Transform_SetLocalScale(UUID id, vec3* position)
+	static void Transform_SetLocalScale(UUID id, vec3* scale)
 	{
 		Scene* scene = &Application::GetInstance().GetScene();
 		std::shared_ptr<Entity> entity = scene->GetEntity(id);
-		entity->GetTransform()->SetLocalScale(*position);
+		entity->GetTransform()->SetLocalScale(*scale);
 	}
 #pragma endregion
 
