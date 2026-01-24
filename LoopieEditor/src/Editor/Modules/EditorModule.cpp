@@ -140,7 +140,7 @@ namespace Loopie
 			}
 			m_game.EndScene();
 		}
-		
+		m_currentScene->FlushRemovedEntities();
 	}
 
 	void EditorModule::OnInterfaceRender()

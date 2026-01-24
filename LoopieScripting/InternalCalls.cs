@@ -56,31 +56,31 @@ namespace Loopie
             internal extern static void Transform_SetLocalScale(string id, Vector3 scale);
 
             [MethodImplAttribute(MethodImplOptions.InternalCall)]
-            internal extern static void Transform_Translate(string id, Vector3 translation, Space objectSpace);
+            internal extern static void Transform_Translate(string id, Vector3 translation, Transform.Space objectSpace);
             
             [MethodImplAttribute(MethodImplOptions.InternalCall)]
-            internal extern static void Transform_Rotate(string id, Vector3 eulerAngles, Space objectSpace);
+            internal extern static void Transform_Rotate(string id, Vector3 eulerAngles, Transform.Space objectSpace);
 
             [MethodImplAttribute(MethodImplOptions.InternalCall)]
             internal extern static void Transform_LookAt(string id, Vector3 target, Vector3 worldUp);
 
             [MethodImplAttribute(MethodImplOptions.InternalCall)]
-            internal extern static void Transform_Forward(string id, Vector3 forward);
+            internal extern static void Transform_Forward(string id, out Vector3 forward);
             
             [MethodImplAttribute(MethodImplOptions.InternalCall)]
-            internal extern static void Transform_Back(string id, Vector3 back);
+            internal extern static void Transform_Back(string id, out Vector3 back);
             
             [MethodImplAttribute(MethodImplOptions.InternalCall)]
-            internal extern static void Transform_Up(string id, Vector3 up);
+            internal extern static void Transform_Up(string id, out Vector3 up);
             
             [MethodImplAttribute(MethodImplOptions.InternalCall)]
-            internal extern static void Transform_Down(string id, Vector3 down);
+            internal extern static void Transform_Down(string id, out Vector3 down);
             
             [MethodImplAttribute(MethodImplOptions.InternalCall)]
-            internal extern static void Transform_Left(string id, Vector3 left);
+            internal extern static void Transform_Left(string id, out Vector3 left);
             
             [MethodImplAttribute(MethodImplOptions.InternalCall)]
-            internal extern static void Transform_Right(string id, Vector3 right);
+            internal extern static void Transform_Right(string id, out Vector3 right);
         #endregion
         #region Input
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
@@ -111,13 +111,13 @@ namespace Loopie
         internal extern static bool Input_IsGamepadButtonPressed(GamepadButton gamepadButton);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        internal extern static bool Input_GetMousePosition(out Vector2 mousePosition);
+        internal extern static void Input_GetMousePosition(out Vector2 mousePosition);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        internal extern static bool Input_GetMouseDelta(out Vector2 mouseDelta);
+        internal extern static void Input_GetMouseDelta(out Vector2 mouseDelta);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        internal extern static bool Input_GetScrollDelta(out Vector2 scrollDelta);
+        internal extern static void Input_GetScrollDelta(out Vector2 scrollDelta);
         #endregion
         #region Time
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
@@ -131,6 +131,24 @@ namespace Loopie
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static void Time_SetTimeScale(float scale);
+        #endregion
+        #region Entity
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static object Entity_GetScriptInstance(string entityID, string componentFullName);
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static string Entity_Create(string entityName, string parentId);
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static string Entity_Clone(string entityID, bool cloneChilds);
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Entity_Destroy(string entityID);
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static bool Entity_AddComponent(string entityID, string componentFullName);
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static bool Entity_HasComponent(string entityID, Type componentType);
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static string Entity_FindEntityByName(string name);
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static string Entity_FindEntityByID(string entityID);
         #endregion
     }
 }

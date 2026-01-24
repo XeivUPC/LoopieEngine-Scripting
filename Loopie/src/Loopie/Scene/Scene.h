@@ -37,6 +37,11 @@ namespace Loopie {
 		void RemoveEntity(UUID uuid);
 		void RemoveEntity(std::shared_ptr<Entity> entity);
 
+		void RemoveEntityDeferred(UUID uuid);
+		void FlushRemovedEntities();
+
+		std::shared_ptr<Entity> CloneEntity(const std::shared_ptr<Entity>& source, std::shared_ptr<Entity> newParent = nullptr, bool cloneChildren = true);
+
 		void SetFilePath(std::string filePath);
 
 		std::string GetFilePath() const;
@@ -63,6 +68,7 @@ namespace Loopie {
 	private:
 		std::unique_ptr<Octree> m_octree;
 		std::unordered_map<UUID, std::shared_ptr<Entity>> m_entities; // Fast lookup
+		std::unordered_set<UUID> m_entitiesPendingDestroy;
 		std::shared_ptr<Entity> m_rootEntity; // Hierarchy based
 		std::string m_filePath;
 		const AABB DEFAULT_WORLD_BOUNDS = AABB(vec3(-500, -450, -500), vec3(500, 550, 500));

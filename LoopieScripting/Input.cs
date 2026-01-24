@@ -62,13 +62,13 @@ namespace Loopie
         private static Vector2 GetMouseDelta()
         {
             Vector2 mouseDelta = Vector2.Zero;
-            InternalCalls.Input_GetMousePosition(out mouseDelta);
+            InternalCalls.Input_GetMouseDelta(out mouseDelta);
             return mouseDelta;
         }
         private static Vector2 GetScrollDelta()
         {
             Vector2 scrollDelta = Vector2.Zero;
-            InternalCalls.Input_GetMousePosition(out scrollDelta);
+            InternalCalls.Input_GetScrollDelta(out scrollDelta);
             return scrollDelta;
         }
     }

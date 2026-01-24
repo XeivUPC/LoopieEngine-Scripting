@@ -2,7 +2,10 @@
 #include "Loopie/Scripting/ScriptingManager.h"
 #include "Loopie/Components/ScriptClass.h"
 
+#include "Loopie/Components/Component.h"
 #include "Loopie/Components/Transform.h"
+#include "Loopie/Components/Camera.h"
+#include "Loopie/Components/MeshRenderer.h"
 
 #include "Loopie/Core/UUID.h"
 #include "Loopie/Core/InputEventManager.h"
@@ -19,6 +22,8 @@
 
 namespace Loopie
 {
+	static std::unordered_map<_MonoType*, std::function<bool(std::shared_ptr<Entity>)>> s_EntityHasComponentFuncs;
+
 	namespace Utils {
 		std::string MonoStringToString(MonoString* string)
 		{
@@ -65,30 +70,131 @@ namespace Loopie
 #pragma endregion
 
 #pragma region Components
-	/*static bool Entity_HasComponent(UUID entityID, MonoReflectionType* componentType)
+	static MonoObject* Entity_GetScriptInstance(MonoString* entityID, MonoString* componentFullName)
+	{
+		UUID uuid(Utils::MonoStringToString(entityID));
+		Scene* scene = &Application::GetInstance().GetScene();
+		ASSERT(scene == nullptr, "Scene not found");
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		ASSERT(entity == nullptr, "Entity not found");
+
+		std::vector<ScriptClass*> scriptComponents = entity->GetComponents<ScriptClass>();
+
+		for (ScriptClass* script : scriptComponents)
+		{
+			if (!script || !script->GetScriptingClass())
+				continue;
+
+			if (script->IsSameType(Utils::MonoStringToString(componentFullName)))
+			{
+				return script->GetInstance();
+			}
+		}
+
+		return nullptr;
+	}
+
+	static MonoString* Entity_Create(MonoString* entityName, MonoString* parentId)
 	{
 		Scene* scene = &Application::GetInstance().GetScene();
 		ASSERT(scene == nullptr, "Scene not found");
-		std::shared_ptr<Entity> entity = scene->GetEntity(entityID);
+
+		std::shared_ptr<Entity> parent = nullptr;
+		if (parentId!=nullptr)
+		{
+			UUID parentUuid(Utils::MonoStringToString(parentId));
+			parent = scene->GetEntity(parentUuid);
+			ASSERT(parent == nullptr, "Parent not found");
+		}
+
+		std::shared_ptr<Entity> entity = scene->CreateEntity(Utils::MonoStringToString(entityName), parent);
+		ASSERT(entity == nullptr, "Entity not created");
+
+		return ScriptingManager::CreateString(entity->GetUUID().Get().c_str());
+	}
+
+	static void Entity_Destroy(MonoString* entityID)
+	{
+		UUID uuid(Utils::MonoStringToString(entityID));
+		Scene* scene = &Application::GetInstance().GetScene();
+		ASSERT(scene == nullptr, "Scene not found");
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		ASSERT(entity == nullptr, "Entity not found");
+		scene->RemoveEntityDeferred(entity->GetUUID());
+	}
+
+	static MonoString* Entity_Clone(MonoString* entityId, MonoBoolean cloneChilds)
+	{
+		Scene* scene = &Application::GetInstance().GetScene();
+		if (!scene)
+			return nullptr;
+
+		UUID uuid(Utils::MonoStringToString(entityId));
+		std::shared_ptr<Entity> source = scene->GetEntity(uuid);
+		if (!source)
+			return nullptr;
+
+		std::shared_ptr<Entity> clone = scene->CloneEntity(source, nullptr, (cloneChilds != 0));
+		if (!clone)
+			return nullptr;
+
+		return ScriptingManager::CreateString(clone->GetUUID().Get().c_str());
+	}
+
+	static MonoBoolean Entity_AddComponent(MonoString* entityID, MonoString* componentType) {
+		UUID uuid(Utils::MonoStringToString(entityID));
+		Scene* scene = &Application::GetInstance().GetScene();
+		ASSERT(scene == nullptr, "Scene not found");
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		ASSERT(entity == nullptr, "Entity not found");
+
+		std::shared_ptr<ScriptingClass> scriptingClass = ScriptingManager::GetScriptingClass(Utils::MonoStringToString(componentType));
+		if (!scriptingClass) {
+			Log::Error("Could not find scripting class {}", Utils::MonoStringToString(componentType));
+			return false;
+		}
+
+		ScriptClass* scriptComponent = entity->AddComponent<ScriptClass>(scriptingClass->GetFullName());
+		scriptComponent->SetUp();
+		scriptComponent->InvokeOnCreate();
+		return true;
+	}
+
+	static MonoBoolean Entity_HasComponent(MonoString* entityID, MonoReflectionType* componentType)
+	{
+		UUID uuid(Utils::MonoStringToString(entityID));
+		Scene* scene = &Application::GetInstance().GetScene();
+		ASSERT(scene == nullptr, "Scene not found");
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
 		ASSERT(entity == nullptr, "Entity not found");
 
 		MonoType* managedType = mono_reflection_type_get_type(componentType);
-		ASSERT(entity->HasComponent<ScriptClass>(), "{0} has no {1} component", entity->GetName(), managedType);
-		std::vector<ScriptClass*> components = entity->GetComponents<ScriptClass>();
-		for (size_t i = 0; i < components.size(); i++)
-		{
 
-		}
-	}*/
+		if (s_EntityHasComponentFuncs.find(managedType) == s_EntityHasComponentFuncs.end())
+			return false;
+		return s_EntityHasComponentFuncs.at(managedType)(entity);
+	}
 
 	static MonoString* Entity_FindEntityByName(MonoString* name)
 	{
-		char* nameCStr = mono_string_to_utf8(name);
+		std::string entityName = Utils::MonoStringToString(name);
 
 		Scene* scene = &Application::GetInstance().GetScene();
 		ASSERT(scene == nullptr, "Scene not found");
-		std::shared_ptr<Entity> entity = scene->GetEntity(nameCStr);
-		mono_free(nameCStr);
+		std::shared_ptr<Entity> entity = scene->GetEntity(entityName);
+
+		if (!entity)
+			return ScriptingManager::CreateString("");
+
+		return ScriptingManager::CreateString(entity->GetUUID().Get().c_str());
+	}
+
+	static MonoString* Entity_FindEntityByID(MonoString* entityID)
+	{
+		UUID uuid(Utils::MonoStringToString(entityID));
+		Scene* scene = &Application::GetInstance().GetScene();
+		ASSERT(scene == nullptr, "Scene not found");
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
 
 		if (!entity)
 			return ScriptingManager::CreateString("");
@@ -207,7 +313,7 @@ namespace Loopie
 		UUID uuid(Utils::MonoStringToString(id));
 		Scene* scene = &Application::GetInstance().GetScene();
 		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
-		forward = &entity->GetTransform()->Up();
+		*forward = entity->GetTransform()->Forward();
 	}
 
 	static void Transform_Back(MonoString* id, vec3* back)
@@ -215,7 +321,7 @@ namespace Loopie
 		UUID uuid(Utils::MonoStringToString(id));
 		Scene* scene = &Application::GetInstance().GetScene();
 		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
-		back = &entity->GetTransform()->Up();
+		*back = entity->GetTransform()->Back();
 	}
 
 	static void Transform_Up(MonoString* id, vec3* up)
@@ -223,7 +329,7 @@ namespace Loopie
 		UUID uuid(Utils::MonoStringToString(id));
 		Scene* scene = &Application::GetInstance().GetScene();
 		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
-		up = &entity->GetTransform()->Up();
+		*up = entity->GetTransform()->Up();
 	}
 
 	static void Transform_Down(MonoString* id, vec3* down)
@@ -231,7 +337,7 @@ namespace Loopie
 		UUID uuid(Utils::MonoStringToString(id));
 		Scene* scene = &Application::GetInstance().GetScene();
 		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
-		down = &entity->GetTransform()->Up();
+		*down = entity->GetTransform()->Down();
 	}
 
 	static void Transform_Left(MonoString* id, vec3* left)
@@ -239,7 +345,7 @@ namespace Loopie
 		UUID uuid(Utils::MonoStringToString(id));
 		Scene* scene = &Application::GetInstance().GetScene();
 		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
-		left = &entity->GetTransform()->Up();
+		*left = entity->GetTransform()->Left();
 	}
 
 	static void Transform_Right(MonoString* id, vec3* right)
@@ -247,7 +353,7 @@ namespace Loopie
 		UUID uuid(Utils::MonoStringToString(id));
 		Scene* scene = &Application::GetInstance().GetScene();
 		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
-		right = &entity->GetTransform()->Up();
+		*right = entity->GetTransform()->Right();
 	}
 #pragma endregion
 
@@ -334,10 +440,33 @@ namespace Loopie
 	}
 #pragma endregion
 
-	/*void ScriptGlue::RegisterComponents()
+	template<typename Comp, typename = std::enable_if_t<std::is_base_of_v<Component, Comp>>>
+	static void RegisterComponent()
 	{
+		([]()
+			{
+				std::string_view typeName = Comp::GetIdentificableName();
+				std::string managedTypename = fmt::format("Loopie.{}", typeName);
 
-	}*/
+				MonoType* managedType = mono_reflection_type_from_name(managedTypename.data(), ScriptingManager::s_Data.CoreImage);
+				if (!managedType)
+				{
+					Log::Warn("Could not find component type {}", managedTypename);
+					return;
+				}
+				s_EntityHasComponentFuncs[managedType] = [](std::shared_ptr<Entity> entity) { return entity->HasComponent<Comp>(); };
+			}());
+	}
+
+
+	void ScriptGlue::RegisterComponents()
+	{
+		s_EntityHasComponentFuncs.clear();
+		RegisterComponent<Transform>();
+		RegisterComponent<Camera>();
+		RegisterComponent<MeshRenderer>();
+	}
+
 
 	void ScriptGlue::RegisterFunctions()
 	{
@@ -347,7 +476,14 @@ namespace Loopie
 		ADD_INTERNAL_CALL(NativeLog_Vector2);
 		ADD_INTERNAL_CALL(NativeLog_Vector3);
 
+		ADD_INTERNAL_CALL(Entity_GetScriptInstance);
+		ADD_INTERNAL_CALL(Entity_Create);
+		ADD_INTERNAL_CALL(Entity_Clone);
+		ADD_INTERNAL_CALL(Entity_Destroy);
+		ADD_INTERNAL_CALL(Entity_AddComponent);
 		ADD_INTERNAL_CALL(Entity_FindEntityByName);
+		ADD_INTERNAL_CALL(Entity_FindEntityByID);
+		ADD_INTERNAL_CALL(Entity_HasComponent);
 
 		ADD_INTERNAL_CALL(Transform_GetPosition);
 		ADD_INTERNAL_CALL(Transform_SetPosition);

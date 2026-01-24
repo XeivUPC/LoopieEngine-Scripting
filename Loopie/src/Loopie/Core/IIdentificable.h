@@ -15,6 +15,7 @@ namespace Loopie {
 		} \
 		size_t GetTypeID() const override { \
 			return GetTypeIDStatic(); \
-		}
+		} \
+		static const char* GetIdentificableName() { return #Type; }
 	};
 }
