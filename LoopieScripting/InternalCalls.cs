@@ -109,6 +109,15 @@ namespace Loopie
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static bool Input_IsGamepadButtonPressed(GamepadButton gamepadButton);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static bool Input_GetMousePosition(out Vector2 mousePosition);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static bool Input_GetMouseDelta(out Vector2 mouseDelta);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static bool Input_GetScrollDelta(out Vector2 scrollDelta);
         #endregion
         #region Time
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
