@@ -47,10 +47,13 @@ namespace Loopie
         }
         
         ////Caching
-        for (const auto& [uuid, entity] : Application::GetInstance().GetScene().GetAllEntities())
+        for (auto& [uuid, entity] : Application::GetInstance().GetScene().GetAllEntities())
         {
+            if (entity == nullptr)
+                continue;
             if (!entity->HasComponent< ScriptClass>())
                 continue;
+
             for (auto& component : entity->GetComponents<ScriptClass>())
             {
                 component->InvokeOnUpdate();

@@ -35,9 +35,18 @@ namespace Loopie
             return scriptInstance as T;
         }
 
-        public Entity FindEntityByName(string name)
+        public static Entity FindEntityByName(string name)
         {
             string entityID = InternalCalls.Entity_FindEntityByName(name);
+            if (entityID == "")
+                return null;
+
+            return new Entity(entityID);
+        }
+
+        public static Entity FindEntityByID(string entityID)
+        {
+            entityID = InternalCalls.Entity_FindEntityByID(entityID);
             if (entityID == "")
                 return null;
 
@@ -63,6 +72,25 @@ namespace Loopie
                 return component;
             }
             return null;
+        }
+
+        public static void Destroy(Entity entity)
+        {
+            InternalCalls.Entity_Destroy(entity.ID);
+        }
+
+        public void Destroy()
+        {
+            InternalCalls.Entity_Destroy(ID);
+        }
+
+        public Entity Clone(bool cloneChilds = false)
+        {
+            string instanceId = InternalCalls.Entity_Clone(ID, cloneChilds); ;
+            if (instanceId == "")
+                return null;
+
+            return new Entity(instanceId);
         }
     }
 }

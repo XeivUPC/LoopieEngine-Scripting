@@ -113,6 +113,34 @@ namespace Loopie
 		return ScriptingManager::CreateString(entity->GetUUID().Get().c_str());
 	}
 
+	static void Entity_Destroy(MonoString* entityID)
+	{
+		UUID uuid(Utils::MonoStringToString(entityID));
+		Scene* scene = &Application::GetInstance().GetScene();
+		ASSERT(scene == nullptr, "Scene not found");
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		ASSERT(entity == nullptr, "Entity not found");
+		scene->RemoveEntityDeferred(entity->GetUUID());
+	}
+
+	static MonoString* Entity_Clone(MonoString* entityId, MonoBoolean cloneChilds)
+	{
+		Scene* scene = &Application::GetInstance().GetScene();
+		if (!scene)
+			return nullptr;
+
+		UUID uuid(Utils::MonoStringToString(entityId));
+		std::shared_ptr<Entity> source = scene->GetEntity(uuid);
+		if (!source)
+			return nullptr;
+
+		std::shared_ptr<Entity> clone = scene->CloneEntity(source, nullptr, (cloneChilds != 0));
+		if (!clone)
+			return nullptr;
+
+		return ScriptingManager::CreateString(clone->GetUUID().Get().c_str());
+	}
+
 	static MonoBoolean Entity_AddComponent(MonoString* entityID, MonoString* componentType) {
 		UUID uuid(Utils::MonoStringToString(entityID));
 		Scene* scene = &Application::GetInstance().GetScene();
@@ -128,6 +156,7 @@ namespace Loopie
 
 		ScriptClass* scriptComponent = entity->AddComponent<ScriptClass>(scriptingClass->GetFullName());
 		scriptComponent->SetUp();
+		scriptComponent->InvokeOnCreate();
 		return true;
 	}
 
@@ -153,6 +182,19 @@ namespace Loopie
 		Scene* scene = &Application::GetInstance().GetScene();
 		ASSERT(scene == nullptr, "Scene not found");
 		std::shared_ptr<Entity> entity = scene->GetEntity(entityName);
+
+		if (!entity)
+			return ScriptingManager::CreateString("");
+
+		return ScriptingManager::CreateString(entity->GetUUID().Get().c_str());
+	}
+
+	static MonoString* Entity_FindEntityByID(MonoString* entityID)
+	{
+		UUID uuid(Utils::MonoStringToString(entityID));
+		Scene* scene = &Application::GetInstance().GetScene();
+		ASSERT(scene == nullptr, "Scene not found");
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
 
 		if (!entity)
 			return ScriptingManager::CreateString("");
@@ -436,8 +478,11 @@ namespace Loopie
 
 		ADD_INTERNAL_CALL(Entity_GetScriptInstance);
 		ADD_INTERNAL_CALL(Entity_Create);
+		ADD_INTERNAL_CALL(Entity_Clone);
+		ADD_INTERNAL_CALL(Entity_Destroy);
 		ADD_INTERNAL_CALL(Entity_AddComponent);
 		ADD_INTERNAL_CALL(Entity_FindEntityByName);
+		ADD_INTERNAL_CALL(Entity_FindEntityByID);
 		ADD_INTERNAL_CALL(Entity_HasComponent);
 
 		ADD_INTERNAL_CALL(Transform_GetPosition);

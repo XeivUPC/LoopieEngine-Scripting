@@ -53,22 +53,22 @@ namespace Loopie
         public static Vector2 scrollDelta
         {get { return GetScrollDelta(); } }
 
-        private Vector2 GetMousePosition()
+        private static Vector2 GetMousePosition()
         {
             Vector2 mousePosition = Vector2.Zero;
             InternalCalls.Input_GetMousePosition(out mousePosition);
             return mousePosition;
         }
-        private Vector2 GetMouseDelta()
+        private static Vector2 GetMouseDelta()
         {
             Vector2 mouseDelta = Vector2.Zero;
-            InternalCalls.Input_GetMousePosition(out mouseDelta);
+            InternalCalls.Input_GetMouseDelta(out mouseDelta);
             return mouseDelta;
         }
-        private Vector2 GetScrollDelta()
+        private static Vector2 GetScrollDelta()
         {
             Vector2 scrollDelta = Vector2.Zero;
-            InternalCalls.Input_GetMousePosition(out scrollDelta);
+            InternalCalls.Input_GetScrollDelta(out scrollDelta);
             return scrollDelta;
         }
     }

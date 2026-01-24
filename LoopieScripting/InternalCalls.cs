@@ -111,13 +111,13 @@ namespace Loopie
         internal extern static bool Input_IsGamepadButtonPressed(GamepadButton gamepadButton);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        internal extern static bool Input_GetMousePosition(out Vector2 mousePosition);
+        internal extern static void Input_GetMousePosition(out Vector2 mousePosition);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        internal extern static bool Input_GetMouseDelta(out Vector2 mouseDelta);
+        internal extern static void Input_GetMouseDelta(out Vector2 mouseDelta);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        internal extern static bool Input_GetScrollDelta(out Vector2 scrollDelta);
+        internal extern static void Input_GetScrollDelta(out Vector2 scrollDelta);
         #endregion
         #region Time
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
@@ -138,11 +138,17 @@ namespace Loopie
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static string Entity_Create(string entityName, string parentId);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static string Entity_Clone(string entityID, bool cloneChilds);
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Entity_Destroy(string entityID);
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static bool Entity_AddComponent(string entityID, string componentFullName);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static bool Entity_HasComponent(string entityID, Type componentType);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static string Entity_FindEntityByName(string name);
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static string Entity_FindEntityByID(string entityID);
         #endregion
     }
 }

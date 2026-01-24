@@ -172,6 +172,96 @@ namespace Loopie {
 		m_octree->Rebuild();
 	}
 
+	void Scene::RemoveEntityDeferred(UUID uuid)
+	{
+		if (m_entities.find(uuid) == m_entities.end())
+			return;
+
+		m_entitiesPendingDestroy.insert(uuid);
+	}
+
+	void Scene::FlushRemovedEntities()
+	{
+		if (m_entitiesPendingDestroy.empty())
+			return;
+
+		for (const UUID& uuid : m_entitiesPendingDestroy)
+		{
+			auto it = m_entities.find(uuid);
+			if (it != m_entities.end())
+			{
+				RemoveEntityRecursive(it->second);
+			}
+		}
+
+		m_entitiesPendingDestroy.clear();
+		m_octree->Rebuild();
+	}
+
+	std::shared_ptr<Entity> Scene::CloneEntity(const std::shared_ptr<Entity>& source, std::shared_ptr<Entity> newParent, bool cloneChildren)
+	{
+		if (!source)
+			return nullptr;
+
+		if (!newParent)
+			newParent = source->GetParent().lock();
+
+		// Create new entity
+		std::shared_ptr<Entity> clone = CreateEntity(
+			source->GetName(),
+			newParent
+		);
+
+		clone->SetIsActive(source->GetIsActive());
+
+		// ---- Clone components ----
+		for (Component* component : source->GetComponents())
+		{
+			JsonData componentData;
+			component->Serialize(componentData.Node());
+
+			// Transform already exists
+			if (componentData.Child("transform").IsValid())
+			{
+				clone->GetTransform()->Deserialize(
+					componentData.Child("transform")
+				);
+				continue;
+			}
+
+			// Camera
+			if (componentData.Child("camera").IsValid())
+			{
+				auto cam = clone->AddComponent<Camera>();
+				cam->Deserialize(componentData.Child("camera"));
+			}
+			// MeshRenderer
+			else if (componentData.Child("meshrenderer").IsValid())
+			{
+				auto mr = clone->AddComponent<MeshRenderer>();
+				mr->Deserialize(componentData.Child("meshrenderer"));
+			}
+			// ScriptClass
+			else if (componentData.Child("script").IsValid())
+			{
+				std::string classID = componentData.Child("script").GetValue<std::string>("class_id", "").Result;
+				ScriptClass* scriptClass = clone->AddComponent<ScriptClass>(classID);
+				scriptClass->Deserialize(componentData.Child("script"));
+			}
+		}
+
+		// ---- Clone children ----
+		if (cloneChildren)
+		{
+			for (const auto& child : source->GetChildren())
+			{
+				CloneEntity(child, clone, true);
+			}
+		}
+
+		return clone;
+	}
+
 	void Scene::SetFilePath(std::string filePath)
 	{
 		m_filePath = filePath;
