@@ -44,13 +44,25 @@ namespace Loopie
             return new Entity(entityID);
         }
 
-        //public Entity Instantiate(string )
-        //{
-        //    ulong entityID = InternalCalls.Entity_FindEntityByName(name);
-        //    if (entityID == 0)
-        //        return null;
+        public static Entity Instantiate(string name)
+        {
+            string instanceId = InternalCalls.Entity_Create(name,null);
+            if (instanceId == "")
+                return null;
 
-        //    return new Entity(entityID);
-        //}
+            return new Entity(instanceId);
+        }
+
+        public T AddComponent<T>() where T : Component, new()
+        {
+            string componentType = typeof(T).FullName;
+            if(InternalCalls.Entity_AddComponent(ID, componentType))
+            {
+                T component = new T();
+                component.entity = this;
+                return component;
+            }
+            return null;
+        }
     }
 }

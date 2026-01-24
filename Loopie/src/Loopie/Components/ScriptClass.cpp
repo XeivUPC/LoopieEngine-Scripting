@@ -59,9 +59,6 @@ namespace Loopie
 			else
 				SetFieldValueInternal(name, fieldData.GetBuffer());
 		}
-
-		if (m_OnCreate)
-			m_scriptingClass->InvokeMethod(m_instance, m_OnCreate);
 	}
 
 	void ScriptClass::DestroyInstance()

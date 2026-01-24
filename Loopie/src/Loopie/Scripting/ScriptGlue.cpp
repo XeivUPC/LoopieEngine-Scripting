@@ -94,7 +94,44 @@ namespace Loopie
 		return nullptr;
 	}
 
-	static bool Entity_HasComponent(MonoString* entityID, MonoReflectionType* componentType)
+	static MonoString* Entity_Create(MonoString* entityName, MonoString* parentId)
+	{
+		Scene* scene = &Application::GetInstance().GetScene();
+		ASSERT(scene == nullptr, "Scene not found");
+
+		std::shared_ptr<Entity> parent = nullptr;
+		if (parentId!=nullptr)
+		{
+			UUID parentUuid(Utils::MonoStringToString(parentId));
+			parent = scene->GetEntity(parentUuid);
+			ASSERT(parent == nullptr, "Parent not found");
+		}
+
+		std::shared_ptr<Entity> entity = scene->CreateEntity(Utils::MonoStringToString(entityName), parent);
+		ASSERT(entity == nullptr, "Entity not created");
+
+		return ScriptingManager::CreateString(entity->GetUUID().Get().c_str());
+	}
+
+	static MonoBoolean Entity_AddComponent(MonoString* entityID, MonoString* componentType) {
+		UUID uuid(Utils::MonoStringToString(entityID));
+		Scene* scene = &Application::GetInstance().GetScene();
+		ASSERT(scene == nullptr, "Scene not found");
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		ASSERT(entity == nullptr, "Entity not found");
+
+		std::shared_ptr<ScriptingClass> scriptingClass = ScriptingManager::GetScriptingClass(Utils::MonoStringToString(componentType));
+		if (!scriptingClass) {
+			Log::Error("Could not find scripting class {}", Utils::MonoStringToString(componentType));
+			return false;
+		}
+
+		ScriptClass* scriptComponent = entity->AddComponent<ScriptClass>(scriptingClass->GetFullName());
+		scriptComponent->SetUp();
+		return true;
+	}
+
+	static MonoBoolean Entity_HasComponent(MonoString* entityID, MonoReflectionType* componentType)
 	{
 		UUID uuid(Utils::MonoStringToString(entityID));
 		Scene* scene = &Application::GetInstance().GetScene();
@@ -111,12 +148,11 @@ namespace Loopie
 
 	static MonoString* Entity_FindEntityByName(MonoString* name)
 	{
-		char* nameCStr = mono_string_to_utf8(name);
+		std::string entityName = Utils::MonoStringToString(name);
 
 		Scene* scene = &Application::GetInstance().GetScene();
 		ASSERT(scene == nullptr, "Scene not found");
-		std::shared_ptr<Entity> entity = scene->GetEntity(nameCStr);
-		mono_free(nameCStr);
+		std::shared_ptr<Entity> entity = scene->GetEntity(entityName);
 
 		if (!entity)
 			return ScriptingManager::CreateString("");
@@ -312,6 +348,8 @@ namespace Loopie
 		ADD_INTERNAL_CALL(NativeLog_Vector3);
 
 		ADD_INTERNAL_CALL(Entity_GetScriptInstance);
+		ADD_INTERNAL_CALL(Entity_Create);
+		ADD_INTERNAL_CALL(Entity_AddComponent);
 		ADD_INTERNAL_CALL(Entity_FindEntityByName);
 		ADD_INTERNAL_CALL(Entity_HasComponent);
 

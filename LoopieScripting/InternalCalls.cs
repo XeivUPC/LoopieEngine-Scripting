@@ -100,6 +100,10 @@ namespace Loopie
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static object Entity_GetScriptInstance(string entityID, string componentFullName);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static string Entity_Create(string entityName, string parentId);
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static bool Entity_AddComponent(string entityID, string componentFullName);
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static bool Entity_HasComponent(string entityID, Type componentType);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static string Entity_FindEntityByName(string name);
