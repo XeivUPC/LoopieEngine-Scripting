@@ -19,8 +19,8 @@ namespace Loopie {
 
 		Log::Info("Application Started");
 
-		ScriptingManager::Init();
-		Log::Info("Scripting created successfully.");
+		//ScriptingManager::Init();
+		//Log::Info("Scripting created successfully.");
 
 		// Window Creation
 		m_window = new Window();

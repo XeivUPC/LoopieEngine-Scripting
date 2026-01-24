@@ -23,8 +23,13 @@ namespace Loopie {
 		_MonoAssembly* AppAssembly = nullptr;
 		_MonoImage* AppImage = nullptr;
 
+		_MonoAssembly* CompilerAssembly = nullptr;
+		_MonoImage* CompilerImage = nullptr;
+
 		std::string CoreAssemblyFilepath;
 		std::string AppAssemblyFilepath;
+		std::string CompilerAssemblyFilepath;
+
 
 		std::unordered_map<std::string, std::shared_ptr<ScriptingClass>> ScriptingClasses;
 
@@ -41,6 +46,7 @@ namespace Loopie {
 
 		static void LoadCoreAssembly();
 		static void LoadAppAssembly();
+		static void LoadCompilerAssembly();
 
 		static void RuntimeStart();
 		static void RuntimeStop();
@@ -59,9 +65,11 @@ namespace Loopie {
 		static ScriptingContext s_Data;
 	private:
 		static _MonoAssembly* LoadAssembly(const char* path);
+		static bool CompileGameAssembly();
 
 	private:
 		static bool s_IsRunning;
+		static bool s_Initialized;
 	};
 	
 }

@@ -10,6 +10,8 @@
 
 #include "Loopie/Math/MathTypes.h"
 
+#include "Loopie/Scripting/ScriptingManager.h"
+
 #include "Loopie/Resources/ResourceManager.h"
 #include "Loopie/Importers/TextureImporter.h"
 #include "Loopie/Math/Ray.h"
@@ -62,6 +64,9 @@ namespace Loopie
 		m_hierarchy.SetScene(m_currentScene);
 
 		Application::GetInstance().m_notifier.AddObserver(this);
+
+		ScriptingManager::Init();
+		Log::Info("Scripting created successfully.");
 
 	}
 

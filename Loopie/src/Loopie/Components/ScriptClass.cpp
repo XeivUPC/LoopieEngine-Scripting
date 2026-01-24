@@ -24,6 +24,7 @@ namespace Loopie
 
 	void ScriptClass::SetUp()
 	{
+		m_scriptingClass = ScriptingManager::GetScriptingClass(m_className);
 		m_instance = m_scriptingClass->Instantiate();
 
 		m_OnCreate = m_scriptingClass->GetMethod("OnCreate", 0);
@@ -187,7 +188,7 @@ namespace Loopie
 				node.CreateField(name, (uint64_t)GetFieldValue<uint64_t>(name));
 				break;
 			case ScriptFieldType::String:
-				node.CreateField(name, m_scriptFields.at(name).GetString());
+				node.CreateField(name, GetFieldString(name));
 				break;
 				// more types ...
 

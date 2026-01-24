@@ -30,5 +30,6 @@ set_target_properties(Mono::Runtime PROPERTIES IMPORTED_LOCATION "${MONO_BIN_DIR
 add_subdirectory("Loopie")
 add_subdirectory("LoopieEditor")
 add_subdirectory("LoopieScripting")
+add_subdirectory("LoopieCompiler")
 
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT LoopieEditor)    
