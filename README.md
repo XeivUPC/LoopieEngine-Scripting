@@ -1,35 +1,27 @@
 
 
-# **Loopie Engine README**  
-**![][image1]**
+# Loopie Engine README  
+
+<img width="352" height="352" alt="logo - Copy" src="https://github.com/user-attachments/assets/105c7d03-2966-4a57-a751-971171ffb169" />
 
 Videogame Design & Development  
 Game Engines \- Manish Thani  
 5th Semester \- CITM (UPC)  
 
-## **Summary**
+## Summary
 
-[Introduction	3](#introduction)
+1. [Introduction](#introduction)
+2. [Team Members](#team-members)
+3. [Sub-systems brief explanation](#sub-systems-brief-explanation)
+4. [In-Depth Scripting description](#in-depth-scripting-description)
+5. [Mono Integration](#mono-integration)
+6. [C++ to C\# conversions](#c-to-c-conversions)
+7. [Text Editor](#text-editor)
+8. [Tank Scripts](#tank-scripts)
+9. [Links](#links)
+10. [License](#license)
 
-[Team Members	4](#team-members)
-
-[Sub-systems brief explanation	5](#sub-systems-brief-explanation)
-
-[In-Depth Scripting description	6](#in-depth-scripting-description)
-
-[Mono Integration	7](#mono-integration)
-
-[C++ to C\# conversions	8](#c++-to-c#-conversions)
-
-[Text Editor	9](#text-editor)
-
-[Tank Scripts	11](#tank-scripts)
-
-[Links	12](#links)
-
-[License	13](#license)
-
-## **Introduction** {#introduction}
+## Introduction
 
 The Loopie Engine was born as a project to explore our capabilities while working together as a team. Since the end of the first year, proposals to make works together were sparked, but never ignited. 
 
@@ -43,17 +35,21 @@ What’s more, a lot was learnt from tackling this project, in team-working, pro
 
 Without further ado, here’s the team members who made this Engine possible:
 
- 
+## Team Members
 
-## **Team Members** {#team-members}
+<img width="262" height="395" alt="photo" src="https://github.com/user-attachments/assets/4ae48e9b-3614-486a-a8b6-b6d26f82ad9b" />
 
 Adrià García [XeivUPC](https://github.com/XeivUPC) → AKA: *The master-mind*. This guy just codes for fun. 
 
+<img width="256" height="320" alt="photo" src="https://github.com/user-attachments/assets/47979cae-c388-448d-9ef6-b669fc7a1b9e" />
+
 Ana Alcazar [Ana-Alcazar-Cobo-CITM-UPC](https://github.com/Ana-Alcazar-Cobo-CITM-UPC) → AKA: *The great Side-kick*. As consistent as a busy bee.
+
+<img width="322" height="322" alt="photo" src="https://github.com/user-attachments/assets/e0cee04b-42d8-46f1-824c-a44713004735" />
 
 Pol Sierra [AbyssWatcher64](https://github.com/AbyssWatcher64) → *He kinda codes after work-hours*. Tries his best despite his little free time.
 
-## **Sub-systems brief explanation** {#sub-systems-brief-explanation}
+## Sub-systems brief explanation
 
 The Engine, as of now, counts with multiple sub-systems that have been expanded throughout this semester.
 
@@ -79,11 +75,11 @@ The Engine, as of now, counts with multiple sub-systems that have been expanded 
 - **Log**: Log system for asserts and debugging information.  
 - **Save / Load of projects**: Allows for the creation of different projects while working on the Engine.
 
-## **In-Depth Scripting description**  {#in-depth-scripting-description}
+## In-Depth Scripting description
 
 Our team picked the sub-system Scripting.
 
-We all investigated and saw different Cherno videos recommended by Adrià in order to further understand how it worked (example: [https://www.youtube.com/watch?v=EKnJOwGhPj4](https://www.youtube.com/watch?v=EKnJOwGhPj4)), in the meantime that we were waiting for Manish, our teacher, to publish our grades and see if there were any corrections needed for it. Adrià also used that time to polish some features of the Resource Manager.
+We all investigated and saw different Cherno videos recommended by Adrià in order to further understand how it worked ([example here](https://www.youtube.com/watch?v=EKnJOwGhPj4)), in the meantime that we were waiting for Manish, our teacher, to publish our grades and see if there were any corrections needed for it. Adrià also used that time to polish some features of the Resource Manager.
 
 The way we divided our work was the following:
 
@@ -95,7 +91,7 @@ We will explain in more detail each of these in the following pages.
 
 ### 
 
-### Mono Integration {#mono-integration}
+### Mono Integration
 
 Adrià: We installed mono locally in our PC, then we selected the required files, and copied them inside our vendor folder. Making use of CMake, we copied those files inside our build directory. 
 
@@ -105,7 +101,7 @@ We created a new Loopie subdirectory, which is in charge of compiling all those 
 
 ### 
 
-### C++ to C\# conversions {#c++-to-c#-conversions}
+### C\+\+ to C\# conversions
 
 Ana: We’ve created a serialization bridge between the cpp native engine language and the desired user scripting language, for this we’ve done scripts in charge of serializing internal engine functions such as component manipulations,  time managing and entity control called “ScriptGlue” in charge of revealing and serialize those functions to Mono.
 
@@ -117,16 +113,18 @@ Also we’ve created custom variable types (Vector2, Vector3, Vector4, KeyCode) 
 
 ### 
 
-### Text Editor {#text-editor}
+### Text Editor
 
 Pol: I was interested in doing the C++ to C\# conversion. However (as per usual) my lack of free time made my winter a very busy one with all the other deliveries \+ exams. I was unable to work on the engine until very late (which I’m guessing many students have done as well), and I didn’t want a blocker TODO for this assignment, otherwise my team would suffer and halt their progress until I was done with mine, with very few days of margin. After a bit of back and forth, I decided to take the Text Editor.
 
-There was this given ([github.com/BalazsJako/ImGuiColorTextEdit](http://github.com/BalazsJako/ImGuiColorTextEdit)) as a way to start this part of the code. The way I understood it, I was supposed to create something from scratch resembling something similar to this, however, it is a big project. I now suspect that Manish wanted us to just integrate that into our code. After all, hindsight is 20/20.
+There was [this repository given](github.com/BalazsJako/ImGuiColorTextEdit) as a way to start this part of the code. The way I understood it, I was supposed to create something from scratch resembling something similar to this, however, it is a big project. I now suspect that Manish wanted us to just integrate that into our code. After all, hindsight is 20/20.
 
 However, I felt more interested in getting more familiar with how text-editing works, so I made something more akin to the *Notepad* as a docking window in our Game Engine. It doesn’t have language functionality, or syntax highlighting, but it does the basic things a text editor does, and I did it mostly from scratch, that helped me learn a ton.
 
 The way it works is that when you select a file with a .txt or .cs extension, the Text Editor will be populated with that specific file text.  
-![][image3]  
+
+<img width="830" height="658" alt="image" src="https://github.com/user-attachments/assets/6820f4f6-3705-4e4a-9c01-f628d2d716b3" />
+  
 You can then modify the text directly, do Ctrl+S to save it, Ctrl+Z to undo, Ctrl+Y to re-do.
 
 You can select things with the mouse, you can press Home or End to move and select multiple things with the cursor just like you would in a normal text editor.  
@@ -139,26 +137,27 @@ There are two things that could be improved upon this basic Text Editor:
 
 Overall, a more neat integration with C\# is in place, but it’s a good place to start.
 
-![][image4]
+![ezgif-33489de2d76c4e73](https://github.com/user-attachments/assets/3490a0b9-cd30-45be-bef0-86bb018ab8d8)
 
 ### 
 
-### Tank Scripts {#tank-scripts}
+### Tank Scripts
 
-Making use of our wrapper classes, and the InternalCalls, we created multiple C\# scripts that created the behavior we were looking for. We made use of functions like Entity.Clone / GetComponent / Rotate / … Functions that as we said before, were linked to c++ code. Thanks to that, we just need it to think about the logic, and not about the way of doing that logic work.
+Adrià: Making use of our wrapper classes, and the InternalCalls, we created multiple C\# scripts that created the behavior we were looking for. We made use of functions like Entity.Clone / GetComponent / Rotate / … Functions that as we said before, were linked to c++ code. Thanks to that, we just need it to think about the logic, and not about the way of doing that logic work.
 
-![][image5]
+![ezgif-3601f3a366763003](https://github.com/user-attachments/assets/278e63e2-56c7-4f3a-9501-b2b9737a4f2a)
 
-## **Links** {#links}
+## Links
 
-Video: 
+[Demo Video](https://youtu.be/lAaqZoWc5hA)
 
-Github Repository: [https://github.com/XeivUPC/LoopieEngine-Scripting](https://github.com/XeivUPC/LoopieEngine-Scripting)   
-Github Release: 
+[Github Repository](https://github.com/XeivUPC/LoopieEngine-Scripting)
 
-## **License** {#license}
+Github Release: Can be found in the Github Repository.
 
-You can find the license in the repository as well: [https://github.com/XeivUPC/LoopieEngine-Scripting/blob/main/LICENSE](https://github.com/XeivUPC/LoopieEngine-Scripting/blob/main/LICENSE) 
+## License
+
+[You can find the license here as well.](https://github.com/XeivUPC/LoopieEngine-Scripting/blob/main/LICENSE)
 
 MIT License
 
