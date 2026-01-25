@@ -1,0 +1,526 @@
+#include "ScriptGlue.h"
+#include "Loopie/Scripting/ScriptingManager.h"
+#include "Loopie/Components/ScriptClass.h"
+
+#include "Loopie/Components/Component.h"
+#include "Loopie/Components/Transform.h"
+#include "Loopie/Components/Camera.h"
+#include "Loopie/Components/MeshRenderer.h"
+
+#include "Loopie/Core/UUID.h"
+#include "Loopie/Core/InputEventManager.h"
+
+#include "Loopie/Core/Application.h"
+#include "Loopie/Scene/Scene.h"
+#include "Loopie/Scene/Entity.h"
+#include "Loopie/Core/Log.h"
+#include "Loopie/Core/Time.h"
+#include "Loopie/Core/Assert.h"
+
+#include <mono/metadata/object.h>
+#include <mono/metadata/reflection.h>
+
+namespace Loopie
+{
+	static std::unordered_map<_MonoType*, std::function<bool(std::shared_ptr<Entity>)>> s_EntityHasComponentFuncs;
+
+	namespace Utils {
+		std::string MonoStringToString(MonoString* string)
+		{
+			char* cStr = mono_string_to_utf8(string);
+			std::string str(cStr);
+			mono_free(cStr);
+			return str;
+		}
+	}
+
+	#define ADD_INTERNAL_CALL(Name) mono_add_internal_call("Loopie.InternalCalls::" #Name, Name)
+
+#pragma region Log
+	static void NativeLog(MonoString* parameter)
+	{
+		std::string str = Utils::MonoStringToString(parameter);
+		Log::Warn("{0}", str);
+	}
+
+	static void NativeLog_Int(int parameter)
+	{
+		Log::Warn("{0}", parameter);
+	}
+
+	static void NativeLog_Float(float parameter)
+	{
+		Log::Warn("{0}", parameter);
+	}
+
+	static void NativeLog_Vector2(vec2* parameter)
+	{
+		Log::Warn("{0} {1}", parameter->x, parameter->y);
+	}
+
+	static void NativeLog_Vector3(vec3* parameter)
+	{
+		Log::Warn("{0} {1} {2}", parameter->x, parameter->y, parameter->z);
+	}
+
+	static void NativeLog_Vector4(vec4* parameter)
+	{
+		Log::Warn("{0} {1} {2} {3}", parameter->x, parameter->y, parameter->z, parameter->w);
+	}
+#pragma endregion
+
+#pragma region Components
+	static MonoObject* Entity_GetScriptInstance(MonoString* entityID, MonoString* componentFullName)
+	{
+		UUID uuid(Utils::MonoStringToString(entityID));
+		Scene* scene = &Application::GetInstance().GetScene();
+		ASSERT(scene == nullptr, "Scene not found");
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		ASSERT(entity == nullptr, "Entity not found");
+
+		std::vector<ScriptClass*> scriptComponents = entity->GetComponents<ScriptClass>();
+
+		for (ScriptClass* script : scriptComponents)
+		{
+			if (!script || !script->GetScriptingClass())
+				continue;
+
+			if (script->IsSameType(Utils::MonoStringToString(componentFullName)))
+			{
+				return script->GetInstance();
+			}
+		}
+
+		return nullptr;
+	}
+
+	static MonoString* Entity_Create(MonoString* entityName, MonoString* parentId)
+	{
+		Scene* scene = &Application::GetInstance().GetScene();
+		ASSERT(scene == nullptr, "Scene not found");
+
+		std::shared_ptr<Entity> parent = nullptr;
+		if (parentId!=nullptr)
+		{
+			UUID parentUuid(Utils::MonoStringToString(parentId));
+			parent = scene->GetEntity(parentUuid);
+			ASSERT(parent == nullptr, "Parent not found");
+		}
+
+		std::shared_ptr<Entity> entity = scene->CreateEntity(Utils::MonoStringToString(entityName), parent);
+		ASSERT(entity == nullptr, "Entity not created");
+
+		return ScriptingManager::CreateString(entity->GetUUID().Get().c_str());
+	}
+
+	static void Entity_Destroy(MonoString* entityID)
+	{
+		UUID uuid(Utils::MonoStringToString(entityID));
+		Scene* scene = &Application::GetInstance().GetScene();
+		ASSERT(scene == nullptr, "Scene not found");
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		ASSERT(entity == nullptr, "Entity not found");
+		scene->RemoveEntityDeferred(entity->GetUUID());
+	}
+
+	static MonoString* Entity_Clone(MonoString* entityId, MonoBoolean cloneChilds)
+	{
+		Scene* scene = &Application::GetInstance().GetScene();
+		if (!scene)
+			return nullptr;
+
+		UUID uuid(Utils::MonoStringToString(entityId));
+		std::shared_ptr<Entity> source = scene->GetEntity(uuid);
+		if (!source)
+			return nullptr;
+
+		std::shared_ptr<Entity> clone = scene->CloneEntity(source, nullptr, (cloneChilds != 0));
+		if (!clone)
+			return nullptr;
+
+		return ScriptingManager::CreateString(clone->GetUUID().Get().c_str());
+	}
+
+	static MonoBoolean Entity_AddComponent(MonoString* entityID, MonoString* componentType) {
+		UUID uuid(Utils::MonoStringToString(entityID));
+		Scene* scene = &Application::GetInstance().GetScene();
+		ASSERT(scene == nullptr, "Scene not found");
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		ASSERT(entity == nullptr, "Entity not found");
+
+		std::shared_ptr<ScriptingClass> scriptingClass = ScriptingManager::GetScriptingClass(Utils::MonoStringToString(componentType));
+		if (!scriptingClass) {
+			Log::Error("Could not find scripting class {}", Utils::MonoStringToString(componentType));
+			return false;
+		}
+
+		ScriptClass* scriptComponent = entity->AddComponent<ScriptClass>(scriptingClass->GetFullName());
+		scriptComponent->SetUp();
+		scriptComponent->InvokeOnCreate();
+		return true;
+	}
+
+	static MonoBoolean Entity_HasComponent(MonoString* entityID, MonoReflectionType* componentType)
+	{
+		UUID uuid(Utils::MonoStringToString(entityID));
+		Scene* scene = &Application::GetInstance().GetScene();
+		ASSERT(scene == nullptr, "Scene not found");
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		ASSERT(entity == nullptr, "Entity not found");
+
+		MonoType* managedType = mono_reflection_type_get_type(componentType);
+
+		if (s_EntityHasComponentFuncs.find(managedType) == s_EntityHasComponentFuncs.end())
+			return false;
+		return s_EntityHasComponentFuncs.at(managedType)(entity);
+	}
+
+	static MonoString* Entity_FindEntityByName(MonoString* name)
+	{
+		std::string entityName = Utils::MonoStringToString(name);
+
+		Scene* scene = &Application::GetInstance().GetScene();
+		ASSERT(scene == nullptr, "Scene not found");
+		std::shared_ptr<Entity> entity = scene->GetEntity(entityName);
+
+		if (!entity)
+			return ScriptingManager::CreateString("");
+
+		return ScriptingManager::CreateString(entity->GetUUID().Get().c_str());
+	}
+
+	static MonoString* Entity_FindEntityByID(MonoString* entityID)
+	{
+		UUID uuid(Utils::MonoStringToString(entityID));
+		Scene* scene = &Application::GetInstance().GetScene();
+		ASSERT(scene == nullptr, "Scene not found");
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+
+		if (!entity)
+			return ScriptingManager::CreateString("");
+
+		return ScriptingManager::CreateString(entity->GetUUID().Get().c_str());
+	}
+#pragma endregion
+
+#pragma region Transform
+	static void Transform_GetPosition(MonoString* id, vec3* position)
+	{
+		UUID uuid(Utils::MonoStringToString(id));
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		*position = entity->GetTransform()->GetPosition();
+	}
+
+	static void Transform_SetPosition(MonoString* id, vec3* position)
+	{
+		UUID uuid(Utils::MonoStringToString(id));
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		entity->GetTransform()->SetPosition(*position);
+	}
+
+	static void Transform_GetLocalPosition(MonoString* id, vec3* position)
+	{
+		UUID uuid(Utils::MonoStringToString(id));
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		*position = entity->GetTransform()->GetLocalPosition();
+	}
+
+	static void Transform_SetLocalPosition(MonoString* id, vec3* position)
+	{
+		UUID uuid(Utils::MonoStringToString(id));
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		entity->GetTransform()->SetLocalPosition(*position);
+	}
+
+	static void Transform_GetRotation(MonoString* id, vec3* rotation)
+	{
+		UUID uuid(Utils::MonoStringToString(id));
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		*rotation = entity->GetTransform()->GetEulerAngles();
+	}
+
+	static void Transform_SetRotation(MonoString* id, vec3* rotation)
+	{
+		UUID uuid(Utils::MonoStringToString(id));
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		entity->GetTransform()->SetEulerAngles(*rotation);
+	}
+
+	static void Transform_GetLocalRotation(MonoString* id, vec3* rotation)
+	{
+		UUID uuid(Utils::MonoStringToString(id));
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		*rotation = entity->GetTransform()->GetLocalEulerAngles();
+	}
+
+	static void Transform_SetLocalRotation(MonoString* id, vec3* rotation)
+	{
+		UUID uuid(Utils::MonoStringToString(id));
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		entity->GetTransform()->SetLocalEulerAngles(*rotation);
+	}
+
+	static void Transform_GetLocalScale(MonoString* id, vec3* position)
+	{
+		UUID uuid(Utils::MonoStringToString(id));
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		*position = entity->GetTransform()->GetLocalScale();
+	}
+
+	static void Transform_SetLocalScale(MonoString* id, vec3* position)
+	{
+		UUID uuid(Utils::MonoStringToString(id));
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		entity->GetTransform()->SetLocalScale(*position);
+	}
+
+	static void Transform_Translate(MonoString* id, vec3* translation, ObjectSpace space)
+	{
+		UUID uuid(Utils::MonoStringToString(id));
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		entity->GetTransform()->Translate(*translation, (ObjectSpace)space);
+	}
+
+	static void Transform_Rotate(MonoString* id, vec3* eulerAngles, ObjectSpace space)
+	{
+		UUID uuid(Utils::MonoStringToString(id));
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		entity->GetTransform()->Rotate(*eulerAngles, (ObjectSpace)space);
+	}
+
+	static void Transform_LookAt(MonoString* id, vec3* target, vec3* worldUp)
+	{
+		UUID uuid(Utils::MonoStringToString(id));
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		entity->GetTransform()->LookAt(*target, *worldUp);
+	}
+
+	static void Transform_Forward(MonoString* id, vec3* forward)
+	{
+		UUID uuid(Utils::MonoStringToString(id));
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		*forward = entity->GetTransform()->Forward();
+	}
+
+	static void Transform_Back(MonoString* id, vec3* back)
+	{
+		UUID uuid(Utils::MonoStringToString(id));
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		*back = entity->GetTransform()->Back();
+	}
+
+	static void Transform_Up(MonoString* id, vec3* up)
+	{
+		UUID uuid(Utils::MonoStringToString(id));
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		*up = entity->GetTransform()->Up();
+	}
+
+	static void Transform_Down(MonoString* id, vec3* down)
+	{
+		UUID uuid(Utils::MonoStringToString(id));
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		*down = entity->GetTransform()->Down();
+	}
+
+	static void Transform_Left(MonoString* id, vec3* left)
+	{
+		UUID uuid(Utils::MonoStringToString(id));
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		*left = entity->GetTransform()->Left();
+	}
+
+	static void Transform_Right(MonoString* id, vec3* right)
+	{
+		UUID uuid(Utils::MonoStringToString(id));
+		Scene* scene = &Application::GetInstance().GetScene();
+		std::shared_ptr<Entity> entity = scene->GetEntity(uuid);
+		*right = entity->GetTransform()->Right();
+	}
+#pragma endregion
+
+#pragma region Input
+	static MonoBoolean Input_IsKeyDown(int keycode)
+	{
+		return Application::GetInstance().GetInputEvent().GetKeyStatus((SDL_Scancode)keycode) == KeyState::DOWN;
+	}
+
+	static MonoBoolean Input_IsKeyUp(int keycode)
+	{
+		return Application::GetInstance().GetInputEvent().GetKeyStatus((SDL_Scancode)keycode) == KeyState::UP;
+	}
+
+	static MonoBoolean Input_IsKeyPressed(int keycode)
+	{
+		return Application::GetInstance().GetInputEvent().GetKeyStatus((SDL_Scancode)keycode) == KeyState::REPEAT;
+	}
+
+	static MonoBoolean Input_IsMouseButtonDown(int mouseButton)
+	{
+		return Application::GetInstance().GetInputEvent().GetMouseButtonStatus(mouseButton) == KeyState::DOWN;
+	}
+
+	static MonoBoolean Input_IsMouseButtonUp(int mouseButton)
+	{
+		return Application::GetInstance().GetInputEvent().GetMouseButtonStatus(mouseButton) == KeyState::UP;
+	}
+
+	static MonoBoolean Input_IsMouseButtonPressed(int mouseButton)
+	{
+		return Application::GetInstance().GetInputEvent().GetMouseButtonStatus(mouseButton) == KeyState::REPEAT;
+	}
+	static MonoBoolean Input_IsGamepadButtonDown(int gamepadButton)
+	{
+		return Application::GetInstance().GetInputEvent().GetGamepadButtonStatus((SDL_GamepadButton)gamepadButton) == KeyState::DOWN;
+	}
+
+	static MonoBoolean Input_IsGamepadButtonUp(int gamepadButton)
+	{
+		return Application::GetInstance().GetInputEvent().GetGamepadButtonStatus((SDL_GamepadButton)gamepadButton) == KeyState::UP;
+	}
+
+	static MonoBoolean Input_IsGamepadButtonPressed(int gamepadButton)
+	{
+		return Application::GetInstance().GetInputEvent().GetGamepadButtonStatus((SDL_GamepadButton)gamepadButton) == KeyState::REPEAT;
+	}
+
+	static void Input_GetMousePosition(vec2* mousePosition)
+	{
+		*mousePosition = Application::GetInstance().GetInputEvent().GetMousePosition();
+	}
+
+	static void Input_GetMouseDelta(vec2* mouseDelta)
+	{
+		*mouseDelta = Application::GetInstance().GetInputEvent().GetMouseDelta();
+	}
+
+	static void Input_GetScrollDelta(vec2* scrollDelta)
+	{
+		*scrollDelta = Application::GetInstance().GetInputEvent().GetScrollDelta();
+	}
+#pragma endregion
+
+#pragma region Time
+	static float Time_GetDeltaTime()
+	{
+		return Time::GetDeltaTime();
+	}
+
+	static float Time_GetFixedDeltaTime()
+	{
+		return Time::GetFixedDeltaTime();
+	}
+
+	static float Time_GetTimeScale()
+	{
+		return Time::GetTimeScale();
+	}
+
+	static void Time_SetTimeScale(float scale)
+	{
+		Time::SetTimeScale(scale);
+	}
+#pragma endregion
+
+	template<typename Comp, typename = std::enable_if_t<std::is_base_of_v<Component, Comp>>>
+	static void RegisterComponent()
+	{
+		([]()
+			{
+				std::string_view typeName = Comp::GetIdentificableName();
+				std::string managedTypename = fmt::format("Loopie.{}", typeName);
+
+				MonoType* managedType = mono_reflection_type_from_name(managedTypename.data(), ScriptingManager::s_Data.CoreImage);
+				if (!managedType)
+				{
+					Log::Warn("Could not find component type {}", managedTypename);
+					return;
+				}
+				s_EntityHasComponentFuncs[managedType] = [](std::shared_ptr<Entity> entity) { return entity->HasComponent<Comp>(); };
+			}());
+	}
+
+
+	void ScriptGlue::RegisterComponents()
+	{
+		s_EntityHasComponentFuncs.clear();
+		RegisterComponent<Transform>();
+		RegisterComponent<Camera>();
+		RegisterComponent<MeshRenderer>();
+	}
+
+
+	void ScriptGlue::RegisterFunctions()
+	{
+		ADD_INTERNAL_CALL(NativeLog);
+		ADD_INTERNAL_CALL(NativeLog_Int);
+		ADD_INTERNAL_CALL(NativeLog_Float);
+		ADD_INTERNAL_CALL(NativeLog_Vector2);
+		ADD_INTERNAL_CALL(NativeLog_Vector3);
+
+		ADD_INTERNAL_CALL(Entity_GetScriptInstance);
+		ADD_INTERNAL_CALL(Entity_Create);
+		ADD_INTERNAL_CALL(Entity_Clone);
+		ADD_INTERNAL_CALL(Entity_Destroy);
+		ADD_INTERNAL_CALL(Entity_AddComponent);
+		ADD_INTERNAL_CALL(Entity_FindEntityByName);
+		ADD_INTERNAL_CALL(Entity_FindEntityByID);
+		ADD_INTERNAL_CALL(Entity_HasComponent);
+
+		ADD_INTERNAL_CALL(Transform_GetPosition);
+		ADD_INTERNAL_CALL(Transform_SetPosition);
+		ADD_INTERNAL_CALL(Transform_GetLocalPosition);
+		ADD_INTERNAL_CALL(Transform_SetLocalPosition);
+		ADD_INTERNAL_CALL(Transform_GetRotation);
+		ADD_INTERNAL_CALL(Transform_SetRotation);
+		ADD_INTERNAL_CALL(Transform_GetLocalRotation);
+		ADD_INTERNAL_CALL(Transform_SetLocalRotation);
+		ADD_INTERNAL_CALL(Transform_GetLocalScale);
+		ADD_INTERNAL_CALL(Transform_SetLocalScale);
+		ADD_INTERNAL_CALL(Transform_Translate);
+		ADD_INTERNAL_CALL(Transform_Rotate);
+		ADD_INTERNAL_CALL(Transform_LookAt);
+		ADD_INTERNAL_CALL(Transform_Forward);
+		ADD_INTERNAL_CALL(Transform_Back);
+		ADD_INTERNAL_CALL(Transform_Up);
+		ADD_INTERNAL_CALL(Transform_Down);
+		ADD_INTERNAL_CALL(Transform_Left);
+		ADD_INTERNAL_CALL(Transform_Right);
+
+		ADD_INTERNAL_CALL(Input_IsKeyDown);
+		ADD_INTERNAL_CALL(Input_IsKeyUp);
+		ADD_INTERNAL_CALL(Input_IsKeyPressed);
+		ADD_INTERNAL_CALL(Input_IsMouseButtonDown);
+		ADD_INTERNAL_CALL(Input_IsMouseButtonUp);
+		ADD_INTERNAL_CALL(Input_IsMouseButtonPressed);
+		ADD_INTERNAL_CALL(Input_IsGamepadButtonDown);
+		ADD_INTERNAL_CALL(Input_IsGamepadButtonUp);
+		ADD_INTERNAL_CALL(Input_IsGamepadButtonPressed);
+		ADD_INTERNAL_CALL(Input_GetMousePosition);
+		ADD_INTERNAL_CALL(Input_GetMouseDelta);
+		ADD_INTERNAL_CALL(Input_GetScrollDelta);
+
+		ADD_INTERNAL_CALL(Time_GetDeltaTime);
+		ADD_INTERNAL_CALL(Time_GetFixedDeltaTime);
+		ADD_INTERNAL_CALL(Time_GetTimeScale);
+		ADD_INTERNAL_CALL(Time_SetTimeScale);
+	}
+}

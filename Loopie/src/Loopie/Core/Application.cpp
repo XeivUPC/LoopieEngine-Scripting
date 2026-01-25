@@ -19,14 +19,18 @@ namespace Loopie {
 
 		Log::Info("Application Started");
 
-		ScriptingManager::Init();
-		Log::Info("Scripting created successfully.");
+		//ScriptingManager::Init();
+		//Log::Info("Scripting created successfully.");
 
 		// Window Creation
 		m_window = new Window();
 		Log::Info("Window created successfully.");
 
+		m_inputEvent.Initialize();
+
 		m_imguiManager.Init();
+
+		m_notifier.AddObserver(this);
 
 	}
 
@@ -46,6 +50,8 @@ namespace Loopie {
 		//// Cleaning
 		delete(m_window); 
 		m_window = nullptr;
+
+		m_notifier.RemoveObserver(this);
 
 		Log::Info("Application Closed");
 	}
@@ -156,6 +162,15 @@ namespace Loopie {
 			{
 				Close();
 			}
+		}
+	}
+
+	void Application::OnNotify(const EngineNotification& id)
+	{
+		if(id == EngineNotification::OnAssemblyReloadRequiered)
+		{
+			ScriptingManager::Reload();
+			Log::Info("Scripting Reloaded Successfully.");
 		}
 	}
 

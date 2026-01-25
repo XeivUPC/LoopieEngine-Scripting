@@ -15,6 +15,7 @@ namespace Loopie {
 
 
 		m_congifPath = DirectoryManager::CreateFile(m_projectPath, "project", ".config");
+		m_gameDLLPath = m_projectPath / "Scripting/Game.dll";
 		CreateDefaultPaths();
 
 		JsonData configData;	
@@ -36,6 +37,7 @@ namespace Loopie {
 
 		m_projectPath = projectPath;
 		m_congifPath = projectPath / "project.config";
+		m_gameDLLPath = m_projectPath / "Scripting/Game.dll";
 		CreateDefaultPaths();
 
 		/// Maybe read/save config Files????

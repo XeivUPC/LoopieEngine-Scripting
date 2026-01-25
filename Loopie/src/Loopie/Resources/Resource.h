@@ -6,12 +6,13 @@
 namespace Loopie {
 	enum ResourceType
 	{
+		UNKNOWN,
 		TEXTURE,
 		MESH,
 		MATERIAL,
 		SHADER,
 		SCENE,
-		UNKNOWN
+		SCRIPT
 	};
 
 	class Resource : public  IIdentificable {

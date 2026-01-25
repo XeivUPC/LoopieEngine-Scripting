@@ -2,14 +2,20 @@
 #include "Editor/Interfaces/Workspace/HierarchyInterface.h"
 #include "Editor/Interfaces/Workspace/AssetsExplorerInterface.h"
 
-#include "Loopie/Components/Transform.h"
 #include "Loopie/Core/Log.h"
 #include "Loopie/Math/MathTypes.h"
+
+#include "Loopie/Components/Transform.h"
 #include "Loopie/Components/Camera.h"
 #include "Loopie/Components/MeshRenderer.h"
+#include "Loopie/Components/ScriptClass.h"
+
+#include "Loopie/Scripting/ScriptingManager.h"
+
 #include "Loopie/Resources/AssetRegistry.h"
 
 #include <imgui.h>
+#include <unordered_map>
 
 namespace Loopie {
 
@@ -63,6 +69,9 @@ namespace Loopie {
 			}
 			else if (component->GetTypeID() == MeshRenderer::GetTypeIDStatic()) {
 				DrawMeshRenderer(static_cast<MeshRenderer*>(component));
+			}
+			else if (component->GetTypeID() == ScriptClass::GetTypeIDStatic()) {
+				DrawScriptClass(static_cast<ScriptClass*>(component));
 			}
 		}
 		AddComponent(entity);
@@ -382,6 +391,108 @@ namespace Loopie {
 		ImGui::PopID();
 	}
 
+	void InspectorInterface::DrawScriptClass(ScriptClass* scriptClass)
+	{
+		ImGui::PushID(scriptClass);
+
+		bool open = ImGui::CollapsingHeader(scriptClass->GetClassName().c_str());
+
+		if (RemoveComponent(scriptClass)) {
+			ImGui::PopID();
+			return;
+		}
+
+		bool isRuntime = ScriptingManager::IsRunning();
+
+		if (open) {
+			/// Get Fields and show (one runtime version, and one editor version) -> For now, this is only editor version
+
+			std::shared_ptr<ScriptingClass> scriptingClass = ScriptingManager::s_Data.ScriptingClasses[scriptClass->GetClassName()];
+			const std::map<std::string, ScriptField>& fields = scriptingClass->GetFields();
+			for (const auto& [name, field] : fields)
+			{
+				switch (field.Type)
+				{
+				case ScriptFieldType::Float:
+				{
+					float v = isRuntime ? scriptClass->GetRuntimeFieldValue<float>(name) : scriptClass->GetFieldValue<float>(name);
+					if (ImGui::DragFloat(name.c_str(), &v, 0.1f))
+						isRuntime ? scriptClass->SetRuntimeFieldValue(name, v) : scriptClass->SetFieldValue(name, v);
+					break;
+				}
+				case ScriptFieldType::Double:
+				{
+					double v = isRuntime ? scriptClass->GetRuntimeFieldValue<double>(name) : scriptClass->GetFieldValue<double>(name);
+					if (ImGui::DragScalar(name.c_str(), ImGuiDataType_Double, &v, 0.1))
+						isRuntime ? scriptClass->SetRuntimeFieldValue(name, v) : scriptClass->SetFieldValue(name, v);
+					break;
+				}
+				case ScriptFieldType::Bool:
+				{
+					bool v = isRuntime ? scriptClass->GetRuntimeFieldValue<bool>(name) : scriptClass->GetFieldValue<bool>(name);
+					if (ImGui::Checkbox(name.c_str(), &v))
+						isRuntime ? scriptClass->SetRuntimeFieldValue(name, v) : scriptClass->SetFieldValue(name, v);
+					break;
+				}
+				case ScriptFieldType::Char:
+				{
+					int v = isRuntime ? scriptClass->GetRuntimeFieldValue<char>(name) : scriptClass->GetFieldValue<char>(name);
+					if (ImGui::DragInt(name.c_str(), &v, 1, 0, 255))
+						isRuntime ? scriptClass->SetRuntimeFieldValue(name, (char)v) : scriptClass->SetFieldValue(name, (char)v);
+					break;
+				}
+
+				case ScriptFieldType::Byte:
+				{
+					int v = isRuntime ? scriptClass->GetRuntimeFieldValue<uint8_t>(name) : scriptClass->GetFieldValue<uint8_t>(name);
+					if (ImGui::DragInt(name.c_str(), &v, 1, 0, 255))
+						isRuntime ? scriptClass->SetRuntimeFieldValue(name, (uint8_t)v) : scriptClass->SetFieldValue(name, (uint8_t)v);
+					break;
+				}
+
+				case ScriptFieldType::Short:
+				case ScriptFieldType::UShort:
+				case ScriptFieldType::Int:
+				case ScriptFieldType::UInt:
+				{
+					int v = isRuntime ? scriptClass->GetRuntimeFieldValue<int>(name) : scriptClass->GetFieldValue<int>(name);
+					if (ImGui::DragInt(name.c_str(), &v))
+						isRuntime ? scriptClass->SetRuntimeFieldValue(name, v) : scriptClass->SetFieldValue(name, v);
+					break;
+				}
+
+				case ScriptFieldType::Long:
+				case ScriptFieldType::ULong:
+				{
+					int64_t v = isRuntime ? scriptClass->GetRuntimeFieldValue<int64_t>(name) : scriptClass->GetFieldValue<int64_t>(name);
+					if (ImGui::DragScalar(name.c_str(), ImGuiDataType_S64, &v))
+						isRuntime ? scriptClass->SetRuntimeFieldValue(name, v) : scriptClass->SetFieldValue(name, v);
+					break;
+				}
+
+				case ScriptFieldType::String:
+				{
+					std::string value = isRuntime ? scriptClass->GetRuntimeFieldString(name) :  scriptClass->GetFieldString(name);
+
+					char buffer[256];
+					memset(buffer, 0, sizeof(buffer));
+					strncpy(buffer, value.c_str(), sizeof(buffer) - 1);
+
+					if (ImGui::InputText(name.c_str(), buffer, sizeof(buffer)))
+						isRuntime ? scriptClass->SetRuntimeFieldString(name, std::string(buffer)) : scriptClass->SetFieldString(name, std::string(buffer));
+
+					break;
+				}
+
+				default:
+					ImGui::Text("Unsupported Field: %s", name.c_str());
+					break;
+				}
+			}
+		}
+		ImGui::PopID();
+	}
+
 	void InspectorInterface::AddComponent(const std::shared_ptr<Entity>& entity)
 	{
 		if (!entity)
@@ -420,6 +531,17 @@ namespace Loopie {
 			//    ImGui::EndCombo();
 			//    return;
 			//}
+
+			const std::unordered_map<std::string, std::shared_ptr<ScriptingClass>>& scriptingClasses = ScriptingManager::s_Data.ScriptingClasses;
+			for(const auto& scriptClass : scriptingClasses)
+			{
+				if (ImGui::Selectable(scriptClass.second->GetClassName().c_str()))
+				{
+					entity->AddComponent<ScriptClass>(scriptClass.first);
+					ImGui::EndCombo();
+					return;
+				}
+			}
 
 			
 

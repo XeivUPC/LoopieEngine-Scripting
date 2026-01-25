@@ -5,6 +5,7 @@
 #include "Loopie/Components/Transform.h"
 #include "Loopie/Components/Camera.h"
 #include "Loopie/Components/MeshRenderer.h"
+#include "Loopie/Components/ScriptClass.h"
 #include "Loopie/Helpers/LoopieHelpers.h"
 #include "Loopie/Resources/AssetRegistry.h"
 
@@ -21,10 +22,12 @@ namespace Loopie {
 
 		m_octree = std::make_unique<Octree>(DEFAULT_WORLD_BOUNDS);
 
+		Application::GetInstance().m_notifier.AddObserver(this);
 	}
 
 	Scene::~Scene()
 	{
+		Application::GetInstance().m_notifier.RemoveObserver(this);
 		m_entities.clear();
 	}
 
@@ -167,6 +170,96 @@ namespace Loopie {
 
 		RemoveEntityRecursive(entity);
 		m_octree->Rebuild();
+	}
+
+	void Scene::RemoveEntityDeferred(UUID uuid)
+	{
+		if (m_entities.find(uuid) == m_entities.end())
+			return;
+
+		m_entitiesPendingDestroy.insert(uuid);
+	}
+
+	void Scene::FlushRemovedEntities()
+	{
+		if (m_entitiesPendingDestroy.empty())
+			return;
+
+		for (const UUID& uuid : m_entitiesPendingDestroy)
+		{
+			auto it = m_entities.find(uuid);
+			if (it != m_entities.end())
+			{
+				RemoveEntityRecursive(it->second);
+			}
+		}
+
+		m_entitiesPendingDestroy.clear();
+		m_octree->Rebuild();
+	}
+
+	std::shared_ptr<Entity> Scene::CloneEntity(const std::shared_ptr<Entity>& source, std::shared_ptr<Entity> newParent, bool cloneChildren)
+	{
+		if (!source)
+			return nullptr;
+
+		if (!newParent)
+			newParent = source->GetParent().lock();
+
+		// Create new entity
+		std::shared_ptr<Entity> clone = CreateEntity(
+			source->GetName(),
+			newParent
+		);
+
+		clone->SetIsActive(source->GetIsActive());
+
+		// ---- Clone components ----
+		for (Component* component : source->GetComponents())
+		{
+			JsonData componentData;
+			component->Serialize(componentData.Node());
+
+			// Transform already exists
+			if (componentData.Child("transform").IsValid())
+			{
+				clone->GetTransform()->Deserialize(
+					componentData.Child("transform")
+				);
+				continue;
+			}
+
+			// Camera
+			if (componentData.Child("camera").IsValid())
+			{
+				auto cam = clone->AddComponent<Camera>();
+				cam->Deserialize(componentData.Child("camera"));
+			}
+			// MeshRenderer
+			else if (componentData.Child("meshrenderer").IsValid())
+			{
+				auto mr = clone->AddComponent<MeshRenderer>();
+				mr->Deserialize(componentData.Child("meshrenderer"));
+			}
+			// ScriptClass
+			else if (componentData.Child("script").IsValid())
+			{
+				std::string classID = componentData.Child("script").GetValue<std::string>("class_id", "").Result;
+				ScriptClass* scriptClass = clone->AddComponent<ScriptClass>(classID);
+				scriptClass->Deserialize(componentData.Child("script"));
+			}
+		}
+
+		// ---- Clone children ----
+		if (cloneChildren)
+		{
+			for (const auto& child : source->GetChildren())
+			{
+				CloneEntity(child, clone, true);
+			}
+		}
+
+		return clone;
 	}
 
 	void Scene::SetFilePath(std::string filePath)
@@ -344,6 +437,15 @@ namespace Loopie {
 							meshRenderer->Deserialize(node);
 						}
 					}
+					else if (componentNode.Contains("script"))
+					{
+						JsonNode node = componentNode.Child("script");
+						auto scriptClass = entity->AddComponent<ScriptClass>("");
+						if (scriptClass)
+						{
+							scriptClass->Deserialize(node);
+						}
+					}
 				}
 			}
 		}
@@ -371,6 +473,32 @@ namespace Loopie {
 		m_octree->Rebuild();
 
 		return true;
+	}
+
+	void Scene::OnNotify(const EngineNotification& id)
+	{
+		if(id == EngineNotification::OnRuntimeStart)
+		{
+			for(const auto& [uuid, entity] : m_entities)
+			{
+				std::vector<ScriptClass*> scripts =entity->GetComponents<ScriptClass>();
+				for (size_t i = 0; i < scripts.size(); i++)
+				{
+					scripts[i]->SetUp();
+				}
+			}
+		}
+		else if (id == EngineNotification::OnRuntimeStop)
+		{
+			for (const auto& [uuid, entity] : m_entities)
+			{
+				std::vector<ScriptClass*> scripts = entity->GetComponents<ScriptClass>();
+				for (size_t i = 0; i < scripts.size(); i++)
+				{
+					scripts[i]->DestroyInstance();
+				}
+			}
+		}
 	}
 
 	std::string Scene::GetUniqueName(std::shared_ptr<Entity> parentEntity, const std::string& desiredName)

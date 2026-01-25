@@ -1,0 +1,7 @@
+namespace Loopie
+{
+    class DefaultScript
+    {
+
+    };
+}

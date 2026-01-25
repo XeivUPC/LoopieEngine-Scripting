@@ -18,6 +18,8 @@ namespace Loopie {
 
 		m_touchedEvents.reserve(15);
 
+		
+
 	}
 	InputEventManager::~InputEventManager()
 	{
@@ -26,6 +28,12 @@ namespace Loopie {
 			gamepad = nullptr;
 		}
 	}
+
+	void InputEventManager::Initialize()
+	{
+		SDL_StartTextInput(Application::GetInstance().GetWindow().GetSDLWindow());
+	}
+
 	void InputEventManager::Update() {
 
 		for (Uint32 t : m_touchedEvents) {

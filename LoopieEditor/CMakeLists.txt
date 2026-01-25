@@ -17,14 +17,9 @@ target_link_libraries(${PROJECT_NAME} PUBLIC loopie-core)
 
 file(COPY ${PROJECT_SOURCE_DIR}/assets DESTINATION ${OUTPUT_PATH})
 
-add_dependencies(${PROJECT_NAME} LoopieScriptingBuild)
 
-# Copy Engine DLL
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${PROJECT_NAME}>/Scripting
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${CMAKE_BINARY_DIR}/Loopie.Core.dll
-        $<TARGET_FILE_DIR:${PROJECT_NAME}>/Scripting/Loopie.Core.dll
+add_dependencies(${PROJECT_NAME}
+    LoopieScriptingBuild LoopieCompilerBuild
 )
 
 # Copy Mono DLL

@@ -11,7 +11,7 @@ _deps
 .cache
 build
 out
-bin
+
 *.vscode
 *.kdev4
 *.kate-swp
@@ -30,3 +30,6 @@ bin
 
 LoopieScripting/bin/
 LoopieScripting/obj/
+
+LoopieCompiler/bin/
+LoopieCompiler/obj/

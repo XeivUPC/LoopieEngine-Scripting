@@ -10,6 +10,8 @@
 
 #include "Loopie/Math/MathTypes.h"
 
+#include "Loopie/Scripting/ScriptingManager.h"
+
 #include "Loopie/Resources/ResourceManager.h"
 #include "Loopie/Importers/TextureImporter.h"
 #include "Loopie/Math/Ray.h"
@@ -27,6 +29,10 @@ namespace Loopie
 	void EditorModule::OnLoad()
 	{
 		AssetRegistry::Initialize();
+
+		ScriptingManager::Init();
+		Log::Info("Scripting created successfully.");
+
 		Application::GetInstance().GetWindow().SetResizable(true);
 
 		/////SCENE
@@ -58,6 +64,7 @@ namespace Loopie
 		m_game.Init();
 		m_scene.Init();
 		m_mainMenu.Init();
+		m_textEditor.Init();
 
 		m_hierarchy.SetScene(m_currentScene);
 
@@ -134,7 +141,7 @@ namespace Loopie
 			}
 			m_game.EndScene();
 		}
-		
+		m_currentScene->FlushRemovedEntities();
 	}
 
 	void EditorModule::OnInterfaceRender()
@@ -176,6 +183,7 @@ namespace Loopie
 		m_assetsExplorer.Render();
 		m_game.Render();
 		m_scene.Render();
+		m_textEditor.Render();
 	}
 
 	void EditorModule::RenderWorld(Camera* camera)

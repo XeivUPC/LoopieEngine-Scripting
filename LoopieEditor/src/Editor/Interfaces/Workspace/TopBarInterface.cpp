@@ -1,11 +1,14 @@
 #include "TopBarInterface.h"
-#include <imgui.h>
-#include <imgui_stdlib.h>
 #include "Loopie/Resources/AssetRegistry.h"
 #include "Loopie/Importers/TextureImporter.h"
 #include "Loopie/Resources/ResourceManager.h"
+#include "Loopie/Scripting/ScriptingManager.h"
+#include "Loopie/Components/ScriptClass.h"
 #include "Loopie/Components/Component.h"
 #include "Loopie/Core/Log.h"
+
+#include <imgui.h>
+#include <imgui_stdlib.h>
 
 namespace Loopie
 {
@@ -42,13 +45,21 @@ namespace Loopie
             m_actualMode = DEACTIVATED;
             return;
         }
-        for (const auto& [uuid, entity] : Application::GetInstance().GetScene().GetAllEntities())
+        
+        ////Caching
+        for (auto& [uuid, entity] : Application::GetInstance().GetScene().GetAllEntities())
         {
-            for (auto& component : entity->GetComponents())
+            if (entity == nullptr)
+                continue;
+            if (!entity->HasComponent< ScriptClass>())
+                continue;
+
+            for (auto& component : entity->GetComponents<ScriptClass>())
             {
-                component->Update();
+                component->InvokeOnUpdate();
             }
         }
+
         if (m_actualMode == NEXTFRAME)
             m_actualMode = PAUSE;
     }
@@ -82,14 +93,37 @@ namespace Loopie
         {
             if (ImGui::ImageButton("play", (ImTextureID)m_playIcon->GetRendererId(), ImVec2(15, 15)))
             {
+				ScriptingManager::RuntimeStart();
                 Application::GetInstance().GetScene().SaveScene("recoverScene.scene");
                 m_actualMode = PLAY;
+
+                for (const auto& [uuid, entity] : Application::GetInstance().GetScene().GetAllEntities())
+                {
+                    if (!entity->HasComponent<ScriptClass>())
+                        continue;
+                    for (auto& component : entity->GetComponents<ScriptClass>())
+                    {
+                        component->InvokeOnCreate();
+                    }
+                }
             }
         }
         else
         {
-            if (ImGui::ImageButton("stop", (ImTextureID)m_stopIcon->GetRendererId(), ImVec2(15, 15)))
+            if (ImGui::ImageButton("stop", (ImTextureID)m_stopIcon->GetRendererId(), ImVec2(15, 15)) || !ScriptingManager::IsRunning())
             {
+
+                for (const auto& [uuid, entity] : Application::GetInstance().GetScene().GetAllEntities())
+                {
+                    if (!entity->HasComponent<ScriptClass>())
+                        continue;
+                    for (auto& component : entity->GetComponents<ScriptClass>())
+                    {
+                        component->DestroyInstance();
+                    }
+                }        
+
+				ScriptingManager::RuntimeStop();
                 m_actualMode = STOP;
             }
         }
