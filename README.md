@@ -152,4 +152,4 @@ Adrià: Making use of our wrapper classes, and the InternalCalls, we created mul
 
 [Github Repository](https://github.com/XeivUPC/LoopieEngine-Scripting)
 
-Github Release: Can be found in the Github Repository.
+[Github Release](https://github.com/XeivUPC/LoopieEngine-Scripting/releases/tag/v0.3)
