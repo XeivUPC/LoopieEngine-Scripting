@@ -1,8 +1,12 @@
 #include "Project.h"
 
 #include "Loopie/Core/Application.h"
+#include "Loopie/Core/Log.h"
 #include "Loopie/Files/DirectoryManager.h"
 #include "Loopie/Files/Json.h"
+
+#include <fstream>
+#include <sstream>
 
 namespace Loopie {
 	bool Project::Create(const std::filesystem::path& projectPath, const std::string& name) {
@@ -55,5 +59,54 @@ namespace Loopie {
 		DirectoryManager::CreateFolder(m_cachePath, "Materials");
 		DirectoryManager::CreateFolder(m_cachePath, "Shaders");
 
+		CreateProjFiles();
+
+	}
+
+	std::string ReplaceAll(std::string str, const std::string& from, const std::string& to) {
+		size_t start_pos = 0;
+		while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
+			str.replace(start_pos, from.length(), to);
+			start_pos += to.length();
+		}
+		return str;
+	}
+
+	const void Project::CreateProjFiles() {
+		std::string csProjString = R"(
+			<Project Sdk="Microsoft.NET.Sdk">
+				<PropertyGroup>
+					<TargetFramework>net472</TargetFramework>
+					<LangVersion>7.3</LangVersion>
+					<Nullable>disable</Nullable>
+					<ImplicitUsings>disable</ImplicitUsings>
+					<NuGetAudit>false</NuGetAudit>
+				</PropertyGroup>
+
+				<ItemGroup>
+					<Reference Include="Loopie">
+						<HintPath>ENGINE_DLL_PATH</HintPath>
+					</Reference>
+				</ItemGroup>
+
+			</Project>
+
+			)";
+
+		std::filesystem::path csprojPath = DirectoryManager::CreateFile(m_projectPath, "LoopieProject", ".csproj");
+		
+		std::ofstream file(csprojPath.string());
+		if (!file.is_open())
+		{
+			Log::Error("CSPROJ not created: {0}", csprojPath.string());
+			return;
+		}
+
+		std::filesystem::path relative = "../LoopieScripting/Loopie.Core.dll";
+
+		csProjString = ReplaceAll(csProjString, "ENGINE_DLL_PATH", std::filesystem::absolute(relative).string());
+
+		file << csProjString;
+		file.close();
 	}
 }

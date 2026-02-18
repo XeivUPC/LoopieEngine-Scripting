@@ -23,6 +23,8 @@ namespace Loopie {
 
 	private:
 		const void CreateDefaultPaths();
+		const void CreateProjFiles();
+		const void RefreshProjFiles();
 	private:
 		std::filesystem::path m_projectPath;
 		std::filesystem::path m_assetsPath;
