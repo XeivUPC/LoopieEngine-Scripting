@@ -29,11 +29,6 @@ namespace Loopie {
 		}
 	}
 
-	void InputEventManager::Initialize()
-	{
-		SDL_StartTextInput(Application::GetInstance().GetWindow().GetSDLWindow());
-	}
-
 	void InputEventManager::Update() {
 
 		for (Uint32 t : m_touchedEvents) {
@@ -264,5 +259,15 @@ namespace Loopie {
 	bool InputEventManager::IsMouseCaptured() const
 	{
 		return SDL_GetWindowRelativeMouseMode(Application::GetInstance().GetWindow().GetSDLWindow());
+	}
+	void InputEventManager::StartReadingInputText() const
+	{
+		SDL_StartTextInput(Application::GetInstance().GetWindow().GetSDLWindow());
+		readingInputText = true;
+	}
+	void InputEventManager::StopReadingInputText() const
+	{
+		SDL_StopTextInput(Application::GetInstance().GetWindow().GetSDLWindow());
+		readingInputText = false;
 	}
 }

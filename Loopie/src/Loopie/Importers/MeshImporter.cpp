@@ -166,7 +166,7 @@ namespace Loopie {
 		
 		aiVector3D aiScaling, aiPosition;
 		aiQuaternion aiRotation;
-		node->mTransformation.Decompose(aiScaling, aiRotation, aiPosition);
+		transformMatrix.Decompose(aiScaling, aiRotation, aiPosition);
 
 		data.Position = vec3(aiPosition.x, aiPosition.y, aiPosition.z);
 		data.Scale = vec3(aiScaling.x, aiScaling.y, aiScaling.z);

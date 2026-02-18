@@ -9,6 +9,7 @@ namespace Loopie {
 	class Camera;
 	class MeshRenderer;
 	class ScriptClass;
+	class Material;
 
 
 	class InspectorInterface : public Interface , public IObserver<OnEntityOrFileNotification>{
@@ -39,7 +40,7 @@ namespace Loopie {
 		bool RemoveComponent(Component* component);
 
 		///FilesRelated
-		void DrawMaterialImportSettings(const std::filesystem::path& path);
+		void DrawMaterial(std::shared_ptr<Material> material);
 
 		// Inherited via IObserver
 		void OnNotify(const OnEntityOrFileNotification& id) override;

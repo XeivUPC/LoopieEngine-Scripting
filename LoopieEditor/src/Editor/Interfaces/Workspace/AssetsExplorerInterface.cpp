@@ -12,6 +12,8 @@
 
 #include <imgui.h>
 #include <imgui_internal.h>
+#include <fstream>
+#include <sstream>
 
 namespace Loopie {
 	Event<OnEntityOrFileNotification> AssetsExplorerInterface::s_OnFileSelected;
@@ -118,49 +120,20 @@ namespace Loopie {
 		}
 		ImGui::End();
 
-		if (!m_renamingFile.empty()) {
-			ImGui::OpenPopup("Renaming...###popUp");
+		if (m_pendingCreateAction)
+		{
+			ImGui::OpenPopup("Set Name");
 		}
 
-		if (ImGui::BeginPopupModal("Renaming...###popUp", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize)) {
-			ImGui::Text("Rename File");
-			ImGui::InputText("##rename", m_renameBuffer, sizeof(m_renameBuffer));
+		if (InputStringPopup("Set Name"))
+		{
+			std::string name = m_actionBuffer;
+			m_actionBuffer[0] = '\0';
 
-			if (ImGui::Button("OK", ImVec2(120, 0))) {
+			m_pendingCreateAction(name);
+			m_pendingCreateAction = nullptr;
 
-				if (!m_renamingFile.empty()) {
-					std::filesystem::path newPath = m_renamingFile.parent_path() / std::string(m_renameBuffer);
-					if (std::filesystem::exists(m_renamingFile)) {
-						
-						DirectoryManager::Move(m_renamingFile, newPath.string() + m_renamingFile.extension().string());
-
-						std::string metafile = m_renamingFile.string();
-						metafile += ".meta";
-
-						std::string newMetafile = newPath.string();
-						if (std::filesystem::is_directory(m_renamingFile))
-							newMetafile += ".meta";
-						else
-							newMetafile += m_renamingFile.extension().string() + ".meta";
-						
-						DirectoryManager::Move(metafile, newMetafile);
-
-
-						
-					}
-					m_renamingFile.clear();
-					Refresh();
-					ImGui::CloseCurrentPopup();
-				}
-			}
-
-			ImGui::SameLine();
-			if (ImGui::Button("Cancel", ImVec2(120, 0))) {
-				m_renamingFile.clear();
-				ImGui::CloseCurrentPopup();
-			}
-
-			ImGui::EndPopup();
+			Refresh();
 		}
 	}
 
@@ -698,10 +671,21 @@ namespace Loopie {
 
 		if (ImGui::MenuItem("Rename"))
 		{
-			m_renamingFile = file;
-			std::string filename = file.stem().string();
-			strncpy(m_renameBuffer, filename.c_str(), sizeof(m_renameBuffer));
-			ImGui::OpenPopup("RenameFilePopup");
+			strcpy(m_actionBuffer, file.stem().string().c_str());
+
+			m_pendingCreateAction = [this, file](const std::string& name)
+				{
+					std::filesystem::path newPath =
+						file.parent_path() / name;
+
+					DirectoryManager::Move(
+						file,
+						newPath.string() + file.extension().string());
+
+					DirectoryManager::Move(
+						file.string() + ".meta",
+						newPath.string() + file.extension().string() + ".meta");
+				};
 		}
 
 		ImGui::Separator();
@@ -713,22 +697,42 @@ namespace Loopie {
 	}
 
 	void AssetsExplorerInterface::DrawCreateAssetMenu() {
-		if(ImGui::MenuItem("Create Folder"))
+		if (ImGui::MenuItem("Create Folder"))
 		{
-			CreateFolder(m_currentDirectory, "NewFolder");
+			strcpy(m_actionBuffer, "NewFolder");
+			m_pendingCreateAction = [this](const std::string& name)
+				{
+					CreateFolder(m_currentDirectory, name);
+				};
 		}
+
 		if (ImGui::MenuItem("Create Material"))
 		{
-			CreateMaterial(m_currentDirectory, "NewMaterial");
+			strcpy(m_actionBuffer, "NewMaterial");
+			m_pendingCreateAction = [this](const std::string& name)
+				{
+					CreateMaterial(m_currentDirectory, name);
+				};
 		}
+
 		if (ImGui::MenuItem("Create Scene"))
 		{
-			CreateScene(m_currentDirectory, "NewScene");
+			strcpy(m_actionBuffer, "NewScene");
+			m_pendingCreateAction = [this](const std::string& name)
+				{
+					CreateScene(m_currentDirectory, name);
+				};
 		}
+
 		if (ImGui::MenuItem("Create Script"))
 		{
-			CreateSript(m_currentDirectory, "NewScript");
+			strcpy(m_actionBuffer, "NewScript");
+			m_pendingCreateAction = [this](const std::string& name)
+				{
+					CreateSript(m_currentDirectory, name);
+				};
 		}
+
 
 		ImGui::Separator();
 
@@ -737,6 +741,41 @@ namespace Loopie {
 			FileDialog::OpenInExplorer(m_currentDirectory);
 		}
 
+	}
+
+	bool AssetsExplorerInterface::InputStringPopup(const char* popupId)
+	{
+		bool confirmed = false;
+
+		if (ImGui::BeginPopupModal(popupId, nullptr,
+			ImGuiWindowFlags_NoResize |
+			ImGuiWindowFlags_NoMove |
+			ImGuiWindowFlags_AlwaysAutoResize))
+		{
+			ImGui::InputText("##name", m_actionBuffer, sizeof(m_actionBuffer));
+
+			ImGui::Spacing();
+
+			if (ImGui::Button("Confirm", ImVec2(120, 0)))
+			{
+				confirmed = true;
+				ImGui::CloseCurrentPopup();
+			}
+
+			ImGui::SameLine();
+
+			if (ImGui::Button("Cancel", ImVec2(120, 0)))
+			{
+				m_pendingAction = PendingAction::None;
+				m_pendingCreateAction = nullptr;
+				m_actionBuffer[0] = '\0';
+				ImGui::CloseCurrentPopup();
+			}
+
+			ImGui::EndPopup();
+		}
+
+		return confirmed;
 	}
 
 	void AssetsExplorerInterface::OpenFile(const std::filesystem::path& filePath)
@@ -781,14 +820,45 @@ namespace Loopie {
 	}
 	std::string AssetsExplorerInterface::CreateSript(const std::filesystem::path& directory, const std::string& name)
 	{
+
 		std::vector<std::string> names;
 		Helper::GetPathExistingNames(directory, names);
-		std::filesystem::path filePath = directory / Helper::MakeUniqueName(name, names);
+
+		// Generate unique name
+		std::string uniqueName = Helper::MakeUniqueName(name, names);
+
+		std::filesystem::path filePath = directory / uniqueName;
 		filePath += ".cs";
-		if (!DirectoryManager::Contains(filePath)) {
+
+		if (!DirectoryManager::Contains(filePath))
+		{
+			// Copy template
 			DirectoryManager::Copy("assets/scripts/DefaultScript.cs", filePath);
+
+			// Read file content
+			std::ifstream inFile(filePath);
+			std::stringstream buffer;
+			buffer << inFile.rdbuf();
+			inFile.close();
+
+			std::string content = buffer.str();
+
+			// Replace placeholder with class name
+			const std::string placeholder = "{$SCRIPT_NAME}";
+			size_t pos = content.find(placeholder);
+			if (pos != std::string::npos)
+			{
+				content.replace(pos, placeholder.length(), uniqueName);
+			}
+
+			// Write modified content back
+			std::ofstream outFile(filePath);
+			outFile << content;
+			outFile.close();
+
 			Refresh();
 		}
+
 		return filePath.string();
 	}
 }

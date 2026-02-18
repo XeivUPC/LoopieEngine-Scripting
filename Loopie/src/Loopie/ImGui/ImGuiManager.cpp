@@ -25,9 +25,10 @@ namespace Loopie {
 
 		io.IniFilename = "assets/imgui.ini";
 
-		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
-		io.ConfigFlags |= ImGuiConfigFlags_NavEnableSetMousePos;
+		io.ConfigFlags &= ~ImGuiConfigFlags_NavEnableKeyboard;
+		io.ConfigFlags &= ~ImGuiConfigFlags_NavEnableGamepad;
+		io.ConfigFlags &= ~ImGuiConfigFlags_NavEnableSetMousePos;
+
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 

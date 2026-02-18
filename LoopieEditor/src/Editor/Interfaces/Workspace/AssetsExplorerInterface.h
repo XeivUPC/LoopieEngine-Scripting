@@ -12,6 +12,8 @@
 #include <vector>
 #include <memory>
 #include <string>
+#include <functional>
+
 
 namespace Loopie {
 	class AssetsExplorerInterface : public Interface , public IObserver<EngineNotification>{
@@ -37,6 +39,14 @@ namespace Loopie {
 			std::filesystem::path Path;
 			bool IsDirectory;
 			bool IsEmpty;
+		};
+
+		enum class PendingAction
+		{
+			None,
+			Rename,
+			Create
+
 		};
 
 		void OnNotify(const EngineNotification& id) override;
@@ -69,6 +79,8 @@ namespace Loopie {
 		void DrawContextMenu(const std::filesystem::path& file);
 		void DrawCreateAssetMenu();
 
+		bool InputStringPopup(const char* popupId);
+
 		void OpenFile(const std::filesystem::path& filePath);
 		std::string CreateFolder(const std::filesystem::path& directory, const std::string& name);
 		std::string CreateMaterial(const std::filesystem::path& directory, const std::string& name);
@@ -87,7 +99,7 @@ namespace Loopie {
 		std::filesystem::path m_relativePath;
 		std::vector<std::string> m_relativePathSteps;
 
-		char m_searchBuffer[256] = "";
+		char m_searchBuffer[256] = { 0 };
 		bool m_isSearching = false;
 
 		int thumbnailSize = 64;
@@ -113,8 +125,11 @@ namespace Loopie {
 		bool m_fileDropped = false;
 		std::vector<std::string> m_droppedFiles;
 
-		std::filesystem::path m_renamingFile;
-		char m_renameBuffer[256] = { 0 };
+
+		char m_actionBuffer[256] = { 0 };
+		PendingAction m_pendingAction = PendingAction::None;
+		std::function<void(const std::string&)> m_pendingCreateAction;
+		std::filesystem::path m_pendingDirectory;
 		
 	};
 }

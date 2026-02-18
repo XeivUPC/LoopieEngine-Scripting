@@ -1,7 +1,15 @@
-namespace Loopie
+using System;
+using Loopie;
+
+class {$SCRIPT_NAME} : Component
 {
-    class DefaultScript
+    void OnCreate()
     {
 
-    };
-}
+    }
+
+    void OnUpdate()
+    {
+
+    }
+};

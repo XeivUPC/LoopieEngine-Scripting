@@ -159,13 +159,10 @@ namespace Loopie
     {
         RefreshMatrices();
 
-        matrix3 rotMat = matrix3(m_localToWorld);
-        vec3 scale(length(rotMat[0]), length(rotMat[1]), length(rotMat[2]));
-        rotMat[0] /= scale.x;
-        rotMat[1] /= scale.y;
-        rotMat[2] /= scale.z;
+        if (auto parent = GetOwner()->GetParent().lock())
+            return parent->GetTransform()->GetWorldRotation() * m_localRotation;
 
-        return Math::ToQuaternion(rotMat);
+        return m_localRotation;
     }
 
     vec3 Transform::GetWorldScale() const
@@ -256,23 +253,25 @@ namespace Loopie
         }
         else {
             quaternion worldRot = GetWorldRotation();
-            quaternion newWorld = normalize(delta * worldRot);
+            quaternion newWorld = normalize(worldRot* delta);
             SetWorldRotation(newWorld);
         }
     }
 
-    void Transform::LookAt(const vec3& worldTarget, const vec3& worldUp)
+    void Transform::LookAt(const vec3& target, const vec3& worldUp)
     {
-        vec3 pos = GetWorldPosition();
-        matrix4 look = lookAt(pos, worldTarget, worldUp);
-        matrix4 rotMat = inverse(look);
-        quaternion quat = Math::ToQuaternion(matrix3(rotMat));
-        SetWorldRotation(quat);
+        vec3 forward = normalize(target - GetWorldPosition());
+        vec3 right = normalize(cross(worldUp, forward));
+        vec3 up = cross(forward, right);
+        matrix3 rotMat(right, up, forward);
+        quaternion q = Math::ToQuaternion(rotMat);
+
+        SetWorldRotation(q);
     }
 
     vec3 Transform::Forward() const
     {
-        return GetWorldRotation() * vec3(0.0f, 0.0f, -1.0f);
+        return normalize(GetWorldRotation() * vec3(0, 0, 1));
     }
 
     vec3 Transform::Back() const
@@ -282,7 +281,7 @@ namespace Loopie
 
     vec3 Transform::Up() const
     {
-        return GetWorldRotation() * vec3(0.0f, 1.0f, 0.0f);
+        return normalize(GetWorldRotation() * vec3(0, 1, 0));
     }
 
     vec3 Transform::Down() const
@@ -292,7 +291,7 @@ namespace Loopie
 
     vec3 Transform::Right() const
     {
-        return GetWorldRotation() * vec3(1.0f, 0.0f, 0.0f);
+        return normalize(GetWorldRotation() * vec3(1, 0, 0));
     }
 
     vec3 Transform::Left() const

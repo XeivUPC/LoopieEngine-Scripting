@@ -48,7 +48,7 @@ namespace Loopie
             if (inputEvent.GetMouseButtonStatus(1) == KeyState::REPEAT)
             {
                 m_entityToPivot = m_entity;
-                m_panDirection = vec3(mouseDelta.x, mouseDelta.y, 0);
+                m_panDirection = vec3(-mouseDelta.x, mouseDelta.y, 0);
             }
             if (inputEvent.GetMouseButtonStatus(2) == KeyState::REPEAT)
             {
@@ -62,8 +62,8 @@ namespace Loopie
             }
             if (inputEvent.GetKeyStatus(SDL_SCANCODE_W) == KeyState::REPEAT) m_inputDirection.z += m_cameraMovementSpeed;
             if (inputEvent.GetKeyStatus(SDL_SCANCODE_S) == KeyState::REPEAT) m_inputDirection.z -= m_cameraMovementSpeed;
-            if (inputEvent.GetKeyStatus(SDL_SCANCODE_A) == KeyState::REPEAT) m_inputDirection.x += m_cameraMovementSpeed;
-            if (inputEvent.GetKeyStatus(SDL_SCANCODE_D) == KeyState::REPEAT) m_inputDirection.x -= m_cameraMovementSpeed;
+            if (inputEvent.GetKeyStatus(SDL_SCANCODE_A) == KeyState::REPEAT) m_inputDirection.x -= m_cameraMovementSpeed;
+            if (inputEvent.GetKeyStatus(SDL_SCANCODE_D) == KeyState::REPEAT) m_inputDirection.x += m_cameraMovementSpeed;
         }
         if (inputEvent.GetKeyStatus(SDL_SCANCODE_F) == KeyState::DOWN)
         {
@@ -78,7 +78,7 @@ namespace Loopie
                     float maxScaleValue = objectScale.x;
                     maxScaleValue = objectScale.y > maxScaleValue ? objectScale.y : maxScaleValue;
                     maxScaleValue = objectScale.z > maxScaleValue ? objectScale.z : maxScaleValue;
-                    m_orbitOffset.z = -5 * maxScaleValue;
+                    m_orbitOffset.z = 5 * maxScaleValue;
                 }
             }
         }
@@ -99,7 +99,7 @@ namespace Loopie
  
         if (m_entityToPivot != m_entity)
         {
-            m_yaw += -m_inputRotation.x;
+            m_yaw += m_inputRotation.x;
             m_pitch += m_inputRotation.y;
 
             quaternion rotation = quaternion((vec3{ m_pitch, m_yaw, 0.f }));
@@ -117,7 +117,7 @@ namespace Loopie
         }
         else
         {
-            m_yaw += -m_inputRotation.x;
+            m_yaw += m_inputRotation.x;
             m_pitch += m_inputRotation.y;
 
             m_inputDirection.x *= (float)Time::GetDeltaTime();

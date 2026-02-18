@@ -47,6 +47,13 @@ namespace Loopie {
 			ALWAYS = 0x0207       // GL_ALWAYS
 		};
 
+		enum class CullFaceMode {
+			FRONT = 0x0404,        // GL_FRONT
+			BACK = 0x0405,         // GL_BACK
+			FRONT_AND_BACK = 0x0408 // GL_FRONT_AND_BACK
+		};
+
+
 		struct RenderItem {
 			std::shared_ptr<VertexArray> VAO;
 			unsigned int IndexCount;
@@ -61,6 +68,7 @@ namespace Loopie {
 		static void Clear();
 		static void SetClearColor(const vec4& color);
 		static void SetViewport(unsigned int x, unsigned int y, unsigned int width, unsigned int height);
+		static const vec4& GetCurrentViewport() { return s_CurrentViewport; }
 
 		static void RegisterCamera(Camera& camera);
 		static void UnregisterCamera(Camera& camera);
@@ -83,6 +91,10 @@ namespace Loopie {
 		static void SetStencilOp(StencilOp stencil_fail, StencilOp depth_fail, StencilOp pass);
 		static void SetStencilFunc(StencilFunc cond, int ref, unsigned int mask);
 
+		static void EnableCulling();
+		static void DisableCulling();
+		static void CullFace(CullFaceMode mode);
+
 	private:
 		static void SetRenderUniforms(std::shared_ptr<Material> material, const Transform* transform);
 		static void SetRenderUniforms(std::shared_ptr<Material> material, const matrix4& modelMatrix);
@@ -96,5 +108,7 @@ namespace Loopie {
 		static std::shared_ptr<UniformBuffer> s_MatricesUniformBuffer;
 
 		static bool s_UseGizmos;
+
+		static vec4 s_CurrentViewport;
 	};
 }

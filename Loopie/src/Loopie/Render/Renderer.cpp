@@ -15,6 +15,7 @@ namespace Loopie {
 	std::vector<Camera*> Renderer::s_RenderCameras = std::vector<Camera*>();
 	std::shared_ptr<UniformBuffer> Renderer::s_MatricesUniformBuffer = nullptr;
 	bool Renderer::s_UseGizmos = true;
+	vec4 Renderer::s_CurrentViewport = {0,0,0,0};
 
 	void Renderer::Init(void* context) {
 		ASSERT(!gladLoadGLLoader((GLADloadproc)context), "Failed to Initialize GLAD!");
@@ -55,6 +56,7 @@ namespace Loopie {
 
 	void Renderer::SetViewport(unsigned int x, unsigned int y, unsigned int width, unsigned int height)
 	{
+		s_CurrentViewport = vec4(x, y, width, height);
 		glViewport(x, y, width, height);
 	}
 
@@ -162,5 +164,17 @@ namespace Loopie {
 	void Renderer::SetStencilFunc(StencilFunc cond, int ref, unsigned int mask)
 	{
 		glStencilFunc((unsigned int)cond, ref, mask);
+	}
+	void Renderer::EnableCulling()
+	{
+		glEnable(GL_CULL_FACE);
+	}
+	void Renderer::DisableCulling()
+	{
+		glDisable(GL_CULL_FACE);
+	}
+	void Renderer::CullFace(CullFaceMode mode)
+	{
+		glCullFace((unsigned int)mode);
 	}
 }

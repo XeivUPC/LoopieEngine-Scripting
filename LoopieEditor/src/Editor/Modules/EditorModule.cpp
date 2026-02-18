@@ -86,6 +86,7 @@ namespace Loopie
 
 		m_hierarchy.Update(inputEvent);
 		m_assetsExplorer.Update(inputEvent);
+		m_textEditor.Update(inputEvent);
 		m_scene.Update(inputEvent);
 		m_topBar.Update(inputEvent);
 

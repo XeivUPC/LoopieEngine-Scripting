@@ -60,6 +60,10 @@ namespace Loopie {
 
 		bool IsMouseCaptured() const;
 
+		void StartReadingInputText() const;
+		void StopReadingInputText() const;	
+		bool IsReadingInputText() const { return readingInputText; }
+
 		
 	private:
 
@@ -105,5 +109,7 @@ namespace Loopie {
 		std::vector<const char*> m_droppedFiles;
 
 		SDL_Gamepad* gamepad = nullptr;
+
+		mutable bool readingInputText = false;	
 	};
 }

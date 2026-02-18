@@ -130,17 +130,24 @@ namespace Loopie
 
 		auto transform = GetTransform();
 
-		const vec3 position = transform->GetPosition();
-		const vec3 forward = -transform->Forward();
-		const vec3 up = transform->Up();
+		vec3 position = transform->GetPosition();
+		vec3 forward = transform->Forward();
+		vec3 up = transform->Up();
 
-		m_viewMatrix = glm::lookAt(position, position + forward, up);
-		m_projectionMatrix = glm::perspective(glm::radians(m_fov), m_viewport.z / m_viewport.w, m_nearPlane, m_farPlane);
+		// LEFT HANDED lookAt
+		m_viewMatrix = glm::lookAtLH(position, position + forward, up);
+
+		float aspect = m_viewport.z / m_viewport.w;
+		m_projectionMatrix =
+			glm::perspectiveLH(glm::radians(m_fov), aspect, m_nearPlane, m_farPlane);
+
 		m_viewProjectionMatrix = m_projectionMatrix * m_viewMatrix;
 
 		m_frustum.FromMatrix(m_viewProjectionMatrix);
+
 		m_dirty = false;
 	}
+
 
 	void Camera::SetDirty() const {
 		m_dirty = true;
